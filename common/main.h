@@ -1,0 +1,30 @@
+#ifndef KASTORS_MAIN_H
+#define KASTORS_MAIN_H
+
+struct user_parameters {
+    int check;
+    int succeed;
+    char* string2display;
+#ifdef MSIZE
+    int matrix_size;
+#endif
+#ifdef SMSIZE
+    int submatrix_size;
+#endif
+#ifdef BSIZE
+    int blocksize;
+#endif
+#ifdef NITER
+    int niter;
+#endif
+#ifdef CUTOFF_DEPTH
+    int cutoff_depth;
+#endif
+#ifdef CUTOFF_SIZE
+    int cutoff_size;
+#endif
+};
+
+extern double run(struct user_parameters* params);
+
+#endif
