@@ -12,7 +12,7 @@ endif
 
 CFLAGS += -I./include -DADD_ -DMSIZE -DBSIZE
 
-LDFLAGS += -lcblas -llapacke -ltmg -llapack -lblas -lpthread -lm -lgfortran
+LDFLAGS += -lcblas -llapacke -llapack -lblas -lpthread -lm -lgfortran
 
 KINDS = seq task
 
