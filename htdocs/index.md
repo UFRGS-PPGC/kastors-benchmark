@@ -10,4 +10,6 @@ Its development is public [here](https://gforge.inria.fr/projects/kastors).
 
 A quick presentation of the benchmark kernels can be found in the user guide [here](README.md).
 
+Performance evaluation of all kernels on two numa machines can be found [here](performances.md).
+
 A first archive can be found [here](kastors.tgz).
