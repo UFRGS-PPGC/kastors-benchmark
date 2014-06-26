@@ -7,7 +7,7 @@ The following results were obtained using GCC 4.9 and clang-omp 3.4, on two diff
 
 The first one holds 8 AMD Magny Cours processors for a total of 48 cores. We will refer to this configuration as **AMD48**.
 
-The second one holds 6 Intel Xeon E5-4620 processors for a total of 32 cores. We will refer to this configuration as **INTEL32**.
+The second one holds 4 Intel Xeon E5-4620 processors for a total of 32 cores. We will refer to this configuration as **INTEL32**.
 
 ##Plasma
 
