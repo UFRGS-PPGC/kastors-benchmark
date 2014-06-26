@@ -15,7 +15,7 @@ CFLAGS += -DMSIZE -DSMSIZE -I./include
 
 .SECONDARY:
 
-all:
+all: obj bin
 	@echo "=== Compile sparselu benchmarks ==="
 	@for kind in $(KINDS);\
 	do\
@@ -27,6 +27,11 @@ all:
 		fi;\
 	done
 	@echo "=== Sparselu Compilation Done ==="
+
+bin:
+	mkdir bin
+obj:
+	mkdir obj
 
 test: all
 	@make test-only

@@ -31,8 +31,14 @@ strassen:
 
 sparselu:
 	@make -C sparselu
+	
+bin:
+	mkdir bin
 
-test: $(DIRS)
+obj:
+	mkdir obj
+
+test: $(DIRS) obj bin
 	@make test-only
 
 test-only:

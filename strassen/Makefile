@@ -15,7 +15,7 @@ CFLAGS += -DMSIZE -DCUTOFF_SIZE -DCUTOFF_DEPTH -I./include
 
 .SECONDARY:
 
-all:
+all: obj bin
 	@echo "=== Compile strassen benchmarks ==="
 	@for kind in $(KINDS);\
 	do\
@@ -27,6 +27,11 @@ all:
 		fi;\
 	done
 	@echo "=== Strassen Compilation Done ==="
+
+bin:
+	mkdir bin
+obj:
+	mkdir obj
 
 test: all
 	@make test-only

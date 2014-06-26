@@ -37,7 +37,7 @@ EXE = $(ALLPROG:.c=)
 
 .SECONDARY:
 
-all:
+all: obj bin
 	@echo "=== Compile plasma benchmarks === "
 	@for kind in $(KINDS);\
 	do\
@@ -55,6 +55,11 @@ all:
 		fi;\
 	done
 	@echo "=== Plasma Compilation Done === "
+
+bin:
+	mkdir bin
+obj:
+	mkdir obj
 
 test: all
 	@make test-only

@@ -15,7 +15,7 @@ CFLAGS += -DMSIZE -DNITER -DBSIZE -I./include -g -std=gnu99
 
 .SECONDARY:
 
-all:
+all: bin obj
 	@echo "=== Compile jacobi benchmarks === "
 	@for kind in $(KINDS);\
 	do\
@@ -27,6 +27,11 @@ all:
 		fi;\
 	done
 	@echo "=== Jacobi Compilation Done === "
+
+bin:
+	mkdir bin
+obj:
+	mkdir obj
 
 test: all
 	@make test-only
