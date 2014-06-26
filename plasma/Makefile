@@ -4,7 +4,7 @@
 
 ifeq ($(SEQ), true)
 CFLAGS += -DSEQ
-CC=$(CC_SEQ)
+CC:=$(CC_SEQ)
 else
 CFLAGS+=$(OMP_CCFLAGS)
 LDFLAGS+=$(OMP_LDFLAGS)

@@ -6,6 +6,7 @@ DIRS = jacobi strassen sparselu plasma
 .SECONDARY:
 
 all:
+	@echo $(CC)
 	@echo "Kaapi Starpu OpenMP Runtime Task suite"
 	@echo ""
 	@echo "Do make [rule] where rule can be one of:"
