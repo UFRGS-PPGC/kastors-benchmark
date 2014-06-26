@@ -11,7 +11,7 @@ CFLAGS+=$(OMP_CCFLAGS)
 LDFLAGS+=$(OMP_LDFLAGS)
 endif
 
-CFLAGS += -DMSIZE -DNITER -DBSIZE -I./include -g -O0 -std=gnu99
+CFLAGS += -DMSIZE -DNITER -DBSIZE -I./include -g -std=gnu99
 
 .SECONDARY:
 
