@@ -13,7 +13,7 @@ AC_PROG_CC_C99
 
 dnl Check for OpenMP support
 AC_OPENMP
-if test "$ac_cv_prog_c_openmp" = "unsupported"; 
+if test "$ac_cv_prog_c_openmp" = "unsupported";
 then
         AC_MSG_ERROR([it appears your $CC compiler does not support OpenMP. Aborting.])
 fi
@@ -56,7 +56,7 @@ then
 fi
 
 dnl AC_SEARCH_LIBS(pthread_create, pthread)
-dnl AC_SEARCH_LIBS(cblas_dgemm, cblas lapacke lapack blas m) 
+dnl AC_SEARCH_LIBS(cblas_dgemm, cblas lapacke lapack blas m)
 
 dnl -lcblas -llapacke -llapack -lblas -lpthread -lm -lgfortran
 
@@ -64,36 +64,36 @@ dnl -lcblas -llapacke -llapack -lblas -lpthread -lm -lgfortran
 
 AC_OUTPUT
 
-echo ""
-echo "===== KaStORS configuration summary ====="
-echo "Compiler: ""$CC"
-echo "Flags:    ""$CFLAGS"
+echo -e ""
+echo -e "===== KaStORS configuration summary ====="
+echo -e "Compiler: ""$CC"
+echo -e "Flags:    ""$CFLAGS"
 
 if test "$KASTORS_COMPILE_JACOBI" = "yes";
 then
-        echo "\twill compile JACOBI?\tyes"
+        echo -e "\twill compile JACOBI?\tyes"
 else
-        echo "\twill compile JACOBI?\tno"
+        echo -e "\twill compile JACOBI?\tno"
 fi
 
 if test "$KASTORS_COMPILE_STRASSEN" = "yes";
 then
-        echo "\twill compile STRASSEN?\tyes"
+        echo -e "\twill compile STRASSEN?\tyes"
 else
-        echo "\twill compile STRASSEN?\tno"
+        echo -e "\twill compile STRASSEN?\tno"
 fi
 
 if test "$KASTORS_COMPILE_SPARSELU" = "yes";
 then
-        echo "\twill compile SPARSELU?\tyes"
+        echo -e "\twill compile SPARSELU?\tyes"
 else
-        echo "\twill compile SPARSELU?\tno"
+        echo -e "\twill compile SPARSELU?\tno"
 fi
 
 if test "$KASTORS_COMPILE_PLASMA" = "yes";
 then
-        echo "\twill compile PLASMA?\tyes"
+        echo -e "\twill compile PLASMA?\tyes"
 else
-        echo "\twill compile PLASMA?\tno"
+        echo -e "\twill compile PLASMA?\tno"
 fi
 echo "========================================="
