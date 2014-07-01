@@ -11,6 +11,12 @@ AC_CONFIG_FILES([
 AC_PROG_CC(gcc icc clang llvm cc)
 AC_PROG_CC_C99
 
+dnl Optimistic scenario!
+AC_SUBST([KASTORS_COMPILE_JACOBI],   [yes])
+AC_SUBST([KASTORS_COMPILE_STRASSEN], [yes])
+AC_SUBST([KASTORS_COMPILE_SPARSELU], [yes])
+AC_SUBST([KASTORS_COMPILE_PLASMA],   [yes])
+
 dnl Check for OpenMP support
 AC_OPENMP
 if test "$ac_cv_prog_c_openmp" = "unsupported";
@@ -33,9 +39,6 @@ AC_COMPILE_IFELSE(
 
 if test "$OMP_DEP" = "yes";
 then
-        AC_SUBST([KASTORS_COMPILE_JACOBI], [yes])
-        AC_SUBST([KASTORS_COMPILE_STRASSEN], [yes])
-        AC_SUBST([KASTORS_COMPILE_SPARSELU], [yes])
         AC_MSG_RESULT([yes])
 else
         AC_MSG_RESULT([no])
@@ -53,6 +56,21 @@ if test "$HAVE_LAPACKE_HEADER" = "no";
 then
         AC_MSG_WARN([couldn't find lapacke.h header. Deactivating compilation of the PLASMA benchmarks.])
         AC_SUBST([KASTORS_COMPILE_PLASMA], [no])
+        AC_SUBST([KASTORS_MISSING_DEPS], [lapacke.h])
+fi
+
+if test "$KASTORS_COMPILE_PLASMA" = "yes";
+then
+        AC_CHECK_LIB([cblas], [cblas_dgemm],
+                     [AC_SUBST([HAVE_CBLAS_LIB], [yes])],
+                     [AC_SUBST([HAVE_CBLAS_LIB], [no])]
+        )
+        if test "$HAVE_CBLAS_LIB" = "no";
+        then
+                AC_MSG_WARN([couldn't find cblas_dgemm in -lcblas. Deactivating compilation of the PLASMA benchmarks.])
+                AC_SUBST([KASTORS_COMPILE_PLASMA], [no])
+                AC_SUBST([KASTORS_MISSING_DEPS], [-lcblas])
+        fi
 fi
 
 dnl AC_SEARCH_LIBS(pthread_create, pthread)
@@ -94,6 +112,6 @@ if test "$KASTORS_COMPILE_PLASMA" = "yes";
 then
         echo -e "\twill compile PLASMA?\tyes"
 else
-        echo -e "\twill compile PLASMA?\tno"
+        echo -e "\twill compile PLASMA?\tno (missing $KASTORS_MISSING_DEPS)"
 fi
 echo "========================================="
