@@ -1,0 +1,23 @@
+** Configure warning and error messages:
+
+    - "it appears your xxx compiler does not support OpenMP.": the
+      configure script did not manage to figure out how to compile
+      OpenMP programs with the C compiler you provided. This could
+      mean your C compiler is too old to support OpenMP (GCC
+      implements OpenMP since gcc-4.2).
+
+    - "it appears your xxx compiler does not support OpenMP task
+      dependencies.": KaStORS benchmarks use the #pragma omp task
+      depend (in:...) (out:...) (inout:...) directives, introduced
+      since OpenMP 4.0. For example, GCC implements this features
+      since gcc-4.9. This error message indicates the C compiler
+      you're using does not implement OpenMP 4.0 task dependencies.
+
+    - "couldn't find lapacke.h header.": KaStORS PLASMA benchmarks
+        need the lapacke.h header file, that comes with the dev
+        version of the lapacke library.
+
+    - "couldn't find cblas_dgemm in -lcblas.": KaStORS PLASMA
+        benchmarks need cblas_dgemm() and friends, that can be found
+        in the libcblas library. "libatlas-base-dev" is an example of
+        libraries providing libcblas.
