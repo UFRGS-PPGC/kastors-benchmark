@@ -3,10 +3,11 @@ include ../common/common.am
 
 bin_PROGRAMS = strassen_seq strassen_task strassen_taskdep
 
-strassen_common_SRCS = src/strassen.c src/strassen-seq.c $(COMMON_SRCS)
 strassen_common_HDRS = include/strassen.h $(COMMON_HDRS)
+strassen_common_SRCS = src/strassen.c src/strassen-seq.c $(COMMON_SRCS) \
+	$(strassen_common_HDRS)
 
-strassen_seq_SOURCES     = $(strassen_common_SRCS) $(strassen_common_HDRS)
+strassen_seq_SOURCES     = $(strassen_common_SRCS)
 strassen_task_SOURCES    = $(strassen_common_SRCS) src/strassen-task.c
 strassen_taskdep_SOURCES = $(strassen_common_SRCS) src/strassen-task-dep.c
 

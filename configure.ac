@@ -11,6 +11,7 @@ AC_PREREQ([2.62])
 
 AC_PROG_CC(gcc icc clang llvm cc)
 AC_PROG_CC_C99
+AC_PROG_RANLIB
 
 dnl Optimistic scenario!
 KASTORS_COMPILE_JACOBI=yes

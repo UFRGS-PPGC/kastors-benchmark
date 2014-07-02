@@ -4,7 +4,6 @@ include ../common/common.am
 bin_PROGRAMS = dpotrf_seq dpotrf_taskdep dgetrf_seq dgetrf_taskdep dgeqrf_seq dgeqrf_taskdep
 
 # Get all source files from ./src except the one called time_xxx
-# (plus common/main.c)
 plasma_SRCS = \
 	src/allocate.c 			\
 	src/async.c 			\
@@ -63,20 +62,29 @@ plasma_SRCS = \
 	src/primes.c			\
 	src/tile.c			\
 	src/workspace.c			\
-	src/workspace_d.c		\
-	$(COMMON_SRCS)
+	src/workspace_d.c
 
-dpotrf_seq_SOURCES      = $(plasma_SRCS) src/time_dpotrf-seq.c
-dpotrf_taskdep_SOURCES  = $(plasma_SRCS) src/time_dpotrf-task.c
-dgetrf_seq_SOURCES      = $(plasma_SRCS) src/time_dgetrf-seq.c
-dgetrf_taskdep_SOURCES  = $(plasma_SRCS) src/time_dgetrf-task.c
-dgeqrf_seq_SOURCES      = $(plasma_SRCS) src/time_dgeqrf-seq.c
-dgeqrf_taskdep_SOURCES  = $(plasma_SRCS) src/time_dgeqrf-task.c
+plasma_common_HDRS = $(COMMON_HDRS)
+plasma_common_SRCS = $(plasma_SRCS) $(COMMON_SRCS) $(plasma_common_HDRS)
+
+noinst_LIBRARIES = libplasma-seq.a libplasma-par.a
+libplasma_seq_a_SOURCES = $(plasma_common_SRCS)
+libplasma_par_a_SOURCES = $(plasma_common_SRCS)
+
+dpotrf_seq_SOURCES      = libplasma-seq.a src/time_dpotrf-seq.c
+dpotrf_taskdep_SOURCES  = libplasma-par.a src/time_dpotrf-task.c
+dgetrf_seq_SOURCES      = libplasma-seq.a src/time_dgetrf-seq.c
+dgetrf_taskdep_SOURCES  = libplasma-par.a src/time_dgetrf-task.c
+dgeqrf_seq_SOURCES      = libplasma-seq.a src/time_dgeqrf-seq.c
+dgeqrf_taskdep_SOURCES  = libplasma-par.a src/time_dgeqrf-task.c
 
 plasma_comCFLAGS	= -I$(srcdir)/include $(COMMON_comCFLAGS) \
-		-DADD_ -DMSIZE -DBSIZE
-plasma_seqCFLAGS	= $(plasma_comCFLAGS) -DSEQ $(PTHREAD_CFLAGS)
-plasma_parCFLAGS	= $(plasma_comCFLAGS) $(OPENMP_CFLAGS)
+		-DADD_ -DMSIZE -DBSIZE $(PTHREAD_CFLAGS)
+plasma_seqCFLAGS	= $(plasma_comCFLAGS) $(COMMON_seqCFLAGS)
+plasma_parCFLAGS	= $(plasma_comCFLAGS) $(COMMON_parCFLAGS)
+
+libplasma_seq_a_CFLAGS  = $(plasma_seqCFLAGS)
+libplasma_par_a_CFLAGS  = $(plasma_parCFLAGS)
 
 dpotrf_seq_CFLAGS       = $(plasma_seqCFLAGS)
 dpotrf_taskdep_CFLAGS   = $(plasma_parCFLAGS)
@@ -85,9 +93,10 @@ dgetrf_taskdep_CFLAGS   = $(plasma_parCFLAGS)
 dgeqrf_seq_CFLAGS       = $(plasma_seqCFLAGS)
 dgeqrf_taskdep_CFLAGS   = $(plasma_parCFLAGS)
 
-plasma_comLDFLAGS	= -lcblas -llapacke -llapack -lblas -lm $(PTHREAD_LDFLAGS)
-plasma_seqLDFLAGS	= $(plasma_comLDFLAGS)
-plasma_parLDFLAGS	= $(plasma_comLDFLAGS) $(OPENMP_LDFLAGS)
+plasma_comLDFLAGS	= $(COMMON_comLDFLAGS) \
+		-lcblas -llapacke -llapack -lblas -lm $(PTHREAD_LDFLAGS)
+plasma_seqLDFLAGS	= $(plasma_comLDFLAGS) $(COMMON_seqLDFLAGS)
+plasma_parLDFLAGS	= $(plasma_comLDFLAGS) $(COMMON_parLDFLAGS)
 
 dpotrf_seq_LDFLAGS      = $(plasma_seqLDFLAGS)
 dpotrf_taskdep_LDFLAGS  = $(plasma_parLDFLAGS)

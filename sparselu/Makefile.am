@@ -3,10 +3,11 @@ include ../common/common.am
 
 bin_PROGRAMS = sparselu_seq sparselu_task sparselu_taskdep
 
-sparselu_common_SRCS = src/sparselu.c src/sparselu-seq.c $(COMMON_SRCS)
 sparselu_common_HDRS = include/sparselu.h $(COMMON_HDRS)
+sparselu_common_SRCS = src/sparselu.c src/sparselu-seq.c $(COMMON_SRCS) \
+	$(sparselu_common_HDRS)
 
-sparselu_seq_SOURCES     = $(sparselu_common_SRCS) $(sparselu_common_HDRS)
+sparselu_seq_SOURCES     = $(sparselu_common_SRCS)
 sparselu_task_SOURCES    = $(sparselu_common_SRCS) src/sparselu-task.c
 sparselu_taskdep_SOURCES = $(sparselu_common_SRCS) src/sparselu-task-dep.c
 
