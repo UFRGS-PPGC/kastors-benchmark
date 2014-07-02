@@ -1,3 +1,7 @@
+
+# flags to aclocal if Makefile rules trigger it
+ACLOCAL_AMFLAGS=-I m4
+
 SUBDIRS = 
 
 EXTRA_DIST=common/main.c common/main.h common/timer.h
