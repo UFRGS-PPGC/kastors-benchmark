@@ -1,10 +1,10 @@
-#KASTORS benchmarks
+#KaStORS benchmarks
 
 This page is still a WIP
 
 ##Overview
 
-KASTORS is composed of four small kernels :
+KaStORS is composed of four small kernels :
 
 * Poisson2D (aka Jacobi)
 * SparseLU

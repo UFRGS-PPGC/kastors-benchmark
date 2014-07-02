@@ -1,4 +1,4 @@
-#KASTORS
+#KaStORS
 
 [About](index.md)
 

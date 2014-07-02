@@ -1,6 +1,6 @@
 #Authors
 
-KASTORS suite has been written by the members of the KSTAR project, namely :
+KaStORS suite has been written by the members of the KSTAR project, namely :
 
 * Olivier Aumage
 * François Broquedis

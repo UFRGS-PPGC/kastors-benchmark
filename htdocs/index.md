@@ -1,20 +1,30 @@
-#KASTORS benchmarks
+#KaStORS benchmarks
 
-##Introduction
+##What is KaStORS?
 
-KASTORS benchmarks suite has been designed to evaluate the implementation of
+The KaStORS benchmark suite has been designed to evaluate the implementation of
 the OpenMP dependent task paradigm, introduced as part of the OpenMP 4.0
-specifications.
+specification.
 
-Its development is public [here](https://gforge.inria.fr/projects/kastors).
+You can follow its development through the [KaStORS project](https://gforge.inria.fr/projects/kastors) on the INRIA forge.
 
-A quick presentation of the benchmark kernels can be found in the user guide [here](README.md).
+A quick presentation of the benchmark kernels can be found in the [KaStORS user guide](README.md).
 
-Performance evaluation of all kernels on two numa machines can be found [here](performances.md).
+Performance evaluation of all kernels on two NUMA machines can be found [here](performances.md).
 
-A first archive can be found [here](kastors.tgz).
+##Citing KaStORS
 
 This work has been described in the paper **Evaluation of the OpenMP dependent tasks with the KASTORS benchmark suite** submitted and accepted at [IWOMP2014](http://portais.fieb.org.br/senai/iwomp2014/).
+
+We will soon provide the corresponding bibtex entry.
+
+##Downloading KaStORS
+
+A preliminary version of the KaStORS suite is provided below.
+
+- 2014-07-02 [KaStORS-0.9.tar.gz](kastors.tgz).
+
+We will release version 1.0 of the benchmark suite by the IWOMP2014 conference (28th-30th of September).
 
 ##Contact
 
