@@ -7,6 +7,7 @@ AC_CONFIG_FILES([
  strassen/Makefile
  jacobi/Makefile
  sparselu/Makefile
+ plasma/Makefile
 ])
 AC_PROG_CC(gcc icc clang llvm cc)
 AC_PROG_CC_C99
@@ -72,6 +73,21 @@ then
                 AC_SUBST([KASTORS_MISSING_DEPS], [-lcblas])
         fi
 fi
+
+if test "$KASTORS_COMPILE_PLASMA" = "yes";
+then
+        AC_CHECK_LIB([pthread], [pthread_create],
+                     [AC_SUBST([HAVE_PTHREAD_LIB], [yes])],
+                     [AC_SUBST([HAVE_PTHREAD_LIB], [no])]
+        )
+        if test "$HAVE_PTHREAD_LIB" = "no";
+        then
+                AC_MSG_WARN([couldn't find pthread_create in -lpthread. Deactivating compilation of the PLASMA benchmarks.])
+                AC_SUBST([KASTORS_COMPILE_PLASMA], [no])
+                AC_SUBST([KASTORS_MISSING_DEPS], [-lpthread])
+        fi
+fi
+
 
 dnl AC_SEARCH_LIBS(pthread_create, pthread)
 dnl AC_SEARCH_LIBS(cblas_dgemm, cblas lapacke lapack blas m)
