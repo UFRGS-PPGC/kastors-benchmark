@@ -1,5 +1,5 @@
 #!/bin/sh
 
-autoreconf -ivf -I m4
+autoreconf -ivf
 
 
