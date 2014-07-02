@@ -1,0 +1,15 @@
+
+COMMON_SRCS=main.c
+COMMON_HDRS=$(top_srcdir)/common/main.h $(top_srcdir)/common/timer.h
+
+COMMON_comCFLAGS  = -I$(top_srcdir)/common
+COMMON_seqCFLAGS  = -DSEQ
+COMMON_parCFLAGS  = $(OPENMP_CFLAGS)
+COMMON_parLDFLAGS = $(OPENMP_LDFLAGS)
+
+
+BUILT_SOURCES=main.c
+CLEANFILES=main.c
+EXTRA_DIST=$(top_srcdir)/common/main.c
+main.c: $(top_srcdir)/common/main.c
+	cp "$<" "$@"

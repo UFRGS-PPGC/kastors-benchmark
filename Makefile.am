@@ -1,5 +1,7 @@
 SUBDIRS = 
 
+EXTRA_DIST=common/main.c common/main.h common/timer.h
+
 if COMPILE_STRASSEN
 SUBDIRS += strassen
 endif

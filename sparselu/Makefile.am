@@ -1,9 +1,27 @@
+
+include ../common/common.am
+
 bin_PROGRAMS = sparselu_seq sparselu_task sparselu_taskdep
 
-sparselu_seq_SOURCES     = ./src/sparselu.c ./src/sparselu-seq.c ../common/main.c
-sparselu_task_SOURCES    = ./src/sparselu.c ./src/sparselu-seq.c ../common/main.c ./src/sparselu-task.c
-sparselu_taskdep_SOURCES = ./src/sparselu.c ./src/sparselu-seq.c ../common/main.c ./src/sparselu-task-dep.c
+sparselu_common_SRCS = src/sparselu.c src/sparselu-seq.c $(COMMON_SRCS)
+sparselu_common_HDRS = include/sparselu.h $(COMMON_HDRS)
 
-sparselu_seq_CFLAGS     = -I$(srcdir)/include -I$(srcdir)/../common -DMSIZE -DSMSIZE -DSEQ
-sparselu_task_CFLAGS    = -I$(srcdir)/include -I$(srcdir)/../common -DMSIZE -DSMSIZE
-sparselu_taskdep_CFLAGS = -I$(srcdir)/include -I$(srcdir)/../common -DMSIZE -DSMSIZE
+sparselu_seq_SOURCES     = $(sparselu_common_SRCS) $(sparselu_common_HDRS)
+sparselu_task_SOURCES    = $(sparselu_common_SRCS) src/sparselu-task.c
+sparselu_taskdep_SOURCES = $(sparselu_common_SRCS) src/sparselu-task-dep.c
+
+sparselu_comCFLAGS = -I$(srcdir)/include $(COMMON_comCFLAGS) \
+		-DMSIZE -DSMSIZE
+sparselu_seq_CFLAGS     = $(sparselu_comCFLAGS) $(COMMON_seqCFLAGS)
+sparselu_parCFLAGS	= $(sparselu_comCFLAGS) $(COMMON_parCFLAGS)
+
+sparselu_task_CFLAGS    = $(sparselu_parCFLAGS)
+sparselu_taskdep_CFLAGS = $(sparselu_parCFLAGS)
+
+sparselu_comLDFLAGS = $(COMMON_comLDFLAGS)
+sparselu_seq_LDFLAGS = $(sparselu_comLDFLAGS) $(COMMON_seqLDFLAGS)
+sparselu_parLDFLAGS = $(sparselu_comLDFLAGS) $(COMMON_parLDFLAGS)
+
+sparselu_task_LDFLAGS    = $(sparselu_parLDFLAGS)
+sparselu_taskdep_LDFLAGS = $(sparselu_parLDFLAGS)
+
