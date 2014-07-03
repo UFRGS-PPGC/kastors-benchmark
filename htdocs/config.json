@@ -3,5 +3,5 @@
     "lineBreaks": "gfm",
     "additionalFooterText": "",
     "anchorCharacter": "",
-    "title": "KASTORS, an OpenMP dependent Task Suite"
+    "title": "KaStORS, an OpenMP benchmark suite for dependent tasks"
 }
