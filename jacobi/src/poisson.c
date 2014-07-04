@@ -107,11 +107,6 @@ double run(struct user_parameters* params)
         return 0;
     }
 
-    /* Some information about domains etc... */
-    char buffer[2048];
-    sprintf(buffer,"Domains: %i x %i\nBlocsize: %i\nNb iteration: %i\n", nx,
-            ny, block_size, niter);
-    params->string2display = strdup( buffer );
 
     /// INITIALISATION
     dx = 1.0 / (double) (nx - 1);
