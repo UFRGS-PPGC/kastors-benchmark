@@ -262,7 +262,7 @@ static void OptimizedStrassenMultiply_par(REAL *C, REAL *A, REAL *B, unsigned Ma
 #pragma omp task depend(out: S7)
     MY_SUB(S7, B22, B12, RowIncrementB, QuadrantSize);
     /* M2 = A11 x B11 */
-#pragma omp task untied depend(in: A11, B11)
+#pragma omp task untied depend(in: A, B)
     OptimizedStrassenMultiply_par(M2, A11, B11, QuadrantSize, QuadrantSize, RowWidthA, RowWidthB, Depth+1, cutoff_size, cutoff_depth);
 
     /* M5 = S1 * S5 */
