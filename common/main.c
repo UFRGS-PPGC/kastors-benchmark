@@ -137,7 +137,9 @@ int main(int argc, char* argv[])
     printf("Threads : %d\n", num_threads);
     printf("Time : %lf sec\n", timing);
     if(params.check)
-        printf("Check : %s\n", (params.succeed)?"success":"fail");
+        printf("Check : %s\n", (params.succeed)?
+                ((params.succeed > 1)?"not implemented":"success")
+                :"fail");
     if (params.string2display !=0)
       printf("%s", params.string2display);
     printf("\n");

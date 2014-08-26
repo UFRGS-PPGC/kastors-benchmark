@@ -394,7 +394,7 @@ print_header(char *prog_name, int * iparam) {
 double run(struct user_parameters* params)
 {
     /*FIXME actually return check-s result*/
-    params->succeed = 1;
+    params->succeed = 2;
     int i, m, mx, nx;
     int start =  2048;
     int stop  = 2048;
