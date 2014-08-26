@@ -131,12 +131,9 @@ double run(struct user_parameters* params)
 #pragma omp parallel
 #pragma omp master
         //for collapse(2)
-#endif
         for (j = 0; j < ny; j+= block_size)
             for (i = 0; i < nx; i+= block_size)
-#ifndef SEQ
 #pragma omp task firstprivate(i,j) private(ii,jj)
-#endif
                 for (jj=j; jj<j+block_size; ++jj)
                     for (ii=i; ii<i+block_size; ++ii)
                     {
@@ -146,6 +143,19 @@ double run(struct user_parameters* params)
                             (*unew)[ii][jj] = 0.0;
                         }
                     }
+#else
+        for (j = 0; j < ny; j+= block_size)
+            for (i = 0; i < nx; i+= block_size)
+                for (jj=j; jj<j+block_size; ++jj)
+                    for (ii=i; ii<i+block_size; ++ii)
+                    {
+                        if (ii == 0 || ii == nx - 1 || jj == 0 || jj == ny - 1) {
+                            (*unew)[ii][jj] = (*f)[ii][jj];
+                        } else {
+                            (*unew)[ii][jj] = 0.0;
+                        }
+                    }
+#endif
         END_TIMER;
         printf("Time init: %lf\n", TIMER);
     }
@@ -249,12 +259,9 @@ void rhs(int nx, int ny, double *f_, int block_size)
 #pragma omp parallel
 #pragma omp master
     //for collapse(2)
-#endif
     for (j = 0; j < ny; j+=block_size)
         for (i = 0; i < nx; i+=block_size)
-#ifndef SEQ
 #pragma omp task firstprivate(block_size,i,j,nx,ny) private(ii,jj,x,y)
-#endif
             for (jj=j; jj<j+block_size; ++jj)
             {
                 y = (double) (jj) / (double) (ny - 1);
@@ -267,6 +274,22 @@ void rhs(int nx, int ny, double *f_, int block_size)
                         (*f)[ii][jj] = - uxxyy_exact(x, y);
                 }
             }
+#else
+    for (j = 0; j < ny; j+=block_size)
+        for (i = 0; i < nx; i+=block_size)
+            for (jj=j; jj<j+block_size; ++jj)
+            {
+                y = (double) (jj) / (double) (ny - 1);
+                for (ii=i; ii<i+block_size; ++ii)
+                {
+                    x = (double) (ii) / (double) (nx - 1);
+                    if (ii == 0 || ii == nx - 1 || jj == 0 || jj == ny - 1)
+                        (*f)[ii][jj] = u_exact(x, y);
+                    else
+                        (*f)[ii][jj] = - uxxyy_exact(x, y);
+                }
+            }
+#endif
 }
 
 /* Evaluates the exact solution. */
