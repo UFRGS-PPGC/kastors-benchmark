@@ -67,6 +67,8 @@ plasma_SRCS = \
 plasma_common_HDRS = $(COMMON_HDRS)
 plasma_common_SRCS = $(plasma_SRCS) $(COMMON_SRCS) $(plasma_common_HDRS)
 
+plasma_comLIBS		= -lcblas -llapacke -llapack -lblas -lm $(PTHREAD_LDFLAGS)
+
 noinst_LIBRARIES = libplasma-seq.a libplasma-par.a
 libplasma_seq_a_SOURCES = $(plasma_common_SRCS)
 libplasma_par_a_SOURCES = $(plasma_common_SRCS)
@@ -78,12 +80,12 @@ dgetrf_taskdep_SOURCES  = src/time_dgetrf-task.c
 dgeqrf_seq_SOURCES      = src/time_dgeqrf-seq.c
 dgeqrf_taskdep_SOURCES  = src/time_dgeqrf-task.c
 
-dpotrf_seq_LDADD      = libplasma-seq.a
-dpotrf_taskdep_LDADD  = libplasma-par.a
-dgetrf_seq_LDADD      = libplasma-seq.a
-dgetrf_taskdep_LDADD  = libplasma-par.a
-dgeqrf_seq_LDADD      = libplasma-seq.a
-dgeqrf_taskdep_LDADD  = libplasma-par.a
+dpotrf_seq_LDADD      = libplasma-seq.a $(plasma_comLIBS)
+dpotrf_taskdep_LDADD  = libplasma-par.a $(plasma_comLIBS)
+dgetrf_seq_LDADD      = libplasma-seq.a $(plasma_comLIBS)
+dgetrf_taskdep_LDADD  = libplasma-par.a $(plasma_comLIBS)
+dgeqrf_seq_LDADD      = libplasma-seq.a $(plasma_comLIBS)
+dgeqrf_taskdep_LDADD  = libplasma-par.a $(plasma_comLIBS)
 
 plasma_comCFLAGS	= -I$(srcdir)/include $(COMMON_comCFLAGS) \
 		-DADD_ -DMSIZE -DBSIZE $(PTHREAD_CFLAGS)
@@ -100,8 +102,7 @@ dgetrf_taskdep_CFLAGS   = $(plasma_parCFLAGS)
 dgeqrf_seq_CFLAGS       = $(plasma_seqCFLAGS)
 dgeqrf_taskdep_CFLAGS   = $(plasma_parCFLAGS)
 
-plasma_comLDFLAGS	= $(COMMON_comLDFLAGS) \
-		-lcblas -llapacke -llapack -lblas -lm $(PTHREAD_LDFLAGS)
+plasma_comLDFLAGS	= $(COMMON_comLDFLAGS)
 plasma_seqLDFLAGS	= $(plasma_comLDFLAGS) $(COMMON_seqLDFLAGS)
 plasma_parLDFLAGS	= $(plasma_comLDFLAGS) $(COMMON_parLDFLAGS)
 
