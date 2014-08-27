@@ -50,7 +50,7 @@ void parse(int argc, char* argv[], struct user_parameters* params)
             }
 #endif
 #ifdef SMSIZE
-        } else if(!strcmp(argv[i], "-n")) {
+        } else if(!strcmp(argv[i], "-m")) {
             if (++i < argc)
                 params->submatrix_size = atoi(argv[i]);
             else {
