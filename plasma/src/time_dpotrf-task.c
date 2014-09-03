@@ -7,6 +7,8 @@
 #define _PREC  double
 #define _LAMCH LAPACKE_dlamch_work
 
+#include "omp.h"
+
 #define _NAME  "PLASMA_dpotrf_Tile"
 /* See Lawn 41 page 120 */
 #define _FMULS FMULS_POTRF( N )
@@ -17,6 +19,10 @@
 static int
 RunTest(int *iparam, double *dparam, real_Double_t *t_)
 {
+#if 0
+double t0;
+printf("%f : ------------- BEGIN INIT\n", t0 =omp_get_wtime());
+#endif
     PASTE_CODE_IPARAM_LOCALS( iparam );
     int uplo = PlasmaUpper;
 
@@ -29,11 +35,20 @@ RunTest(int *iparam, double *dparam, real_Double_t *t_)
 
     /* Save A for check */
     PASTE_TILE_TO_LAPACK( descA, A, check, double, LDA, N );
+#if 0
+printf("%f : ------------- END INIT: %f s\n", omp_get_wtime(), omp_get_wtime()-t0);
+#endif
 
     /* PLASMA DPOSV */
+#if 0
+printf("%f : ------------- BEGIN\n", t0 =omp_get_wtime());
+#endif
     START_TIMING();
     PLASMA_dpotrf_Tile(uplo, descA);
     STOP_TIMING();
+#if 0
+printf("%f : ------------- END COMPUTE: %f s\n", omp_get_wtime(), omp_get_wtime()-t0);
+#endif
 
     /* Check the solution */
     if ( check )

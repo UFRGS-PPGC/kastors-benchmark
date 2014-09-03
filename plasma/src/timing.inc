@@ -416,7 +416,7 @@ double run(struct user_parameters* params)
     iparam[IPARAM_MB            ] = 128;
     iparam[IPARAM_NB            ] = 128;
     iparam[IPARAM_IB            ] = 32;
-    iparam[IPARAM_NITER         ] = 1;
+    iparam[IPARAM_NITER         ] = 2;
     iparam[IPARAM_WARMUP        ] = 1;
     iparam[IPARAM_CHECK         ] = 0;
     iparam[IPARAM_VERBOSE       ] = 0;

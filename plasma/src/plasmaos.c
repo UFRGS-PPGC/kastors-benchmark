@@ -115,6 +115,7 @@ void plasma_topology_finalize(){
  Also, affinity is not resotred when PLASMA_Finalize() is called.
  */
 int plasma_setaffinity(int rank) {
+  return PLASMA_SUCCESS;
 #ifndef PLASMA_AFFINITY_DISABLE
 #if (defined PLASMA_OS_LINUX) || (defined PLASMA_OS_FREEBSD)
     {
@@ -188,6 +189,7 @@ int plasma_setaffinity(int rank) {
  Also, affinity is not resotred when PLASMA_Finalize() is called.
  */
 int plasma_unsetaffinity() {
+  return PLASMA_SUCCESS;
 #ifndef PLASMA_AFFINITY_DISABLE
 #if (defined PLASMA_OS_LINUX) || (defined PLASMA_OS_FREEBSD)
     {

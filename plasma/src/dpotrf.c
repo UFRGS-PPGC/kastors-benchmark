@@ -212,7 +212,6 @@ int PLASMA_dpotrf_Tile(PLASMA_enum uplo, PLASMA_desc *A)
         PLASMA_dpotrf_Tile_Async(uplo, A, sequence, &request);
     if (plasma->dynamic_section) {
         /*QUARK_Waitall(plasma->quark); \*/
-#pragma omp taskwait
         plasma_barrier(plasma);
         plasma->dynamic_section = PLASMA_FALSE;
     }
@@ -300,9 +299,6 @@ int PLASMA_dpotrf_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A,
 
 #pragma omp parallel
     {
-#ifdef _OPENMP
-        plasma_setaffinity(omp_get_thread_num());
-#endif
 #pragma omp master
         {
             plasma_dynamic_spawn();
