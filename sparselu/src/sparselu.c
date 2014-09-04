@@ -216,14 +216,14 @@ double run(struct user_parameters* params)
 
     /// KERNEL INTENSIVE COMPUTATION
     START_TIMER;
-#ifdef SEQ
+#ifndef _OPENMP
     sparselu_seq_call(BENCH, matrix_size, submatrix_size);
 #else
     sparselu_par_call(BENCH, matrix_size, submatrix_size);
 #endif
     END_TIMER;
 
-#ifndef SEQ
+#ifdef _OPENMP
     if(params->check) {
         float **BENCH_SEQ;
         sparselu_init(&BENCH_SEQ, matrix_size, submatrix_size);
