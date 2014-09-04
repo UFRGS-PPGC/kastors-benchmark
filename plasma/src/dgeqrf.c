@@ -268,20 +268,12 @@ int PLASMA_dgeqrf_Tile_Async(PLASMA_desc *A, PLASMA_desc *T,
 */
     if (plasma->householder == PLASMA_FLAT_HOUSEHOLDER) {
 #ifdef _OPENMP
-#pragma omp parallel
-    {
-#ifdef _OPENMP
         plasma_setaffinity(omp_get_thread_num());
-#endif
-#pragma omp master
-        {
         plasma_parallel_call_4(plasma_pdgeqrf,
             PLASMA_desc, descA,
             PLASMA_desc, descT,
             PLASMA_sequence*, sequence,
             PLASMA_request*, request);
-        }
-    }
 #else
 
         plasma_static_call_4(plasma_pdgeqrf,

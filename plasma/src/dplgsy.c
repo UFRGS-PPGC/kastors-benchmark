@@ -101,13 +101,9 @@ int PLASMA_dplgsy( double bump, int N,
     descA.mat = A;
 
     /* Call the tile interface */
-#pragma omp parallel
-#pragma omp master
-{
     PLASMA_dplgsy_Tile_Async( bump, &descA, seed, sequence, &request );
 
     plasma_diptile2lap( descA, A, NB, NB, LDA, N,  sequence, &request);
-}
     plasma_dynamic_sync();
 
     status = sequence->status;
@@ -168,11 +164,7 @@ int PLASMA_dplgsy_Tile( double bump, PLASMA_desc *A,
         return PLASMA_ERR_NOT_INITIALIZED;
     }
     plasma_sequence_create(plasma, &sequence);
-#pragma omp parallel
-#pragma omp master
-{
     PLASMA_dplgsy_Tile_Async( bump, A, seed, sequence, &request );
-}
     plasma_dynamic_sync();
     status = sequence->status;
     plasma_sequence_destroy(plasma, sequence);

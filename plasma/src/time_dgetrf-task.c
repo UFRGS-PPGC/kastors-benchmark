@@ -34,7 +34,11 @@ RunTest(int *iparam, double *dparam, real_Double_t *t_)
     PASTE_TILE_TO_LAPACK( descA, A, check, double, LDA, N );
 
     START_TIMING();
+#pragma omp parallel
+#pragma omp master
+    {
     PLASMA_dgetrf_Tile( descA, piv );
+    }
     STOP_TIMING();
 
     /* Check the solution */

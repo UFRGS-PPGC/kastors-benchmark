@@ -31,7 +31,11 @@ printf("%f : ------------- BEGIN INIT\n", t0 =omp_get_wtime());
     /* Allocate Data */
     PASTE_CODE_ALLOCATE_MATRIX_TILE( descA, 1,     double, PlasmaRealDouble, LDA, N, N );
     PASTE_CODE_ALLOCATE_MATRIX_TILE( descB, check, double, PlasmaRealDouble, LDB, N, NRHS );
+#pragma omp parallel
+#pragma omp master
+    {
     PLASMA_dplgsy_Tile( (double)N, descA, 51 );
+    }
 
     /* Save A for check */
     PASTE_TILE_TO_LAPACK( descA, A, check, double, LDA, N );
@@ -44,7 +48,11 @@ printf("%f : ------------- END INIT: %f s\n", omp_get_wtime(), omp_get_wtime()-t
 printf("%f : ------------- BEGIN\n", t0 =omp_get_wtime());
 #endif
     START_TIMING();
+#pragma omp parallel
+#pragma omp master
+    {
     PLASMA_dpotrf_Tile(uplo, descA);
+    }
     STOP_TIMING();
 #if 0
 printf("%f : ------------- END COMPUTE: %f s\n", omp_get_wtime(), omp_get_wtime()-t0);

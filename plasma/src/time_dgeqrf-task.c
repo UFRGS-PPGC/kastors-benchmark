@@ -35,7 +35,11 @@ RunTest(int *iparam, double *dparam, real_Double_t *t_)
 
     /* Do the computations */
     START_TIMING();
+#pragma omp parallel
+#pragma omp master
+    {
     PLASMA_dgeqrf_Tile( descA, descT );
+    }
     STOP_TIMING();
 
     /* Check the solution */

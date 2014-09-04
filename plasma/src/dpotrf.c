@@ -74,79 +74,6 @@ int PLASMA_dpotrf(PLASMA_enum uplo, int N,
     printf("compute/dpotrf\n");
     abort();
     int status;
-#if 0
-    int NB;
-    plasma_context_t *plasma;
-    PLASMA_sequence *sequence = NULL;
-    PLASMA_request request = PLASMA_REQUEST_INITIALIZER;
-    PLASMA_desc descA;
-
-    plasma = plasma_context_self();
-    if (plasma == NULL) {
-        plasma_fatal_error("PLASMA_dpotrf", "PLASMA not initialized");
-        return PLASMA_ERR_NOT_INITIALIZED;
-    }
-    /* Check input arguments */
-    if (uplo != PlasmaUpper && uplo != PlasmaLower) {
-        plasma_error("PLASMA_dpotrf", "illegal value of uplo");
-        return -1;
-    }
-    if (N < 0) {
-        plasma_error("PLASMA_dpotrf", "illegal value of N");
-        return -2;
-    }
-    if (LDA < max(1, N)) {
-        plasma_error("PLASMA_dpotrf", "illegal value of LDA");
-        return -4;
-    }
-    /* Quick return */
-    if (max(N, 0) == 0)
-        return PLASMA_SUCCESS;
-
-    /* Tune NB depending on M, N & NRHS; Set NBNB */
-    status = plasma_tune(PLASMA_FUNC_DPOSV, N, N, 0);
-    if (status != PLASMA_SUCCESS) {
-        plasma_error("PLASMA_dpotrf", "plasma_tune() failed");
-        return status;
-    }
-
-    /* Set NT */
-    NB   = PLASMA_NB;
-
-
-#pragma omp parallel
-    {
-        fprintf(stderr, "Warning, you are not using plasma with tile, therefore not using the actual OpenMP plasma version\n");
-
-#pragma omp master
-        {
-        plasma_sequence_create(plasma, &sequence);
-        if ( PLASMA_TRANSLATION == PLASMA_OUTOFPLACE ) {
-            plasma_dooplap2tile( descA, A, NB, NB, LDA, N, 0, 0, N, N, sequence, &request,
-                                 plasma_desc_mat_free(&(descA)) );
-        } else {
-            plasma_diplap2tile( descA, A, NB, NB, LDA, N, 0, 0, N, N,
-                                sequence, &request);
-        }
-
-        /* Call the tile interface */
-        PLASMA_dpotrf_Tile_Async(uplo, &descA, sequence, &request);
-
-        if ( PLASMA_TRANSLATION == PLASMA_OUTOFPLACE ) {
-            plasma_dooptile2lap( descA, A, NB, NB, LDA, N,  sequence, &request);
-            plasma_dynamic_sync();
-            plasma_desc_mat_free(&descA);
-        } else {
-            plasma_diptile2lap( descA, A, NB, NB, LDA, N,  sequence, &request);
-            plasma_dynamic_sync();
-        }
-
-        status = sequence->status;
-        plasma_sequence_destroy(plasma, sequence);
-        }
-    }
-
-#endif
     return status;
 }
 
@@ -297,10 +224,6 @@ int PLASMA_dpotrf_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A,
         return PLASMA_SUCCESS;
 */
 
-#pragma omp parallel
-    {
-#pragma omp master
-        {
             plasma_dynamic_spawn();
     if (!plasma->dynamic_section) {
         plasma->dynamic_section = PLASMA_TRUE;
@@ -319,8 +242,6 @@ int PLASMA_dpotrf_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A,
      *    PLASMA_sequence*, sequence,
      *    PLASMA_request*, request);
      */
-        }
-    }
 
     return PLASMA_SUCCESS;
 }

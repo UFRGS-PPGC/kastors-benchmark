@@ -279,13 +279,9 @@ int PLASMA_dgetrf_Tile_Async(PLASMA_desc *A, int *IPIV,
         return PLASMA_SUCCESS;
 */
 
-#pragma omp parallel
-    {
 #ifdef _OPENMP
         plasma_setaffinity(omp_get_thread_num());
 #endif
-#pragma omp master
-        {
     plasma_dynamic_call_3(
         plasma_pdbarrier_tl2pnl,
         PLASMA_desc, descA,
@@ -303,8 +299,6 @@ int PLASMA_dgetrf_Tile_Async(PLASMA_desc *A, int *IPIV,
         PLASMA_desc, descA,
         PLASMA_sequence*, sequence,
         PLASMA_request*,  request);
-        }
-    }
 
     return PLASMA_SUCCESS;
 }
