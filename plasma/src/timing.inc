@@ -92,6 +92,7 @@ int gettimeofday(struct timeval* tv, struct timezone* tz)
 #include "timing.h"
 #include "auxiliary.h"
 #include "main.h"
+#define EPSILON 1.0E-9
 
 static int RunTest(int *iparam, _PREC *dparam, double *t_);
 
@@ -110,7 +111,7 @@ double cWtime(void)
 }
 
 static double
-Test(int64_t n, int *iparam) {
+Test(int64_t n, int *iparam, struct user_parameters* params) {
     int      i, j, iter;
     int      thrdnbr, niter;
     int64_t  M, N, K, NRHS;
@@ -224,6 +225,9 @@ Test(int64_t n, int *iparam) {
     sd = sqrt((sumgf2 - (sumgf*sumgf)/niter)/niter);
 
     free(t);
+
+    if (params->check && dparam[IPARAM_RES] < EPSILON)
+        params->succeed = 1;
 
     return sumt/niter;
 }
@@ -393,8 +397,7 @@ print_header(char *prog_name, int * iparam) {
 /*main(int argc, char *argv[]) {*/
 double run(struct user_parameters* params)
 {
-    /*FIXME actually return check-s result*/
-    params->succeed = 2;
+    params->succeed = 0;
     int i, m, mx, nx;
     int start =  2048;
     int stop  = 2048;
@@ -418,7 +421,7 @@ double run(struct user_parameters* params)
     iparam[IPARAM_IB            ] = 32;
     iparam[IPARAM_NITER         ] = 2;
     iparam[IPARAM_WARMUP        ] = 1;
-    iparam[IPARAM_CHECK         ] = 0;
+    iparam[IPARAM_CHECK         ] = params->check;
     iparam[IPARAM_VERBOSE       ] = 0;
     iparam[IPARAM_AUTOTUNING    ] = 0;
     iparam[IPARAM_INPUTFMT      ] = 0;
@@ -489,7 +492,7 @@ double run(struct user_parameters* params)
 
     if (step < 1) step = 1;
     double timing = 0;
-    Test( -1, iparam ); /* print header */
+    Test( -1, iparam, params); /* print header */
     for (i = start; i <= stop; i += step)
     {
         if ( nx > 0 ) {
@@ -506,7 +509,7 @@ double run(struct user_parameters* params)
         printf("M : %d\n", iparam[IPARAM_M]);
         printf("N : %d\n", iparam[IPARAM_N]);
         printf("NB : %d\n", iparam[IPARAM_NB]);
-        timing = Test( iparam[IPARAM_N], iparam );
+        timing = Test( iparam[IPARAM_N], iparam, params);
     }
 
     PLASMA_Finalize();
