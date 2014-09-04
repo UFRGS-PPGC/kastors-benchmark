@@ -357,6 +357,7 @@ static int compare_matrix(int n, REAL *A, int an, REAL *B, int bn)
             if (c < 0.0)
                 c = -c;
             c = c / ELEM(A, an, i, j);
+//	    printf("C: %f   A: %f   B: %f\n", c, ELEM(A, an, i, j), ELEM(B, bn, i, j));
             if (c > EPSILON)
                 return 0;
         }
@@ -364,14 +365,18 @@ static int compare_matrix(int n, REAL *A, int an, REAL *B, int bn)
     return 1;
 }
 
-/*
- * Allocate a matrix of side n (therefore n^2 elements)
- */
-REAL *alloc_matrix(int n)
+void matrix_multiply(double* A, double* B, double* C, int matrix_size)
 {
-     return malloc(n * n * sizeof(REAL));
+int i, j, k;
+for(i=0; i<matrix_size; i++)
+    for(j=0; j<matrix_size; j++)
+    {
+	double res = 0;
+        for(k=0; k<matrix_size; k++)
+	    res += A[i * matrix_size + k] * B[k * matrix_size + j];
+        C[i * matrix_size + j] = res;
+    }
 }
-
 
 double run(struct user_parameters* params)
 {
@@ -408,17 +413,12 @@ double run(struct user_parameters* params)
 #endif
     END_TIMER;
 
-#ifdef _OPENMP
     if(params->check) {
         double *D = (double *) malloc (matrix_size * matrix_size * sizeof(double));
-        strassen_main_seq(D, A, B, matrix_size, cutoff_size);
+        matrix_multiply(A, B, D, matrix_size);
         params->succeed = compare_matrix(matrix_size, C, matrix_size, D, matrix_size);
         free(D);
     }
-#else
-    params->succeed = 1;
-    (void)error;
-#endif
     free(A);
     free(B);
     free(C);
