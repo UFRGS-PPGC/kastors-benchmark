@@ -401,14 +401,14 @@ double run(struct user_parameters* params)
 
     /// KERNEL INTENSIVE COMPUTATION
     START_TIMER;
-#ifdef SEQ
+#ifndef _OPENMP
     strassen_main_seq(C, A, B, matrix_size, cutoff_size);
 #else
     strassen_main_par(C, A, B, matrix_size, cutoff_size, cutoff_depth);
 #endif
     END_TIMER;
 
-#ifndef SEQ
+#ifdef _OPENMP
     if(params->check) {
         double *D = (double *) malloc (matrix_size * matrix_size * sizeof(double));
         strassen_main_seq(D, A, B, matrix_size, cutoff_size);

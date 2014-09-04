@@ -127,7 +127,6 @@ double run(struct user_parameters* params)
        */
     {
         START_TIMER;
-#ifndef SEQ
 #pragma omp parallel
 #pragma omp master
         //for collapse(2)
@@ -143,33 +142,20 @@ double run(struct user_parameters* params)
                             (*unew)[ii][jj] = 0.0;
                         }
                     }
-#else
-        for (j = 0; j < ny; j+= block_size)
-            for (i = 0; i < nx; i+= block_size)
-                for (jj=j; jj<j+block_size; ++jj)
-                    for (ii=i; ii<i+block_size; ++ii)
-                    {
-                        if (ii == 0 || ii == nx - 1 || jj == 0 || jj == ny - 1) {
-                            (*unew)[ii][jj] = (*f)[ii][jj];
-                        } else {
-                            (*unew)[ii][jj] = 0.0;
-                        }
-                    }
-#endif
         END_TIMER;
         printf("Time init: %lf\n", TIMER);
     }
 
     /// KERNEL INTENSIVE COMPUTATION
     START_TIMER;
-#ifdef SEQ
+#ifndef _OPENMP
     sweep_seq(nx, ny, dx, dy, f_, 0, niter, u_, unew_);
 #else
     sweep(nx, ny, dx, dy, f_, 0, niter, u_, unew_, block_size);
 #endif
     END_TIMER;
 
-#ifndef SEQ
+#ifdef _OPENMP
     if(params->check) {
         /// CHECK OUTPUT
         // Check for convergence.
@@ -255,7 +241,6 @@ void rhs(int nx, int ny, double *f_, int block_size)
     // The "boundary" entries of F store the boundary values of the solution.
     // The "interior" entries of F store the right hand sides of the Poisson equation.
 
-#ifndef SEQ
 #pragma omp parallel
 #pragma omp master
     //for collapse(2)
@@ -274,22 +259,6 @@ void rhs(int nx, int ny, double *f_, int block_size)
                         (*f)[ii][jj] = - uxxyy_exact(x, y);
                 }
             }
-#else
-    for (j = 0; j < ny; j+=block_size)
-        for (i = 0; i < nx; i+=block_size)
-            for (jj=j; jj<j+block_size; ++jj)
-            {
-                y = (double) (jj) / (double) (ny - 1);
-                for (ii=i; ii<i+block_size; ++ii)
-                {
-                    x = (double) (ii) / (double) (nx - 1);
-                    if (ii == 0 || ii == nx - 1 || jj == 0 || jj == ny - 1)
-                        (*f)[ii][jj] = u_exact(x, y);
-                    else
-                        (*f)[ii][jj] = - uxxyy_exact(x, y);
-                }
-            }
-#endif
 }
 
 /* Evaluates the exact solution. */
