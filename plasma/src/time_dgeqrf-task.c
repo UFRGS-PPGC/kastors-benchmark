@@ -22,7 +22,11 @@ RunTest(int *iparam, double *dparam, real_Double_t *t_)
 
     /* Allocate Data */
     PASTE_CODE_ALLOCATE_MATRIX_TILE( descA, 1, double, PlasmaRealDouble, LDA, M, N );
+#pragma omp parallel
+#pragma omp master
+    {
     PLASMA_dplrnt_Tile( descA, 5373 );
+    }
 
     /* Save A for check */
     PASTE_TILE_TO_LAPACK( descA, A, ( check && M == N ), double, LDA, N );

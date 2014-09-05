@@ -28,7 +28,11 @@ RunTest(int *iparam, double *dparam, real_Double_t *t_)
     PASTE_CODE_ALLOCATE_MATRIX_TILE( descA, 1, double, PlasmaRealDouble, LDA, M, N );
     PASTE_CODE_ALLOCATE_MATRIX( piv, 1, int, min(M, N), 1 );
 
+#pragma omp parallel
+#pragma omp master
+    {
     PLASMA_dplrnt_Tile(descA, 3456);
+    }
 
     /* Save AT in lapack layout for check */
     PASTE_TILE_TO_LAPACK( descA, A, check, double, LDA, N );
