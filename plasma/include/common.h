@@ -28,15 +28,9 @@
 #include "allocate.h"
 #include "auxiliary.h"
 #include "tile.h"
-#include "async.h"
 #include "bulge.h"
-#include "plasma_threadsetting.h"
 
-#if defined( _WIN32 ) || defined( _WIN64 )
-# include <io.h>
-#else  /* NOT WIN32 */
 # include <unistd.h>
-#endif  /* IF WIN32 */
 
 
 /** ****************************************************************************
@@ -74,17 +68,11 @@
 /***************************************************************************//**
  *  Global shortcuts
  **/
-#define PLASMA_RANK        plasma_rank(plasma)
-#define PLASMA_SIZE        plasma->world_size
 #define PLASMA_GRPSIZE     plasma->group_size
 #define PLASMA_NB          plasma->nb
 #define PLASMA_IB          plasma->ib
 #define PLASMA_NBNBSIZE    plasma->nbnbsize
 #define PLASMA_IBNBSIZE    plasma->ibnbsize
-#define PLASMA_SCHEDULING  plasma->scheduling
-#define PLASMA_RHBLK       plasma->rhblock
-#define PLASMA_TRANSLATION plasma->translation
-#define PLASMA_TNT_MODE    plasma->tournament
 #define PLASMA_TNT_SIZE    plasma->tntsize
 
 /***************************************************************************//**
@@ -112,13 +100,10 @@
  **/
 #define ss_init(m, n, init_val) \
 { \
-    if (PLASMA_RANK == 0) { \
-        plasma->ss_progress = (volatile int *)plasma_shared_alloc(plasma, (m)*(n), PlasmaInteger); \
-        plasma_memset_int((int*)plasma->ss_progress, (m)*(n), (init_val)); \
-    } \
+    plasma->ss_progress = (volatile int *)plasma_shared_alloc(plasma, (m)*(n), PlasmaInteger); \
+    plasma_memset_int((int*)plasma->ss_progress, (m)*(n), (init_val)); \
     plasma->ss_ld = (m); \
     plasma->ss_abort = 0; \
-    plasma_barrier(plasma); \
 }
 
 #define ss_abort()   plasma->ss_abort = 1;
@@ -133,16 +118,13 @@
 { \
     while (!plasma->ss_abort && \
             plasma->ss_progress[(m)+plasma->ss_ld*(n)] != (val)) \
-        plasma_yield(); \
     if (plasma->ss_abort) \
         break; \
 }
 
 #define ss_finalize() \
 { \
-    plasma_barrier(plasma); \
-    if (PLASMA_RANK == 0) \
-        plasma_shared_free(plasma, (void*)plasma->ss_progress); \
+    plasma_shared_free(plasma, (void*)plasma->ss_progress); \
 }
 
 /***************************************************************************//**

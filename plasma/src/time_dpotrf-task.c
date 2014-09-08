@@ -34,7 +34,7 @@ printf("%f : ------------- BEGIN INIT\n", t0 =omp_get_wtime());
 #pragma omp parallel
 #pragma omp master
     {
-    PLASMA_dplgsy_Tile( (double)N, descA, 51 );
+    plasma_pdplgsy_quark( (double)N, *descA, 51 );
     }
 
     /* Save A for check */
@@ -51,7 +51,7 @@ printf("%f : ------------- BEGIN\n", t0 =omp_get_wtime());
 #pragma omp parallel
 #pragma omp master
     {
-    PLASMA_dpotrf_Tile(uplo, descA);
+    plasma_pdpotrf_quark(uplo, *descA);
     }
     STOP_TIMING();
 #if 0
@@ -61,10 +61,10 @@ printf("%f : ------------- END COMPUTE: %f s\n", omp_get_wtime(), omp_get_wtime(
     /* Check the solution */
     if ( check )
     {
-        PLASMA_dplrnt_Tile( descB, 7672 );
+        plasma_pdpltmg_quark(PlasmaMatrixRandom, * descB, 7672 );
         PASTE_TILE_TO_LAPACK( descB, B, check, double, LDB, NRHS );
 
-        PLASMA_dpotrs_Tile( uplo, descA, descB );
+        PLASMA_dpotrs_Tile_Async( uplo, descA, descB );
 
         PASTE_TILE_TO_LAPACK( descB, X, check, double, LDB, NRHS );
 

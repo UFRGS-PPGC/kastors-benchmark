@@ -25,7 +25,7 @@ RunTest(int *iparam, double *dparam, real_Double_t *t_)
 #pragma omp parallel
 #pragma omp master
     {
-    PLASMA_dplrnt_Tile( descA, 5373 );
+    plasma_pdpltmg_quark(PlasmaMatrixRandom, * descA, 5373 );
     }
 
     /* Save A for check */
@@ -35,14 +35,14 @@ RunTest(int *iparam, double *dparam, real_Double_t *t_)
     PASTE_CODE_ALLOCATE_MATRIX_TILE( descB, (check && M == N), double, PlasmaRealDouble, LDB, M, NRHS );
 
     /* Allocate Workspace */
-    PLASMA_Alloc_Workspace_dgels_Tile(M, N, &descT);
+    plasma_alloc_ibnb_tile(M, N, PLASMA_FUNC_DGELS, PlasmaRealDouble, &descT);
 
     /* Do the computations */
     START_TIMING();
 #pragma omp parallel
 #pragma omp master
     {
-    PLASMA_dgeqrf_Tile( descA, descT );
+    PLASMA_dgeqrf_Tile_Async( descA, descT );
     }
     STOP_TIMING();
 
@@ -50,11 +50,11 @@ RunTest(int *iparam, double *dparam, real_Double_t *t_)
     if ( check && M == N )
     {
         /* Initialize and save B */
-        PLASMA_dplrnt_Tile( descB, 2264 );
+        plasma_pdpltmg_quark(PlasmaMatrixRandom, * descB, 2264 );
         PASTE_TILE_TO_LAPACK( descB, B, 1, double, LDB, NRHS );
 
         /* Compute the solution */
-        PLASMA_dgeqrs_Tile( descA, descT, descB );
+        PLASMA_dgeqrs_Tile_Async( descA, descT, descB );
 
         /* Copy solution to X */
         PASTE_TILE_TO_LAPACK( descB, X, 1, double, LDB, NRHS );

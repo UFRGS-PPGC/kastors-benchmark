@@ -171,75 +171,75 @@ int PLASMA_dormqr_Tile(PLASMA_enum side, PLASMA_enum trans, PLASMA_desc *A, PLAS
 /** ****************************************************************************
  * Declarations of math functions (tile layout, asynchronous execution) - alphabetical order
  **/
-int PLASMA_dgebrd_Tile_Async(PLASMA_enum jobq, PLASMA_enum jobpt, PLASMA_desc *A, double *S, double *E, PLASMA_desc *T, double *U, int LDU, double *VT, int LDVT, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgecon_Tile_Async(PLASMA_enum norm, PLASMA_desc *A, double anorm, double *rcond, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dpocon_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A, double anorm, double *rcond, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgelqf_Tile_Async(PLASMA_desc *A, PLASMA_desc *T, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgelqs_Tile_Async(PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgels_Tile_Async(PLASMA_enum trans, PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgemm_Tile_Async(PLASMA_enum transA, PLASMA_enum transB, double alpha, PLASMA_desc *A, PLASMA_desc *B, double beta, PLASMA_desc *C, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgeqp3_Tile_Async( PLASMA_desc *A, int *jpvt, double *tau, double *work, double *rwork, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgeqrf_Tile_Async(PLASMA_desc *A, PLASMA_desc *T, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgeqrs_Tile_Async(PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgesv_Tile_Async(PLASMA_desc *A, int *IPIV, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgesv_incpiv_Tile_Async(PLASMA_desc *A, PLASMA_desc *L, int *IPIV, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgesvd_Tile_Async(PLASMA_enum jobu, PLASMA_enum jobvt, PLASMA_desc *A, double *S, PLASMA_desc *T, double *U, int LDU, double *VT, int LDVT, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgesdd_Tile_Async(PLASMA_enum jobu, PLASMA_enum jobvt, PLASMA_desc *A, double *S, PLASMA_desc *T, double *U, int LDU, double *VT, int LDVT, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgetrf_Tile_Async(  PLASMA_desc *A, int *IPIV, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgetrf_incpiv_Tile_Async(PLASMA_desc *A, PLASMA_desc *L, int *IPIV, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgetrf_nopiv_Tile_Async( PLASMA_desc *A, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgetrf_tntpiv_Tile_Async(PLASMA_desc *A, int *IPIV, PLASMA_desc *W, int *Wpivot, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgetri_Tile_Async(PLASMA_desc *A, int *IPIV, PLASMA_desc *W, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgetrs_Tile_Async(PLASMA_enum trans, PLASMA_desc *A, const int *IPIV, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgetrs_incpiv_Tile_Async(PLASMA_desc *A, PLASMA_desc *L, const int *IPIV, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
+int PLASMA_dgebrd_Tile_Async(PLASMA_enum jobq, PLASMA_enum jobpt, PLASMA_desc *A, double *S, double *E, PLASMA_desc *T, double *U, int LDU, double *VT, int LDVT);
+int PLASMA_dgecon_Tile_Async(PLASMA_enum norm, PLASMA_desc *A, double anorm, double *rcond);
+int PLASMA_dpocon_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A, double anorm, double *rcond);
+int PLASMA_dgelqf_Tile_Async(PLASMA_desc *A, PLASMA_desc *T);
+int PLASMA_dgelqs_Tile_Async(PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B);
+int PLASMA_dgels_Tile_Async(PLASMA_enum trans, PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B);
+int PLASMA_dgemm_Tile_Async(PLASMA_enum transA, PLASMA_enum transB, double alpha, PLASMA_desc *A, PLASMA_desc *B, double beta, PLASMA_desc *C);
+int PLASMA_dgeqp3_Tile_Async( PLASMA_desc *A, int *jpvt, double *tau, double *work, double *rwork);
+int PLASMA_dgeqrf_Tile_Async(PLASMA_desc *A, PLASMA_desc *T);
+int PLASMA_dgeqrs_Tile_Async(PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B);
+int PLASMA_dgesv_Tile_Async(PLASMA_desc *A, int *IPIV, PLASMA_desc *B);
+int PLASMA_dgesv_incpiv_Tile_Async(PLASMA_desc *A, PLASMA_desc *L, int *IPIV, PLASMA_desc *B);
+int PLASMA_dgesvd_Tile_Async(PLASMA_enum jobu, PLASMA_enum jobvt, PLASMA_desc *A, double *S, PLASMA_desc *T, double *U, int LDU, double *VT, int LDVT);
+int PLASMA_dgesdd_Tile_Async(PLASMA_enum jobu, PLASMA_enum jobvt, PLASMA_desc *A, double *S, PLASMA_desc *T, double *U, int LDU, double *VT, int LDVT);
+int PLASMA_dgetrf_Tile_Async(  PLASMA_desc *A, int *IPIV);
+int PLASMA_dgetrf_incpiv_Tile_Async(PLASMA_desc *A, PLASMA_desc *L, int *IPIV);
+int PLASMA_dgetrf_nopiv_Tile_Async( PLASMA_desc *A);
+int PLASMA_dgetrf_tntpiv_Tile_Async(PLASMA_desc *A, int *IPIV, PLASMA_desc *W, int *Wpivot);
+int PLASMA_dgetri_Tile_Async(PLASMA_desc *A, int *IPIV, PLASMA_desc *W);
+int PLASMA_dgetrs_Tile_Async(PLASMA_enum trans, PLASMA_desc *A, const int *IPIV, PLASMA_desc *B);
+int PLASMA_dgetrs_incpiv_Tile_Async(PLASMA_desc *A, PLASMA_desc *L, const int *IPIV, PLASMA_desc *B);
 #ifdef COMPLEX
-int PLASMA_dsymm_Tile_Async(PLASMA_enum side, PLASMA_enum uplo, double alpha, PLASMA_desc *A, PLASMA_desc *B, double beta, PLASMA_desc *C, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dsyrk_Tile_Async(PLASMA_enum uplo, PLASMA_enum trans, double alpha, PLASMA_desc *A, double beta, PLASMA_desc *C, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dsyr2k_Tile_Async(PLASMA_enum uplo, PLASMA_enum trans, double alpha, PLASMA_desc *A, PLASMA_desc *B, double beta, PLASMA_desc *C, PLASMA_sequence *sequence, PLASMA_request *request);
+int PLASMA_dsymm_Tile_Async(PLASMA_enum side, PLASMA_enum uplo, double alpha, PLASMA_desc *A, PLASMA_desc *B, double beta, PLASMA_desc *C);
+int PLASMA_dsyrk_Tile_Async(PLASMA_enum uplo, PLASMA_enum trans, double alpha, PLASMA_desc *A, double beta, PLASMA_desc *C);
+int PLASMA_dsyr2k_Tile_Async(PLASMA_enum uplo, PLASMA_enum trans, double alpha, PLASMA_desc *A, PLASMA_desc *B, double beta, PLASMA_desc *C);
 #endif
-int PLASMA_dsyev_Tile_Async(PLASMA_enum jobz, PLASMA_enum uplo, PLASMA_desc *A, double *W, PLASMA_desc *T, double *Q, int LDQ, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dsyevd_Tile_Async(PLASMA_enum jobz, PLASMA_enum uplo, PLASMA_desc *A, double *W, PLASMA_desc *T, double *Q, int LDQ, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dsyevr_Tile_Async(PLASMA_enum jobz, PLASMA_enum range, PLASMA_enum uplo, PLASMA_desc *A, double vl, double vu, int il, int iu, double abstol, int *nbcomputedeig, double *W, PLASMA_desc *T, double *Q, int LDQ, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dsygv_Tile_Async( PLASMA_enum itype, PLASMA_enum jobz, PLASMA_enum uplo, PLASMA_desc *A, PLASMA_desc *B, double *W, PLASMA_desc *T, PLASMA_desc *Q, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dsygvd_Tile_Async(PLASMA_enum itype, PLASMA_enum jobz, PLASMA_enum uplo, PLASMA_desc *A, PLASMA_desc *B, double *W, PLASMA_desc *T, PLASMA_desc *Q, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dsygst_Tile_Async(PLASMA_enum itype, PLASMA_enum uplo, PLASMA_desc *A, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dsytrd_Tile_Async(PLASMA_enum jobz, PLASMA_enum uplo, PLASMA_desc *A, double *D, double *E, PLASMA_desc *T, double *Q, int LDQ, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dlacpy_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dlange_Tile_Async(PLASMA_enum norm, PLASMA_desc *A, double *result, PLASMA_sequence *sequence, PLASMA_request *request);
+int PLASMA_dsyev_Tile_Async(PLASMA_enum jobz, PLASMA_enum uplo, PLASMA_desc *A, double *W, PLASMA_desc *T, double *Q, int LDQ);
+int PLASMA_dsyevd_Tile_Async(PLASMA_enum jobz, PLASMA_enum uplo, PLASMA_desc *A, double *W, PLASMA_desc *T, double *Q, int LDQ);
+int PLASMA_dsyevr_Tile_Async(PLASMA_enum jobz, PLASMA_enum range, PLASMA_enum uplo, PLASMA_desc *A, double vl, double vu, int il, int iu, double abstol, int *nbcomputedeig, double *W, PLASMA_desc *T, double *Q, int LDQ);
+int PLASMA_dsygv_Tile_Async( PLASMA_enum itype, PLASMA_enum jobz, PLASMA_enum uplo, PLASMA_desc *A, PLASMA_desc *B, double *W, PLASMA_desc *T, PLASMA_desc *Q);
+int PLASMA_dsygvd_Tile_Async(PLASMA_enum itype, PLASMA_enum jobz, PLASMA_enum uplo, PLASMA_desc *A, PLASMA_desc *B, double *W, PLASMA_desc *T, PLASMA_desc *Q);
+int PLASMA_dsygst_Tile_Async(PLASMA_enum itype, PLASMA_enum uplo, PLASMA_desc *A, PLASMA_desc *B);
+int PLASMA_dsytrd_Tile_Async(PLASMA_enum jobz, PLASMA_enum uplo, PLASMA_desc *A, double *D, double *E, PLASMA_desc *T, double *Q, int LDQ);
+int PLASMA_dlacpy_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A, PLASMA_desc *B);
+int PLASMA_dlange_Tile_Async(PLASMA_enum norm, PLASMA_desc *A, double *result);
 #ifdef COMPLEX
-int PLASMA_dlansy_Tile_Async(PLASMA_enum norm, PLASMA_enum uplo, PLASMA_desc *A, double *result, PLASMA_sequence *sequence, PLASMA_request *request);
+int PLASMA_dlansy_Tile_Async(PLASMA_enum norm, PLASMA_enum uplo, PLASMA_desc *A, double *result);
 #endif
-int PLASMA_dlansy_Tile_Async(PLASMA_enum norm, PLASMA_enum uplo, PLASMA_desc *A, double *result, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dlantr_Tile_Async(PLASMA_enum norm, PLASMA_enum uplo, PLASMA_enum diag, PLASMA_desc *A, double *result, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dlaset_Tile_Async(PLASMA_enum uplo, double alpha, double beta, PLASMA_desc *A, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dlaswp_Tile_Async(PLASMA_desc *A, int K1, int K2, const int *IPIV, int INCX, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dlaswpc_Tile_Async(PLASMA_desc *A, int K1, int K2, const int *IPIV, int INCX, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dlauum_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A, PLASMA_sequence *sequence, PLASMA_request *request);
+int PLASMA_dlansy_Tile_Async(PLASMA_enum norm, PLASMA_enum uplo, PLASMA_desc *A, double *result);
+int PLASMA_dlantr_Tile_Async(PLASMA_enum norm, PLASMA_enum uplo, PLASMA_enum diag, PLASMA_desc *A, double *result);
+int PLASMA_dlaset_Tile_Async(PLASMA_enum uplo, double alpha, double beta, PLASMA_desc *A);
+int PLASMA_dlaswp_Tile_Async(PLASMA_desc *A, int K1, int K2, const int *IPIV, int INCX);
+int PLASMA_dlaswpc_Tile_Async(PLASMA_desc *A, int K1, int K2, const int *IPIV, int INCX);
+int PLASMA_dlauum_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A);
 #ifdef COMPLEX
-int PLASMA_dplgsy_Tile_Async(double bump, PLASMA_desc *A, unsigned long long int seed, PLASMA_sequence *sequence, PLASMA_request *request);
+int PLASMA_dplgsy_Tile_Async(double bump, PLASMA_desc *A, unsigned long long int seed);
 #endif
-int PLASMA_dplgsy_Tile_Async(double bump, PLASMA_desc *A, unsigned long long int seed, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dplrnt_Tile_Async(PLASMA_desc *A, unsigned long long int seed, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dpltmg_Tile_Async(PLASMA_enum mtxtype, PLASMA_desc *A, unsigned long long int seed, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dposv_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dpotrf_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dpotri_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dpotrs_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dsymm_Tile_Async(PLASMA_enum side, PLASMA_enum uplo, double alpha, PLASMA_desc *A, PLASMA_desc *B, double beta, PLASMA_desc *C, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dsyrk_Tile_Async(PLASMA_enum uplo, PLASMA_enum trans, double alpha, PLASMA_desc *A, double beta, PLASMA_desc *C, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dsyr2k_Tile_Async(PLASMA_enum uplo, PLASMA_enum trans, double alpha, PLASMA_desc *A, PLASMA_desc *B, double beta, PLASMA_desc *C, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dtrmm_Tile_Async(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum transA, PLASMA_enum diag, double alpha, PLASMA_desc *A, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dtrsm_Tile_Async(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum transA, PLASMA_enum diag, double alpha, PLASMA_desc *A, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dtrsmpl_Tile_Async(PLASMA_desc *A, PLASMA_desc *L, const int *IPIV, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dtrsmrv_Tile_Async(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum transA, PLASMA_enum diag, double alpha, PLASMA_desc *A, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dtrtri_Tile_Async(PLASMA_enum uplo, PLASMA_enum diag, PLASMA_desc *A, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dorglq_Tile_Async(PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dorgqr_Tile_Async(PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dormlq_Tile_Async(PLASMA_enum side, PLASMA_enum trans, PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dormqr_Tile_Async(PLASMA_enum side, PLASMA_enum trans, PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B, PLASMA_sequence *sequence, PLASMA_request *request);
+int PLASMA_dplgsy_Tile_Async(double bump, PLASMA_desc *A, unsigned long long int seed);
+int PLASMA_dplrnt_Tile_Async(PLASMA_desc *A, unsigned long long int seed);
+int PLASMA_dpltmg_Tile_Async(PLASMA_enum mtxtype, PLASMA_desc *A, unsigned long long int seed);
+int PLASMA_dposv_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A, PLASMA_desc *B);
+int PLASMA_dpotrf_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A);
+int PLASMA_dpotri_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A);
+int PLASMA_dpotrs_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A, PLASMA_desc *B);
+int PLASMA_dsymm_Tile_Async(PLASMA_enum side, PLASMA_enum uplo, double alpha, PLASMA_desc *A, PLASMA_desc *B, double beta, PLASMA_desc *C);
+int PLASMA_dsyrk_Tile_Async(PLASMA_enum uplo, PLASMA_enum trans, double alpha, PLASMA_desc *A, double beta, PLASMA_desc *C);
+int PLASMA_dsyr2k_Tile_Async(PLASMA_enum uplo, PLASMA_enum trans, double alpha, PLASMA_desc *A, PLASMA_desc *B, double beta, PLASMA_desc *C);
+int PLASMA_dtrmm_Tile_Async(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum transA, PLASMA_enum diag, double alpha, PLASMA_desc *A, PLASMA_desc *B);
+int PLASMA_dtrsm_Tile_Async(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum transA, PLASMA_enum diag, double alpha, PLASMA_desc *A, PLASMA_desc *B);
+int PLASMA_dtrsmpl_Tile_Async(PLASMA_desc *A, PLASMA_desc *L, const int *IPIV, PLASMA_desc *B);
+int PLASMA_dtrsmrv_Tile_Async(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum transA, PLASMA_enum diag, double alpha, PLASMA_desc *A, PLASMA_desc *B);
+int PLASMA_dtrtri_Tile_Async(PLASMA_enum uplo, PLASMA_enum diag, PLASMA_desc *A);
+int PLASMA_dorglq_Tile_Async(PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B);
+int PLASMA_dorgqr_Tile_Async(PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B);
+int PLASMA_dormlq_Tile_Async(PLASMA_enum side, PLASMA_enum trans, PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B);
+int PLASMA_dormqr_Tile_Async(PLASMA_enum side, PLASMA_enum trans, PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B);
 
-int PLASMA_dgecfi_Async(int m, int n, double *A, PLASMA_enum f_in, int imb, int inb, PLASMA_enum f_out, int omb, int onb, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dgetmi_Async(int m, int n, double *A, PLASMA_enum f_in, int mb, int inb, PLASMA_sequence *sequence, PLASMA_request *request);
+int PLASMA_dgecfi_Async(int m, int n, double *A, PLASMA_enum f_in, int imb, int inb, PLASMA_enum f_out, int omb, int onb);
+int PLASMA_dgetmi_Async(int m, int n, double *A, PLASMA_enum f_in, int mb, int inb);
 
 /** ****************************************************************************
  * Declarations of workspace allocation functions (tile layout) - alphabetical order
@@ -281,8 +281,8 @@ int PLASMA_Alloc_Workspace_dgetrf_incpiv_Tile(int N, PLASMA_desc **descL, int **
  **/
 int PLASMA_dLapack_to_Tile(double *Af77, int LDA, PLASMA_desc *A);
 int PLASMA_dTile_to_Lapack(PLASMA_desc *A, double *Af77, int LDA);
-int PLASMA_dLapack_to_Tile_Async(double *Af77, int LDA, PLASMA_desc *A, PLASMA_sequence *sequence, PLASMA_request *request);
-int PLASMA_dTile_to_Lapack_Async(PLASMA_desc *A, double *Af77, int LDA, PLASMA_sequence *sequence, PLASMA_request *request);
+int PLASMA_dLapack_to_Tile_Async(double *Af77, int LDA, PLASMA_desc *A);
+int PLASMA_dTile_to_Lapack_Async(PLASMA_desc *A, double *Af77, int LDA);
 
 #ifdef __cplusplus
 }

@@ -59,24 +59,6 @@ typedef struct plasma_desc_t {
     int nt;             /**< number of tile columns of the submatrix - derived parameter      */
 } PLASMA_desc;
 
-/** ****************************************************************************
- *  PLASMA request uniquely identifies each asynchronous function call.
- **/
-typedef struct plasma_request_t {
-    PLASMA_enum status; /**< PLASMA_SUCCESS or appropriate error code */
-} PLASMA_request;
-
-#define PLASMA_REQUEST_INITIALIZER {PLASMA_SUCCESS}
-
-/** ****************************************************************************
- *  PLASMA sequence uniquely identifies a set of asynchronous function calls
- *  sharing common exception handling.
- **/
-typedef struct plasma_sequence_t {
-    PLASMA_bool     status;         /**< PLASMA_SUCCESS or appropriate error code       */
-    PLASMA_request *request;        /**< failed request                                 */
-} PLASMA_sequence;
-
 #define plasma_const_neg(const) (((const-1)^0x01)+1)
 
 /** ****************************************************************************
@@ -90,7 +72,6 @@ typedef struct plasma_sequence_t {
  **/
 #define PLASMA_WARNINGS   1
 #define PLASMA_ERRORS     2
-#define PLASMA_AUTOTUNING 3
 #define PLASMA_DAG        4
 
 /** ****************************************************************************
@@ -99,24 +80,7 @@ typedef struct plasma_sequence_t {
 #define PLASMA_CONCURRENCY      1
 #define PLASMA_TILE_SIZE        2
 #define PLASMA_INNER_BLOCK_SIZE 3
-#define PLASMA_SCHEDULING_MODE  4
-#define PLASMA_HOUSEHOLDER_MODE 5
-#define PLASMA_HOUSEHOLDER_SIZE 6
-#define PLASMA_TRANSLATION_MODE 7
-#define PLASMA_TNTPIVOTING_MODE 8
 #define PLASMA_TNTPIVOTING_SIZE 9
-
-#define PLASMA_STATIC_SCHEDULING  1
-#define PLASMA_DYNAMIC_SCHEDULING 2
-
-#define PLASMA_FLAT_HOUSEHOLDER 1
-#define PLASMA_TREE_HOUSEHOLDER 2
-
-#define PLASMA_TOURNAMENT_LU 1
-#define PLASMA_TOURNAMENT_QR 2
-
-#define PLASMA_INPLACE    1
-#define PLASMA_OUTOFPLACE 2
 
 /** ****************************************************************************
  *  Math function prototypes
@@ -141,7 +105,6 @@ int PLASMA_Disable(PLASMA_enum lever);
 int PLASMA_Set(PLASMA_enum param, int value);
 int PLASMA_Get(PLASMA_enum param, int *value);
 int PLASMA_Init(int cores);
-int PLASMA_Init_Affinity(int cores, int *bindtab);
 int PLASMA_Finalize();
 int PLASMA_Desc_Create(PLASMA_desc **desc, void *mat, PLASMA_enum dtyp, int mb, int nb, int bsiz, int lm, int ln, int i, int j, int m, int n);
 int PLASMA_Desc_Destroy(PLASMA_desc **desc);
@@ -153,14 +116,6 @@ int PLASMA_Tile_to_Lapack(PLASMA_desc *A, void *Af77, int LDA);
  **/
 int PLASMA_Dealloc_Handle(void **handle);
 int PLASMA_Dealloc_Handle_Tile(PLASMA_desc **desc);
-
-/** ****************************************************************************
- *  Sequence
- **/
-int PLASMA_Sequence_Create(PLASMA_sequence **sequence);
-int PLASMA_Sequence_Destroy(PLASMA_sequence *sequence);
-int PLASMA_Sequence_Wait(PLASMA_sequence *sequence);
-int PLASMA_Sequence_Flush(PLASMA_sequence *sequence, PLASMA_request *request);
 
 #ifdef __cplusplus
 }
