@@ -394,7 +394,7 @@ double run(struct user_parameters* params)
         params->cutoff_size = cutoff_size;
     }
     if (cutoff_depth <= 0) {
-        cutoff_depth = 3;
+        cutoff_depth = 4;
         params->cutoff_depth = cutoff_depth;
     }
 

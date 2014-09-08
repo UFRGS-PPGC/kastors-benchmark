@@ -79,7 +79,7 @@ void parse(int argc, char* argv[], struct user_parameters* params)
 #ifdef CUTOFF_SIZE
         } else if(!strcmp(argv[i], "-s")) {
             if (++i < argc)
-                params->cutoff_depth = atoi(argv[i]);
+                params->cutoff_size = atoi(argv[i]);
             else {
                 fprintf(stderr, "-s requires a number\n");
                 exit(EXIT_FAILURE);
@@ -88,7 +88,7 @@ void parse(int argc, char* argv[], struct user_parameters* params)
 #ifdef CUTOFF_DEPTH
         } else if(!strcmp(argv[i], "-d")) {
             if (++i < argc)
-                params->cutoff_size = atoi(argv[i]);
+                params->cutoff_depth = atoi(argv[i]);
             else {
                 fprintf(stderr, "-d requires a number\n");
                 exit(EXIT_FAILURE);
