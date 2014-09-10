@@ -41,11 +41,9 @@ void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T)
         double *dT = T(k, k);
 #pragma omp task depend(inout: dA[0:T.nb*T.nb]) depend(out:dT[0:ib*T.nb])
         {
-            double *tau = (double *)malloc(T.nb * sizeof(double));
-            double *work = (double *)malloc(ib * T.nb * sizeof(double));
-            CORE_dgeqrt(tempkm, tempkn, ib, dA, ldak, dT, T.mb, tau, work);
-            free(tau);
-            free(work);
+            double tau[T.nb];
+            double work[ib * T.nb];
+            CORE_dgeqrt(tempkm, tempkn, ib, dA, ldak, dT, T.mb, &tau, &work);
         }
 
         for (n = k+1; n < A.nt; n++) {
@@ -55,14 +53,13 @@ void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T)
             double *dC = A(k, n);
 #pragma omp task depend(in: dA[0:T.nb*T.nb], dT[0:ib*T.nb]) depend(inout:dC[0:T.nb*T.nb])
             {
-                double *work = (double *)malloc(sizeof(double) * T.nb * ib);
+                double work[T.nb * ib];
                 CORE_dormqr(PlasmaLeft, PlasmaTrans,
                         tempkm, tempnn, tempkm, ib,
                         dA, ldak,
                         dT, T.mb,
                         dC, ldak,
-                        work, T.nb);
-                free(work);
+                        &work, T.nb);
             }
         }
         for (m = k+1; m < A.mt; m++) {
@@ -73,14 +70,12 @@ void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T)
             double *dT = T(m, k);
 #pragma omp task depend(inout:dA[0:T.nb*T.nb], dB[0:T.nb*T.nb]) depend(out:dT[0:ib*T.nb])
             {
-                double *tau = (double *)malloc(T.nb * sizeof(double));
-                double *work = (double *)malloc(ib * T.nb * sizeof(double));
+                double tau[T.nb];
+                double work[ib * T.nb];
                 CORE_dtsqrt(tempmm, tempkn, ib,
                         dA, ldak,
                         dB, ldam,
-                        dT, T.mb, tau, work);
-                free(tau);
-                free(work);
+                        dT, T.mb, &tau, &work);
             }
 
             for (n = k+1; n < A.nt; n++) {
@@ -91,14 +86,13 @@ void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T)
                 double *dT = T(m, k);
 #pragma omp task depend(inout:dA[0:T.nb*T.nb], dB[0:T.nb*T.nb]) depend(in:dV[0:T.nb*T.nb], dT[0:ib*T.nb])
                 {
-                    double *work = (double *)malloc(ib * T.nb * sizeof(double));
+                    double work[ib * T.nb];
                     CORE_dtsmqr(PlasmaLeft, PlasmaTrans,
                             A.mb, tempnn, tempmm, tempnn, A.nb, ib,
                             dA, ldak,
                             dB, ldam,
                             dV, ldam,
-                            dT, T.mb, work, ib);
-                    free(work);
+                            dT, T.mb, &work, ib);
                 }
             }
         }
