@@ -70,6 +70,18 @@ dnl '
 	     ]
 )
 
+case $host in
+    *linux*)
+AC_CHECK_LIB([rt], [clock_gettime],
+             [],
+             [
+                AC_MSG_ERROR([couldn't find clock_gettime in -lrt.])
+dnl '
+                KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lrt"
+	     ]
+);;
+esac
+
 ACX_PTHREAD([],[
                 AC_MSG_WARN([couldn't find pthread_create in -lpthread. Deactivating compilation of the PLASMA benchmarks.])
 dnl '
