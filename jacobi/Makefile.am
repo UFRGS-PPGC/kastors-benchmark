@@ -25,7 +25,7 @@ jacobi_block_task_CFLAGS     = $(jacobi_parCFLAGS)
 jacobi_block_taskdep_CFLAGS  = $(jacobi_parCFLAGS)
 jacobi_block_for_CFLAGS      = $(jacobi_parCFLAGS)
 
-jacobi_comLDFLAGS = -lm $(COMMON_comLDFLAGS)
+jacobi_comLDFLAGS = -lm $(COMMON_comLDFLAGS) -lrt
 jacobi_seq_LDFLAGS = $(jacobi_comLDFLAGS) $(COMMON_seqLDFLAGS)
 jacobi_parLDFLAGS = $(jacobi_comLDFLAGS) $(COMMON_seqLDFLAGS)
 

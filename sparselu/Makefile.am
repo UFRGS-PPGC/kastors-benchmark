@@ -19,7 +19,7 @@ sparselu_parCFLAGS	= $(sparselu_comCFLAGS) $(COMMON_parCFLAGS)
 sparselu_task_CFLAGS    = $(sparselu_parCFLAGS)
 sparselu_taskdep_CFLAGS = $(sparselu_parCFLAGS)
 
-sparselu_comLDFLAGS = $(COMMON_comLDFLAGS)
+sparselu_comLDFLAGS = $(COMMON_comLDFLAGS) -lrt
 sparselu_seq_LDFLAGS = $(sparselu_comLDFLAGS) $(COMMON_seqLDFLAGS)
 sparselu_parLDFLAGS = $(sparselu_comLDFLAGS) $(COMMON_parLDFLAGS)
 

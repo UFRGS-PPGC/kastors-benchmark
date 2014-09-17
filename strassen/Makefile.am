@@ -19,7 +19,7 @@ strassen_parCFLAGS = $(strassen_comCFLAGS) $(COMMON_parCFLAGS)
 strassen_task_CFLAGS    = $(strassen_parCFLAGS)
 strassen_taskdep_CFLAGS = $(strassen_parCFLAGS)
 
-strassen_comLDFLAGS = $(COMMON_comLDFLAGS)
+strassen_comLDFLAGS = $(COMMON_comLDFLAGS) -lrt
 strassen_seq_LDFLAGS = $(strassen_comLDFLAGS) $(COMMON_seqLDFLAGS)
 strassen_parLDFLAGS = $(strassen_comLDFLAGS) $(COMMON_parLDFLAGS)
 
