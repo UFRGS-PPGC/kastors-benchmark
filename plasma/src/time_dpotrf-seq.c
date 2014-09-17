@@ -25,23 +25,23 @@ RunTest(int *iparam, double *dparam, real_Double_t *t_)
     /* Allocate Data */
     PASTE_CODE_ALLOCATE_MATRIX_TILE( descA, 1,     double, PlasmaRealDouble, LDA, N, N );
     PASTE_CODE_ALLOCATE_MATRIX_TILE( descB, check, double, PlasmaRealDouble, LDB, N, NRHS );
-    PLASMA_dplgsy_Tile( (double)N, descA, 51 );
+    plasma_pdplgsy_quark( (double)N, *descA, 51 );
 
     /* Save A for check */
     PASTE_TILE_TO_LAPACK( descA, A, check, double, LDA, N );
 
     /* PLASMA DPOSV */
     START_TIMING();
-    PLASMA_dpotrf_Tile(uplo, descA);
+    plasma_pdpotrf_quark(uplo, *descA);
     STOP_TIMING();
 
     /* Check the solution */
     if ( check )
     {
-        PLASMA_dplrnt_Tile( descB, 7672 );
+        plasma_pdpltmg_quark(PlasmaMatrixRandom, * descB, 7672 );
         PASTE_TILE_TO_LAPACK( descB, B, check, double, LDB, NRHS );
 
-        PLASMA_dpotrs_Tile( uplo, descA, descB );
+        PLASMA_dpotrs_Tile_Async( uplo, descA, descB );
 
         PASTE_TILE_TO_LAPACK( descB, X, check, double, LDB, NRHS );
 

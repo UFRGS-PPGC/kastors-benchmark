@@ -31,7 +31,7 @@ RunTest(int *iparam, double *dparam, real_Double_t *t_)
 #pragma omp parallel
 #pragma omp master
     {
-    PLASMA_dplrnt_Tile(descA, 3456);
+    plasma_pdpltmg_quark(PlasmaMatrixRandom, *descA, 3456);
     }
 
     /* Save AT in lapack layout for check */
@@ -41,7 +41,7 @@ RunTest(int *iparam, double *dparam, real_Double_t *t_)
 #pragma omp parallel
 #pragma omp master
     {
-    PLASMA_dgetrf_Tile( descA, piv );
+    PLASMA_dgetrf_Tile_Async( descA, piv );
     }
     STOP_TIMING();
 
@@ -49,10 +49,10 @@ RunTest(int *iparam, double *dparam, real_Double_t *t_)
     if ( check )
     {
         PASTE_CODE_ALLOCATE_MATRIX_TILE( descB, 1, double, PlasmaRealDouble, LDB, N, NRHS );
-        PLASMA_dplrnt_Tile( descB, 7732 );
+        plasma_pdpltmg_quark(PlasmaMatrixRandom, * descB, 7732 );
         PASTE_TILE_TO_LAPACK( descB, b, check, double, LDB, NRHS );
 
-        PLASMA_dgetrs_Tile( PlasmaNoTrans, descA, piv, descB );
+        PLASMA_dgetrs_Tile_Async( PlasmaNoTrans, descA, piv, descB );
 
         PASTE_TILE_TO_LAPACK( descB, x, check, double, LDB, NRHS );
         dparam[IPARAM_RES] = d_check_solution(M, N, NRHS, A, LDA, b, x, LDB,

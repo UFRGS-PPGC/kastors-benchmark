@@ -7,82 +7,27 @@
  *  Univ. of California Berkeley and Univ. of Colorado Denver
  *
  * @version 2.6.0
- * @author ???
  * @author Mathieu Faverge
  * @author Dulceneia Becker
  * @date 2010-11-15
  *
  **/
 
-#if defined( _WIN32 ) || defined( _WIN64 )
-#define int64_t __int64
-#endif
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 #ifdef PLASMA_EZTRACE
 #include <eztrace.h>
 #endif
 
-#if defined( _WIN32 ) || defined( _WIN64 )
-#include <windows.h>
-#include <time.h>
-#include <sys/timeb.h>
-#if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
-#define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
-#else
-#define DELTA_EPOCH_IN_MICROSECS  11644473600000000ULL
-#endif
-
-
-struct timezone
-{
-    int  tz_minuteswest; /* minutes W of Greenwich */
-    int  tz_dsttime;     /* type of dst correction */
-};
-
-int gettimeofday(struct timeval* tv, struct timezone* tz)
-{
-    FILETIME         ft;
-    unsigned __int64 tmpres = 0;
-    static int       tzflag;
-
-    if (NULL != tv)
-        {
-            GetSystemTimeAsFileTime(&ft);
-            tmpres |=  ft.dwHighDateTime;
-            tmpres <<= 32;
-            tmpres |=  ft.dwLowDateTime;
-
-            /*converting file time to unix epoch*/
-            tmpres /= 10;  /*convert into microseconds*/
-            tmpres -= DELTA_EPOCH_IN_MICROSECS;
-
-            tv->tv_sec  = (long)(tmpres / 1000000UL);
-            tv->tv_usec = (long)(tmpres % 1000000UL);
-        }
-    if (NULL != tz)
-        {
-            if (!tzflag)
-                {
-                    _tzset();
-                    tzflag++;
-                }
-            tz->tz_minuteswest = _timezone / 60;
-            tz->tz_dsttime     = _daylight;
-        }
-    return 0;
-}
-
-#else  /* Non-Windows */
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/resource.h>
-#endif
 
 #include <cblas.h>
 #include <lapacke.h>
@@ -111,70 +56,25 @@ double cWtime(void)
 }
 
 static double
-Test(int64_t n, int *iparam, struct user_parameters* params) {
-    int      i, j, iter;
-    int      thrdnbr, niter;
-    int64_t  M, N, K, NRHS;
+Test(int *iparam, struct user_parameters* params) {
+    int      iter;
+    int      niter;
+    int64_t M, N, K, NRHS;
     double  *t;
-    _PREC    eps = _LAMCH( 'e' );
     _PREC    dparam[IPARAM_DNBPARAM];
     double   fmuls, fadds, fp_per_mul, fp_per_add;
-    double   sumgf, sumgf2, sumt, sd, flops, gflops;
-    char    *s;
-    char    *env[] = {
-        "OMP_NUM_THREADS",
-        "MKL_NUM_THREADS",
-        "GOTO_NUM_THREADS",
-        "ACML_NUM_THREADS",
-        "ATLAS_NUM_THREADS",
-        "BLAS_NUM_THREADS", ""
-    };
-    int gnuplot = 0;
+    double   sumgf, sumt, flops, gflops;
 
     memset( &dparam, 0, IPARAM_DNBPARAM * sizeof(_PREC) );
 
-    thrdnbr = iparam[IPARAM_THRDNBR];
     niter   = iparam[IPARAM_NITER];
 
     M    = iparam[IPARAM_M];
     N    = iparam[IPARAM_N];
     K    = iparam[IPARAM_K];
     NRHS = K;
-    (void)M;(void)N;(void)K;(void)NRHS;
 
-    if ( (n < 0) || (thrdnbr < 0 ) ) {
-        if (gnuplot) {
-            printf( "set title '%d_NUM_THREADS: ", thrdnbr );
-            for (i = 0; env[i][0]; ++i) {
-                s = getenv( env[i] );
-
-                if (i) printf( " " ); /* separating space */
-
-                for (j = 0; j < 5 && env[i][j] && env[i][j] != '_'; ++j)
-                    printf( "%c", env[i][j] );
-
-                if (s)
-                    printf( "=%s", s );
-                else
-                    printf( "->%s", "?" );
-            }
-            printf( "'\n" );
-            printf( "%s\n%s\n%s\n%s\n%s%s%s\n",
-                    "set xlabel 'Matrix size'",
-                    "set ylabel 'Gflop/s'",
-                    "set key bottom",
-                    gnuplot > 1 ? "set terminal png giant\nset output 'timeplot.png'" : "",
-                    "plot '-' using 1:5 title '", _NAME, "' with linespoints" );
-        }
-
-        return 0;
-    }
-
-    /*printf( "%7d %7d %7d ", iparam[IPARAM_M], iparam[IPARAM_N], iparam[IPARAM_K] );*/
-    /*fflush( stdout );*/
-
-    t = (double*)malloc(niter*sizeof(double));
-    memset(t, 0, niter*sizeof(double));
+    t = (double*)calloc(niter, sizeof(double));
 
     if (sizeof(_TYPE) == sizeof(_PREC)) {
         fp_per_mul = 1;
@@ -194,7 +94,6 @@ Test(int64_t n, int *iparam, struct user_parameters* params) {
     }
 
     sumgf  = 0.0;
-    sumgf2 = 0.0;
     sumt   = 0.0;
 
     for (iter = 0; iter < niter; iter++)
@@ -217,12 +116,10 @@ Test(int64_t n, int *iparam, struct user_parameters* params) {
 
         sumt   += t[iter];
         sumgf  += gflops;
-        sumgf2 += gflops*gflops;
     }
 
     gflops = sumgf / niter;
     printf("Gflops : %f\n", gflops);
-    sd = sqrt((sumgf2 - (sumgf*sumgf)/niter)/niter);
 
     free(t);
 
@@ -232,169 +129,6 @@ Test(int64_t n, int *iparam, struct user_parameters* params) {
     return sumt/niter;
 }
 
-static int
-startswith(const char *s, const char *prefix) {
-    size_t n = strlen( prefix );
-    if (strncmp( s, prefix, n ))
-        return 0;
-    return 1;
-}
-
-static int
-get_range(char *range, int *start_p, int *stop_p, int *step_p) {
-    char *s, *s1, buf[21];
-    int colon_count, copy_len, nbuf=20, n;
-    int start=1000, stop=10000, step=1000;
-
-    colon_count = 0;
-    for (s = strchr( range, ':'); s; s = strchr( s+1, ':'))
-        colon_count++;
-
-    if (colon_count == 0) { /* No colon in range. */
-        if (sscanf( range, "%d", &start ) < 1 || start < 1)
-            return -1;
-        step = start / 10;
-        if (step < 1) step = 1;
-        stop = start + 10 * step;
-
-    } else if (colon_count == 1) { /* One colon in range.*/
-        /* First, get the second number (after colon): the stop value. */
-        s = strchr( range, ':' );
-        if (sscanf( s+1, "%d", &stop ) < 1 || stop < 1)
-            return -1;
-
-        /* Next, get the first number (before colon): the start value. */
-        n = s - range;
-        copy_len = n > nbuf ? nbuf : n;
-        strncpy( buf, range, copy_len );
-        buf[copy_len] = 0;
-        if (sscanf( buf, "%d", &start ) < 1 || start > stop || start < 1)
-            return -1;
-
-        /* Let's have 10 steps or less. */
-        step = (stop - start) / 10;
-        if (step < 1)
-            step = 1;
-    } else if (colon_count == 2) { /* Two colons in range. */
-        /* First, get the first number (before the first colon): the start value. */
-        s = strchr( range, ':' );
-        n = s - range;
-        copy_len = n > nbuf ? nbuf : n;
-        strncpy( buf, range, copy_len );
-        buf[copy_len] = 0;
-        if (sscanf( buf, "%d", &start ) < 1 || start < 1)
-            return -1;
-
-        /* Next, get the second number (after the first colon): the stop value. */
-        s1 = strchr( s+1, ':' );
-        n = s1 - (s + 1);
-        copy_len = n > nbuf ? nbuf : n;
-        strncpy( buf, s+1, copy_len );
-        buf[copy_len] = 0;
-        if (sscanf( buf, "%d", &stop ) < 1 || stop < start)
-            return -1;
-
-        /* Finally, get the third number (after the second colon): the step value. */
-        if (sscanf( s1+1, "%d", &step ) < 1 || step < 1)
-            return -1;
-    } else
-
-        return -1;
-
-    *start_p = start;
-    *stop_p = stop;
-    *step_p = step;
-
-    return 0;
-}
-
-static void
-show_help(char *prog_name) {
-    printf( "Usage:\n%s [options]\n\n", prog_name );
-    printf( "Options are:\n"
-            "  --help           Show this help\n"
-            "\n"
-            "  --threads=X      Number of CPU workers (default: _SC_NPROCESSORS_ONLN)\n"
-            "\n"
-            "  --[a]sync        Enable/Disable synchronous calls in wrapper function such as POTRI. (default: async)\n"
-            "  --[no]check      Check result (default: nocheck)\n"
-            "  --[no]inv        Check on inverse (default: noinv)\n"
-            "  --[no]warmup     Perform a warmup run to pre-load libraries (default: warmup)\n"
-#if defined(PLASMA_EZTRACE)
-            "  --[no]trace      Enable/Disable trace generation (default: notrace)\n"
-#endif
-            "  --[no]dag        Enable/Disable DAG generation (default: nodag)\n"
-            "                   Generates a dot_dag_file.dot.\n"
-            "  --[no]atun       Activate autotuning (default: noatun) [Deprecated]\n"
-            "  --inplace        Enable layout conversion inplace for lapack interface timers (default: enable)\n"
-            "  --outplace       Enable layout conversion out of place for lapack interface timers (default: disable)\n"
-            "\n"
-            "  --n_range=R      Range of N values\n"
-            "                   with R=Start:Stop:Step (default: 500:5000:500)\n"
-            "  --m=X            dimension (M) of the matrices (default: N)\n"
-            "  --k=X            dimension (K) of the matrices (default: 1)\n"
-            "  --nrhs=X         Number of right-hand size (default: 1)\n"
-            "  --nb=N           Nb size. (default: 128)\n"
-            "  --ib=N           IB size. (default: 32)\n"
-            "\n"
-            "  --niter=N        Number of iterations performed for each test (default: 1)\n"
-            "\n"
-            "  --rhblk=N        If N > 0, enable Householder mode for QR and LQ factorization\n"
-            "                   N is the size of each subdomain (default: 0)\n"
-            "  --tntmode=x      Factorization used to select the pivots in the tournament pivoting algorithm (default: 1)\n"
-            "                     1 - LU factorization with partial pivoting\n"
-            "                     2 - QR rank revealing factorization\n"
-            "  --tntsize=N      If N > 0, number of tiles grouped together during the tournament (default=4)\n"
-            "\n"
-            " Options specific to the conversion format timings xgetri and xgecfi:\n"
-            "  --ifmt           Input format. (default: 0)\n"
-            "  --ofmt           Output format. (default: 1)\n"
-            "                   The possible values are:\n"
-            "                     0 - MorseCM, Column major\n"
-            "                     1 - MorseCCRB, Column-Colum rectangular block\n"
-            "                     2 - MorseCRRB, Column-Row rectangular block\n"
-            "                     3 - MorseRCRB, Row-Colum rectangular block\n"
-            "                     4 - MorseRRRB, Row-Row rectangular block\n"
-            "                     5 - MorseRM, Row Major\n"
-            "  --thrdbypb       Number of threads per subproblem for inplace transformation (default: 1)\n"
-            "\n");
-}
-
-#ifndef COMPILER
-    #define COMPILER "unknown"
-#endif
-static void
-print_header(char *prog_name, int * iparam) {
-    _PREC    eps = _LAMCH( 'e' );
-    int nthread = 0;
-
-    printf( "#\n"
-            "# PLASMA %d.%d.%d, %s\n"
-            "# Compiler: "COMPILER"\n"
-            "# Nb threads: %d\n"
-            "# NB:         %d\n"
-            "# IB:         %d\n"
-            "# eps:        %e\n"
-            "#\n",
-            PLASMA_VERSION_MAJOR,
-            PLASMA_VERSION_MINOR,
-            PLASMA_VERSION_MICRO,
-            prog_name,
-            nthread,
-            iparam[IPARAM_NB],
-            iparam[IPARAM_IB],
-            eps );
-    if  (iparam[IPARAM_CHECK] )
-        printf( "#     M       N  K/NRHS   seconds   Gflop/s Deviation"
-                "    ||Ax-b||       ||A||       ||x||       ||b|| ||Ax-b||/N/eps/(||A||||x||+||b||)\n" );
-    else
-        printf( "#     M       N  K/NRHS   seconds   Gflop/s Deviation\n" );
-
-    return;
-}
-
-/*int*/
-/*main(int argc, char *argv[]) {*/
 double run(struct user_parameters* params)
 {
     params->succeed = 0;
@@ -409,7 +143,6 @@ double run(struct user_parameters* params)
 
     iparam[IPARAM_THRDNBR       ] = 1;
     iparam[IPARAM_THRDNBR_SUBGRP] = 1;
-    iparam[IPARAM_SCHEDULER     ] = 1;
     iparam[IPARAM_M             ] = -1;
     iparam[IPARAM_N             ] = 500;
     iparam[IPARAM_K             ] = 1;
@@ -423,7 +156,6 @@ double run(struct user_parameters* params)
     iparam[IPARAM_WARMUP        ] = 1;
     iparam[IPARAM_CHECK         ] = params->check;
     iparam[IPARAM_VERBOSE       ] = 0;
-    iparam[IPARAM_AUTOTUNING    ] = 0;
     iparam[IPARAM_INPUTFMT      ] = 0;
     iparam[IPARAM_OUTPUTFMT     ] = 0;
     iparam[IPARAM_TRACE         ] = 0;
@@ -431,11 +163,7 @@ double run(struct user_parameters* params)
     iparam[IPARAM_ASYNC         ] = 1;
     iparam[IPARAM_MX            ] = -1;
     iparam[IPARAM_NX            ] = -1;
-    iparam[IPARAM_RHBLK         ] = 0;
-    iparam[IPARAM_TNTPIV_MODE   ] = PLASMA_TOURNAMENT_LU;
     iparam[IPARAM_TNTPIV_SIZE   ] = 4;
-    iparam[IPARAM_INPLACE       ] = PLASMA_INPLACE;
-
 
 
     m  = iparam[IPARAM_M];
@@ -459,40 +187,14 @@ double run(struct user_parameters* params)
     /* Initialize Plasma */
     PLASMA_Init( iparam[IPARAM_THRDNBR] );
 
-    if ( iparam[IPARAM_SCHEDULER] )
-        PLASMA_Set(PLASMA_SCHEDULING_MODE, PLASMA_DYNAMIC_SCHEDULING );
-    else
-        PLASMA_Set(PLASMA_SCHEDULING_MODE, PLASMA_STATIC_SCHEDULING );
-
-    /* if ( !iparam[IPARAM_AUTOTUNING] ) { */
-    PLASMA_Disable(PLASMA_AUTOTUNING);
     PLASMA_Set(PLASMA_TILE_SIZE,        iparam[IPARAM_NB] );
     PLASMA_Set(PLASMA_INNER_BLOCK_SIZE, iparam[IPARAM_IB] );
-    /* } else { */
-    /*     PLASMA_Get(PLASMA_TILE_SIZE,        &iparam[IPARAM_NB] ); */
-    /*     PLASMA_Get(PLASMA_INNER_BLOCK_SIZE, &iparam[IPARAM_IB] ); */
-    /* } */
-
-    /* Householder mode */
-    if (iparam[IPARAM_RHBLK] < 1) {
-        PLASMA_Set(PLASMA_HOUSEHOLDER_MODE, PLASMA_FLAT_HOUSEHOLDER);
-    } else {
-        PLASMA_Set(PLASMA_HOUSEHOLDER_MODE, PLASMA_TREE_HOUSEHOLDER);
-        PLASMA_Set(PLASMA_HOUSEHOLDER_SIZE, iparam[IPARAM_RHBLK]);
-    }
 
     /* Tournament pivoting */
-    PLASMA_Set(PLASMA_TNTPIVOTING_MODE, iparam[IPARAM_TNTPIV_MODE]);
     PLASMA_Set(PLASMA_TNTPIVOTING_SIZE, iparam[IPARAM_TNTPIV_SIZE]);
-
-    /* Layout conversion */
-    PLASMA_Set(PLASMA_TRANSLATION_MODE, iparam[IPARAM_INPLACE]);
-
-    /*print_header( "coucou", iparam);*/
 
     if (step < 1) step = 1;
     double timing = 0;
-    Test( -1, iparam, params); /* print header */
     for (i = start; i <= stop; i += step)
     {
         if ( nx > 0 ) {
@@ -509,16 +211,10 @@ double run(struct user_parameters* params)
         printf("M : %d\n", iparam[IPARAM_M]);
         printf("N : %d\n", iparam[IPARAM_N]);
         printf("NB : %d\n", iparam[IPARAM_NB]);
-        timing = Test( iparam[IPARAM_N], iparam, params);
+        timing = Test(iparam, params);
     }
 
     PLASMA_Finalize();
-
-    /* if (gnuplot) { */
-    /*         printf( "%s\n%s\n", */
-    /*                 "e", */
-    /*                 gnuplot > 1 ? "" : "pause 10" ); */
-    /* } */
 
     return timing;
 }

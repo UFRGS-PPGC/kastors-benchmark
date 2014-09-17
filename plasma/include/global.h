@@ -25,12 +25,6 @@
 #include <assert.h>
 #include <string.h>
 
-#if defined( _WIN32 ) || defined( _WIN64 )
-#include "plasmawinthread.h"
-#else
-#include <pthread.h>
-#endif
-
 /***************************************************************************//**
  *  Configuration
  **/
@@ -715,48 +709,13 @@
 }
 
 /***************************************************************************//**
- *  Sync after dynamically scheduled section
- **/
-#define plasma_dynamic_sync() \
-{ \
-    if (plasma->dynamic_section) { \
-        plasma_barrier(plasma); \
-        plasma->dynamic_section = PLASMA_FALSE; \
-    } \
-}
-
-/***************************************************************************//**
  *  Parallel SPMD function call - thread control
  **/
 #define plasma_static_call(parallel_function) \
 { \
-    if (plasma->dynamic_section) \
-        plasma_dynamic_sync(); \
-    pthread_mutex_lock(&plasma->action_mutex); \
     plasma->action = PLASMA_ACT_PARALLEL; \
     plasma->parallel_func_ptr = &parallel_function; \
-    pthread_mutex_unlock(&plasma->action_mutex); \
-    pthread_cond_broadcast(&plasma->action_condt); \
-    plasma_barrier(plasma); \
-    plasma->action = PLASMA_ACT_STAND_BY; \
     parallel_function(plasma); \
-    plasma_barrier(plasma); \
-}
-
-/***************************************************************************//**
- *  Start dynamically scheduled section
- **/
-#define plasma_dynamic_spawn() \
-{ \
-    if (!plasma->dynamic_section) { \
-        plasma->dynamic_section = PLASMA_TRUE; \
-        pthread_mutex_lock(&plasma->action_mutex); \
-        plasma->action = PLASMA_ACT_DYNAMIC; \
-        pthread_mutex_unlock(&plasma->action_mutex); \
-        pthread_cond_broadcast(&plasma->action_condt); \
-        plasma_barrier(plasma); \
-        plasma->action = PLASMA_ACT_STAND_BY; \
-    } \
 }
 
 /***************************************************************************//**
@@ -1087,50 +1046,26 @@
 #define plasma_parallel_call_1( \
            parallel_function, \
     type1, arg1) \
-    if (PLASMA_SCHEDULING == PLASMA_STATIC_SCHEDULING) { \
-        plasma_pack_args_1( \
-            type1, (arg1)) \
-        plasma_static_call(parallel_function) \
-    } else { \
-        plasma_dynamic_spawn(); \
         parallel_function##_quark( \
-            arg1); \
-    }
+            arg1);
 
 #define plasma_parallel_call_2( \
            parallel_function, \
     type1, arg1, \
     type2, arg2) \
-    if (PLASMA_SCHEDULING == PLASMA_STATIC_SCHEDULING) { \
-        plasma_pack_args_2( \
-            type1, (arg1), \
-            type2, (arg2)) \
-        plasma_static_call(parallel_function) \
-    } else { \
-        plasma_dynamic_spawn(); \
         parallel_function##_quark( \
             arg1, \
-            arg2); \
-    }
+            arg2);
 
 #define plasma_parallel_call_3( \
            parallel_function, \
     type1, arg1, \
     type2, arg2, \
     type3, arg3) \
-    if (PLASMA_SCHEDULING == PLASMA_STATIC_SCHEDULING) { \
-        plasma_pack_args_3( \
-            type1, (arg1), \
-            type2, (arg2), \
-            type3, (arg3)) \
-        plasma_static_call(parallel_function) \
-    } else { \
-        plasma_dynamic_spawn(); \
         parallel_function##_quark( \
             arg1, \
             arg2, \
-            arg3); \
-    }
+            arg3);
 
 #define plasma_parallel_call_4( \
            parallel_function, \
@@ -1138,21 +1073,11 @@
     type2, arg2, \
     type3, arg3, \
     type4, arg4) \
-    if (PLASMA_SCHEDULING == PLASMA_STATIC_SCHEDULING) { \
-        plasma_pack_args_4( \
-            type1, (arg1), \
-            type2, (arg2), \
-            type3, (arg3), \
-            type4, (arg4)) \
-        plasma_static_call(parallel_function) \
-    } else { \
-        plasma_dynamic_spawn(); \
         parallel_function##_quark( \
             arg1, \
             arg2, \
             arg3, \
-            arg4); \
-    }
+            arg4);
 
 #define plasma_parallel_call_5( \
            parallel_function, \
@@ -1161,23 +1086,12 @@
     type3, arg3, \
     type4, arg4, \
     type5, arg5) \
-    if (PLASMA_SCHEDULING == PLASMA_STATIC_SCHEDULING) { \
-        plasma_pack_args_5( \
-            type1, (arg1), \
-            type2, (arg2), \
-            type3, (arg3), \
-            type4, (arg4), \
-            type5, (arg5)) \
-        plasma_static_call(parallel_function) \
-    } else { \
-        plasma_dynamic_spawn(); \
         parallel_function##_quark( \
             arg1, \
             arg2, \
             arg3, \
             arg4, \
-            arg5); \
-    }
+            arg5);
 
 #define plasma_parallel_call_6( \
            parallel_function, \
@@ -1187,25 +1101,13 @@
     type4, arg4, \
     type5, arg5, \
     type6, arg6) \
-    if (PLASMA_SCHEDULING == PLASMA_STATIC_SCHEDULING) { \
-        plasma_pack_args_6( \
-            type1, (arg1), \
-            type2, (arg2), \
-            type3, (arg3), \
-            type4, (arg4), \
-            type5, (arg5), \
-            type6, (arg6)) \
-        plasma_static_call(parallel_function) \
-    } else { \
-        plasma_dynamic_spawn(); \
         parallel_function##_quark( \
             arg1, \
             arg2, \
             arg3, \
             arg4, \
             arg5, \
-            arg6); \
-    }
+            arg6);
 
 #define plasma_parallel_call_7( \
            parallel_function, \
@@ -1216,18 +1118,6 @@
     type5, arg5, \
     type6, arg6, \
     type7, arg7) \
-    if (PLASMA_SCHEDULING == PLASMA_STATIC_SCHEDULING) { \
-        plasma_pack_args_7( \
-            type1, (arg1), \
-            type2, (arg2), \
-            type3, (arg3), \
-            type4, (arg4), \
-            type5, (arg5), \
-            type6, (arg6), \
-            type7, (arg7)) \
-        plasma_static_call(parallel_function) \
-    } else { \
-        plasma_dynamic_spawn(); \
         parallel_function##_quark( \
             arg1, \
             arg2, \
@@ -1235,8 +1125,7 @@
             arg4, \
             arg5, \
             arg6, \
-            arg7); \
-    }
+            arg7);
 
 #define plasma_parallel_call_8( \
            parallel_function, \
@@ -1248,19 +1137,6 @@
     type6, arg6, \
     type7, arg7, \
     type8, arg8) \
-    if (PLASMA_SCHEDULING == PLASMA_STATIC_SCHEDULING) { \
-        plasma_pack_args_8( \
-            type1, (arg1), \
-            type2, (arg2), \
-            type3, (arg3), \
-            type4, (arg4), \
-            type5, (arg5), \
-            type6, (arg6), \
-            type7, (arg7), \
-            type8, (arg8)) \
-        plasma_static_call(parallel_function) \
-    } else { \
-        plasma_dynamic_spawn(); \
         parallel_function##_quark( \
             arg1, \
             arg2, \
@@ -1269,8 +1145,7 @@
             arg5, \
             arg6, \
             arg7, \
-            arg8); \
-    }
+            arg8);
 
 #define plasma_parallel_call_9( \
            parallel_function, \
@@ -1283,20 +1158,6 @@
     type7, arg7, \
     type8, arg8, \
     type9, arg9) \
-    if (PLASMA_SCHEDULING == PLASMA_STATIC_SCHEDULING) { \
-        plasma_pack_args_9( \
-            type1, (arg1), \
-            type2, (arg2), \
-            type3, (arg3), \
-            type4, (arg4), \
-            type5, (arg5), \
-            type6, (arg6), \
-            type7, (arg7), \
-            type8, (arg8), \
-            type9, (arg9)) \
-        plasma_static_call(parallel_function) \
-    } else { \
-        plasma_dynamic_spawn(); \
         parallel_function##_quark( \
             arg1, \
             arg2, \
@@ -1306,8 +1167,7 @@
             arg6, \
             arg7, \
             arg8, \
-            arg9); \
-    }
+            arg9);
 
 #define plasma_parallel_call_10( \
            parallel_function, \
@@ -1321,21 +1181,6 @@
     type8, arg8, \
     type9, arg9, \
     type10, arg10) \
-    if (PLASMA_SCHEDULING == PLASMA_STATIC_SCHEDULING) { \
-        plasma_pack_args_10( \
-            type1, (arg1), \
-            type2, (arg2), \
-            type3, (arg3), \
-            type4, (arg4), \
-            type5, (arg5), \
-            type6, (arg6), \
-            type7, (arg7), \
-            type8, (arg8), \
-            type9, (arg9), \
-            type10, (arg10)) \
-        plasma_static_call(parallel_function) \
-    } else { \
-        plasma_dynamic_spawn(); \
         parallel_function##_quark( \
             arg1, \
             arg2, \
@@ -1346,8 +1191,7 @@
             arg7, \
             arg8, \
             arg9, \
-            arg10); \
-    }
+            arg10);
 
 #define plasma_parallel_call_11( \
            parallel_function, \
@@ -1362,22 +1206,6 @@
     type9, arg9, \
     type10, arg10, \
     type11, arg11) \
-    if (PLASMA_SCHEDULING == PLASMA_STATIC_SCHEDULING) { \
-        plasma_pack_args_11( \
-            type1, (arg1), \
-            type2, (arg2), \
-            type3, (arg3), \
-            type4, (arg4), \
-            type5, (arg5), \
-            type6, (arg6), \
-            type7, (arg7), \
-            type8, (arg8), \
-            type9, (arg9), \
-            type10, (arg10), \
-            type11, (arg11)) \
-        plasma_static_call(parallel_function) \
-    } else { \
-        plasma_dynamic_spawn(); \
         parallel_function##_quark( \
             arg1, \
             arg2, \
@@ -1389,8 +1217,7 @@
             arg8, \
             arg9, \
             arg10, \
-            arg11); \
-    }
+            arg11);
 
 
 
@@ -1408,23 +1235,6 @@
     type10, arg10, \
     type11, arg11, \
     type12, arg12) \
-    if (PLASMA_SCHEDULING == PLASMA_STATIC_SCHEDULING) { \
-        plasma_pack_args_12( \
-            type1, (arg1), \
-            type2, (arg2), \
-            type3, (arg3), \
-            type4, (arg4), \
-            type5, (arg5), \
-            type6, (arg6), \
-            type7, (arg7), \
-            type8, (arg8), \
-            type9, (arg9), \
-            type10, (arg10), \
-            type11, (arg11), \
-            type12, (arg12)) \
-        plasma_static_call(parallel_function) \
-    } else { \
-        plasma_dynamic_spawn(); \
         parallel_function##_quark( \
             arg1, \
             arg2, \
@@ -1437,8 +1247,7 @@
             arg9, \
             arg10, \
             arg11, \
-            arg12); \
-    }
+            arg12);
 
 
 #define plasma_parallel_call_13( \
@@ -1456,24 +1265,6 @@
     type11, arg11, \
     type12, arg12, \
     type13, arg13) \
-    if (PLASMA_SCHEDULING == PLASMA_STATIC_SCHEDULING) { \
-        plasma_pack_args_13( \
-            type1, (arg1), \
-            type2, (arg2), \
-            type3, (arg3), \
-            type4, (arg4), \
-            type5, (arg5), \
-            type6, (arg6), \
-            type7, (arg7), \
-            type8, (arg8), \
-            type9, (arg9), \
-            type10, (arg10), \
-            type11, (arg11), \
-            type12, (arg12), \
-            type13, (arg13)) \
-        plasma_static_call(parallel_function) \
-    } else { \
-        plasma_dynamic_spawn(); \
         parallel_function##_quark( \
             arg1, \
             arg2, \
@@ -1487,8 +1278,7 @@
             arg10, \
             arg11, \
             arg12, \
-            arg13); \
-    }
+            arg13);
 
 #define plasma_parallel_call_14( \
            parallel_function, \
@@ -1506,25 +1296,6 @@
     type12, arg12, \
     type13, arg13, \
     type14, arg14) \
-    if (PLASMA_SCHEDULING == PLASMA_STATIC_SCHEDULING) { \
-        plasma_pack_args_14( \
-            type1, (arg1), \
-            type2, (arg2), \
-            type3, (arg3), \
-            type4, (arg4), \
-            type5, (arg5), \
-            type6, (arg6), \
-            type7, (arg7), \
-            type8, (arg8), \
-            type9, (arg9), \
-            type10, (arg10), \
-            type11, (arg11), \
-            type12, (arg12), \
-            type13, (arg13), \
-            type14, (arg14)) \
-        plasma_static_call(parallel_function) \
-    } else { \
-        plasma_dynamic_spawn(); \
         parallel_function##_quark( \
             arg1, \
             arg2, \
@@ -1539,8 +1310,7 @@
             arg11, \
             arg12, \
             arg13, \
-            arg14); \
-    }
+            arg14);
 
 #define plasma_parallel_call_16( \
            parallel_function, \
@@ -1560,27 +1330,6 @@
     type14, arg14, \
     type15, arg15, \
     type16, arg16) \
-    if (PLASMA_SCHEDULING == PLASMA_STATIC_SCHEDULING) { \
-        plasma_pack_args_16( \
-            type1, (arg1), \
-            type2, (arg2), \
-            type3, (arg3), \
-            type4, (arg4), \
-            type5, (arg5), \
-            type6, (arg6), \
-            type7, (arg7), \
-            type8, (arg8), \
-            type9, (arg9), \
-            type10, (arg10), \
-            type11, (arg11), \
-            type12, (arg12), \
-            type13, (arg13), \
-            type14, (arg14), \
-            type15, (arg15), \
-            type16, (arg16)) \
-        plasma_static_call(parallel_function) \
-    } else { \
-        plasma_dynamic_spawn(); \
         parallel_function##_quark( \
             arg1, \
             arg2, \
@@ -1597,8 +1346,7 @@
             arg13, \
             arg14, \
             arg15, \
-            arg16); \
-    }
+            arg16);
 
 /***************************************************************************//**
  *  Parallel call for functions with dynamic versions only
@@ -1606,7 +1354,6 @@
 #define plasma_dynamic_call_1( \
            parallel_function, \
     type1, arg1) \
-    plasma_dynamic_spawn(); \
     parallel_function##_quark( \
         arg1); \
 
@@ -1614,7 +1361,6 @@
            parallel_function, \
     type1, arg1, \
     type2, arg2) \
-    plasma_dynamic_spawn(); \
     parallel_function##_quark( \
         arg1, \
         arg2); \
@@ -1624,7 +1370,6 @@
     type1, arg1, \
     type2, arg2, \
     type3, arg3) \
-    plasma_dynamic_spawn(); \
     parallel_function##_quark( \
         arg1, \
         arg2, \
@@ -1636,7 +1381,6 @@
     type2, arg2, \
     type3, arg3, \
     type4, arg4) \
-    plasma_dynamic_spawn(); \
     parallel_function##_quark( \
         arg1, \
         arg2, \
@@ -1650,7 +1394,6 @@
     type3, arg3, \
     type4, arg4, \
     type5, arg5) \
-    plasma_dynamic_spawn(); \
     parallel_function##_quark( \
         arg1, \
         arg2, \
@@ -1666,7 +1409,6 @@
     type4, arg4, \
     type5, arg5, \
     type6, arg6) \
-    plasma_dynamic_spawn(); \
     parallel_function##_quark( \
         arg1, \
         arg2, \
@@ -1684,7 +1426,6 @@
     type5, arg5, \
     type6, arg6, \
     type7, arg7) \
-    plasma_dynamic_spawn(); \
     parallel_function##_quark( \
         arg1, \
         arg2, \
@@ -1704,7 +1445,6 @@
     type6, arg6, \
     type7, arg7, \
     type8, arg8) \
-    plasma_dynamic_spawn(); \
     parallel_function##_quark( \
         arg1, \
         arg2, \
@@ -1726,7 +1466,6 @@
     type7, arg7, \
     type8, arg8, \
     type9, arg9) \
-    plasma_dynamic_spawn(); \
     parallel_function##_quark( \
         arg1, \
         arg2, \
@@ -1750,7 +1489,6 @@
     type8, arg8, \
     type9, arg9, \
     type10, arg10) \
-    plasma_dynamic_spawn(); \
     parallel_function##_quark( \
         arg1, \
         arg2, \
@@ -1777,7 +1515,6 @@
     type9, arg9, \
     type10, arg10, \
     type11, arg11) \
-    plasma_dynamic_spawn(); \
     parallel_function##_quark( \
         arg1, \
         arg2, \
@@ -1806,7 +1543,6 @@
     type10, arg10, \
     type11, arg11, \
     type12, arg12) \
-    plasma_dynamic_spawn(); \
     parallel_function##_quark( \
         arg1, \
         arg2, \
@@ -1836,7 +1572,6 @@
     type11, arg11, \
     type12, arg12, \
     type13, arg13) \
-    plasma_dynamic_spawn(); \
     parallel_function##_quark( \
         arg1, \
         arg2, \
@@ -1868,7 +1603,6 @@
     type12, arg12, \
     type13, arg13, \
     type14, arg14) \
-    plasma_dynamic_spawn(); \
     parallel_function##_quark( \
         arg1, \
         arg2, \
@@ -1904,7 +1638,6 @@
     type14, arg14, \
     type15, arg15, \
     type16, arg16) \
-    plasma_dynamic_spawn(); \
     parallel_function##_quark( \
         arg1, \
         arg2, \

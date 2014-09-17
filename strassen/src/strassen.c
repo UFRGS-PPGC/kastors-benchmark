@@ -230,32 +230,29 @@ void MultiplyByDivideAndConquer(REAL *C, REAL *A, REAL *B,
 				     int AdditiveMode
 				    )
 {
-  #define A00 A
-  #define B00 B
-  #define C00 C
   REAL  *A01, *A10, *A11, *B01, *B10, *B11, *C01, *C10, *C11;
   unsigned QuadrantSize = MatrixSize >> 1;
 
   /* partition the matrix */
-  A01 = A00 + QuadrantSize;
-  A10 = A00 + RowWidthA * QuadrantSize;
+  A01 = A + QuadrantSize;
+  A10 = A + RowWidthA * QuadrantSize;
   A11 = A10 + QuadrantSize;
 
-  B01 = B00 + QuadrantSize;
-  B10 = B00 + RowWidthB * QuadrantSize;
+  B01 = B + QuadrantSize;
+  B10 = B + RowWidthB * QuadrantSize;
   B11 = B10 + QuadrantSize;
 
-  C01 = C00 + QuadrantSize;
-  C10 = C00 + RowWidthC * QuadrantSize;
+  C01 = C + QuadrantSize;
+  C10 = C + RowWidthC * QuadrantSize;
   C11 = C10 + QuadrantSize;
 
   if (QuadrantSize > SizeAtWhichNaiveAlgorithmIsMoreEfficient) {
 
-    MultiplyByDivideAndConquer(C00, A00, B00, QuadrantSize,
+    MultiplyByDivideAndConquer(C, A, B, QuadrantSize,
 				     RowWidthC, RowWidthA, RowWidthB,
 				     AdditiveMode);
 
-    MultiplyByDivideAndConquer(C01, A00, B01, QuadrantSize,
+    MultiplyByDivideAndConquer(C01, A, B01, QuadrantSize,
 				     RowWidthC, RowWidthA, RowWidthB,
 				     AdditiveMode);
 
@@ -263,11 +260,11 @@ void MultiplyByDivideAndConquer(REAL *C, REAL *A, REAL *B,
 				     RowWidthC, RowWidthA, RowWidthB,
 				     AdditiveMode);
 
-    MultiplyByDivideAndConquer(C10, A10, B00, QuadrantSize,
+    MultiplyByDivideAndConquer(C10, A10, B, QuadrantSize,
 				     RowWidthC, RowWidthA, RowWidthB,
 				     AdditiveMode);
 
-    MultiplyByDivideAndConquer(C00, A01, B10, QuadrantSize,
+    MultiplyByDivideAndConquer(C, A01, B10, QuadrantSize,
 				     RowWidthC, RowWidthA, RowWidthB,
 				     1);
 
@@ -286,34 +283,34 @@ void MultiplyByDivideAndConquer(REAL *C, REAL *A, REAL *B,
   } else {
 
     if (AdditiveMode) {
-      FastAdditiveNaiveMatrixMultiply(C00, A00, B00, QuadrantSize,
+      FastAdditiveNaiveMatrixMultiply(C, A, B, QuadrantSize,
 			      RowWidthC, RowWidthA, RowWidthB);
 
-      FastAdditiveNaiveMatrixMultiply(C01, A00, B01, QuadrantSize,
+      FastAdditiveNaiveMatrixMultiply(C01, A, B01, QuadrantSize,
 			      RowWidthC, RowWidthA, RowWidthB);
 
       FastAdditiveNaiveMatrixMultiply(C11, A10, B01, QuadrantSize,
 			      RowWidthC, RowWidthA, RowWidthB);
 
-      FastAdditiveNaiveMatrixMultiply(C10, A10, B00, QuadrantSize,
+      FastAdditiveNaiveMatrixMultiply(C10, A10, B, QuadrantSize,
 			      RowWidthC, RowWidthA, RowWidthB);
 
     } else {
 
-      FastNaiveMatrixMultiply(C00, A00, B00, QuadrantSize,
+      FastNaiveMatrixMultiply(C, A, B, QuadrantSize,
 			      RowWidthC, RowWidthA, RowWidthB);
 
-      FastNaiveMatrixMultiply(C01, A00, B01, QuadrantSize,
+      FastNaiveMatrixMultiply(C01, A, B01, QuadrantSize,
 			      RowWidthC, RowWidthA, RowWidthB);
 
       FastNaiveMatrixMultiply(C11, A10, B01, QuadrantSize,
 			      RowWidthC, RowWidthA, RowWidthB);
 
-      FastNaiveMatrixMultiply(C10, A10, B00, QuadrantSize,
+      FastNaiveMatrixMultiply(C10, A10, B, QuadrantSize,
 			      RowWidthC, RowWidthA, RowWidthB);
     }
 
-    FastAdditiveNaiveMatrixMultiply(C00, A01, B10, QuadrantSize,
+    FastAdditiveNaiveMatrixMultiply(C, A01, B10, QuadrantSize,
 				    RowWidthC, RowWidthA, RowWidthB);
 
     FastAdditiveNaiveMatrixMultiply(C01, A01, B11, QuadrantSize,
@@ -394,7 +391,7 @@ double run(struct user_parameters* params)
         params->cutoff_size = cutoff_size;
     }
     if (cutoff_depth <= 0) {
-        cutoff_depth = 3;
+        cutoff_depth = 4;
         params->cutoff_depth = cutoff_depth;
     }
 

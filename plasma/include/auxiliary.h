@@ -40,7 +40,6 @@ void plasma_fatal_error(const char *func_name, char* msg_text);
 void plasma_memcpy(void *dst, void *src, PLASMA_size size, int type);
 void plasma_memzero(void *memptr, PLASMA_size size, int type);
 void plasma_memset_int(int *mem, int size, int value);
-int  plasma_rank(plasma_context_t *plasma);
 int  plasma_tune(PLASMA_enum func, int M, int N, int NRHS);
 
 

@@ -18,344 +18,13 @@
 
 #define A(m,n) BLKADDR(A, double, m, n)
 #define B(m,n) BLKADDR(B, double, m, n)
-/***************************************************************************//**
- *  Parallel tile triangular solve - static scheduling
- **/
-void plasma_pdtrsm(plasma_context_t *plasma)
-{
-
-    printf("not quark");
-    abort();
-#if 0
-    PLASMA_enum side;
-    PLASMA_enum uplo;
-    PLASMA_enum trans;
-    PLASMA_enum diag;
-    double alpha;
-    PLASMA_desc A;
-    PLASMA_desc B;
-    PLASMA_sequence *sequence;
-    PLASMA_request *request;
-
-    int k, m, n;
-    int next_k;
-    int next_m;
-    int next_n;
-    int lda, ldb;
-    int tempkm, tempnn, tempmm, tempkn;
-
-    double zone  = (double) 1.0;
-    double mzone = (double)-1.0;
-    double lalpha;
-    double minvalpha;
-
-    plasma_unpack_args_9(side, uplo, trans, diag, alpha, A, B, sequence, request);
-    minvalpha = mzone / alpha;
-    if (sequence->status != PLASMA_SUCCESS)
-        return;
-    ss_init(B.mt, B.nt, -1);
-    /*
-     *  PlasmaLeft
-     */
-    if (side == PlasmaLeft) {
-        k = 0;
-        m = PLASMA_RANK;
-        while (m >= B.mt) {
-            k++;
-            m = m - B.mt + k;
-        }
-        n = 0;
-
-        while (k < B.mt && m < B.mt) {
-            next_n = n;
-            next_m = m;
-            next_k = k;
-
-            next_n++;
-            if (next_n >= B.nt) {
-                next_m += PLASMA_SIZE;
-                while (next_m >= B.mt && next_k < B.mt) {
-                    next_k++;
-                    next_m = next_m - B.mt + next_k;
-                }
-                next_n = 0;
-            }
-
-            tempnn = n == B.nt-1 ? B.n-n*B.nb : B.nb;
-            tempmm = m == B.mt-1 ? B.m-m*B.mb : B.mb;
-
-            lalpha = k == 0 ? alpha : zone;
-            if (m == k) {
-                ss_cond_wait(m, n, k-1);
-                /*
-                 *  PlasmaLeft / PlasmaLower / PlasmaNoTrans
-                 *  PlasmaLeft / PlasmaUpper / Plasma[Conj]Trans
-                 */
-                if ((uplo == PlasmaLower && trans == PlasmaNoTrans)
-                    || (uplo == PlasmaUpper && trans != PlasmaNoTrans)) {
-                    tempkm = k == B.mt-1 ? B.m-k*B.mb : B.mb;
-                    lda = BLKLDD(A, k);
-                    ldb = BLKLDD(B, k);
-                    CORE_dtrsm(
-                        side, uplo, trans, diag,
-                        tempkm, tempnn,
-                        lalpha, A(k, k), lda,
-                                B(k, n), ldb);
-                }
-                /*
-                 *  PlasmaLeft / PlasmaLower / Plasma[Cojn]Trans
-                 *  PlasmaLeft / PlasmaUpper / PlasmaNoTrans
-                 */
-                else {
-                    tempkm = k == 0 ? B.m-(B.mt-1)*B.mb : B.mb;
-                    lda = BLKLDD(A, B.mt-1-k);
-                    ldb = BLKLDD(B, B.mt-1-k);
-                    CORE_dtrsm(
-                        side, uplo, trans, diag,
-                        tempkm, tempnn,
-                        lalpha, A(B.mt-1-k, B.mt-1-k), lda,
-                                B(B.mt-1-k, n       ), ldb);
-                }
-                ss_cond_set(k, n, k);
-            }
-            else {
-                ss_cond_wait(k, n, k);
-                ss_cond_wait(m, n, k-1);
-                /*
-                 *  PlasmaRight / PlasmaLower / PlasmaNoTrans
-                 */
-                if (uplo == PlasmaLower) {
-                    if (trans == PlasmaNoTrans) {
-                        lda = BLKLDD(A, m);
-                        ldb = BLKLDD(B, m);
-                        CORE_dgemm(
-                            PlasmaNoTrans, PlasmaNoTrans,
-                            tempmm, tempnn, B.mb,
-                            mzone,  A(m, k), lda,
-                                    B(k, n), B.mb,
-                            lalpha, B(m, n), ldb);
-                    }
-                    /*
-                     *  PlasmaRight / PlasmaLower / Plasma[Conj]Trans
-                     */
-                    else {
-                        tempkm = k == 0 ? A.m-(A.mt-1)*A.mb : A.mb;
-                        lda = BLKLDD(A, B.mt-1-k);
-                        ldb = BLKLDD(B, B.mt-1-k);
-                        CORE_dgemm(
-                            trans, PlasmaNoTrans,
-                            B.mb, tempnn, tempkm,
-                            mzone,  A(A.mt-1-k, A.mt-1-m), lda,
-                                    B(B.mt-1-k, n       ), ldb,
-                            lalpha, B(B.mt-1-m, n       ), B.mb);
-                    }
-                }
-                else {
-                    /*
-                     *  PlasmaRight / PlasmaUpper / PlasmaNoTrans
-                     */
-                    if (trans == PlasmaNoTrans) {
-                        tempkm = k == 0 ? A.m-(A.mt-1)*A.mb : A.mb;
-                        ldb = BLKLDD(B, B.mt-1-k);
-                        CORE_dgemm(
-                            PlasmaNoTrans, PlasmaNoTrans,
-                            B.mb, tempnn, tempkm,
-                            mzone,  A(A.mt-1-m, A.mt-1-k), A.mb,
-                                    B(B.mt-1-k, n       ), ldb,
-                            lalpha, B(B.mt-1-m, n       ), B.mb);
-                    }
-                    /*
-                     *  PlasmaRight / PlasmaUpper / Plasma[Conj]Trans
-                     */
-                    else {
-                        ldb = BLKLDD(B, m);
-                        CORE_dgemm(
-                            trans, PlasmaNoTrans,
-                            tempmm, tempnn, B.mb,
-                            mzone,  A(k, m), A.mb,
-                                    B(k, n), B.mb,
-                            lalpha, B(m, n), ldb);
-                    }
-                }
-                ss_cond_set(m, n, k);
-            }
-            n = next_n;
-            m = next_m;
-            k = next_k;
-        }
-    }
-    /*
-     *  PlasmaRight
-     */
-    else {
-        k = 0;
-        n = PLASMA_RANK;
-        while (n >= B.nt) {
-            k++;
-            n = n - B.nt + k;
-        }
-        m = 0;
-
-        while (k < B.nt && n < B.nt) {
-            next_n = n;
-            next_m = m;
-            next_k = k;
-
-            next_m++;
-            if (next_m >= B.mt) {
-                next_n += PLASMA_SIZE;
-                while (next_n >= B.nt && next_k < B.nt) {
-                    next_k++;
-                    next_n = next_n - B.nt + next_k;
-                }
-                next_m = 0;
-            }
-
-            tempmm = m == B.mt-1 ? B.m-m*B.mb : B.mb;
-            tempnn = n == B.nt-1 ? B.n-n*B.nb : B.nb;
-
-            lalpha = k == 0 ? alpha : zone;
-            if (n == k) {
-                ss_cond_wait(m, n, k-1);
-                /*
-                 *  PlasmaRight / PlasmaLower / PlasmaNoTrans
-                 */
-                if (uplo == PlasmaLower) {
-                    if (trans == PlasmaNoTrans) {
-                        tempkn = k == 0 ? B.n-(B.nt-1)*B.nb : B.nb;
-                        lda = BLKLDD(A, B.nt-1-k);
-                        ldb = BLKLDD(B, m);
-                        CORE_dtrsm(
-                            side, uplo, trans, diag,
-                            tempmm, tempkn,
-                            lalpha, A(B.nt-1-k, B.nt-1-k), lda,
-                                    B(m,        B.nt-1-k), ldb);
-                    }
-                    /*
-                     *  PlasmaRight / PlasmaLower / Plasma[Conj]Trans
-                     */
-                    else {
-                        tempkn = k == B.nt-1 ? B.n-k*B.nb : B.nb;
-                        lda = BLKLDD(A, k);
-                        ldb = BLKLDD(B, m);
-                        CORE_dtrsm(
-                            side, uplo, trans, diag,
-                            tempmm, tempkn,
-                            alpha, A(k, k), lda,
-                                   B(m, k), ldb);
-                    }
-                }
-                else {
-                    /*
-                     *  PlasmaRight / PlasmaUpper / PlasmaNoTrans
-                     */
-                    if (trans == PlasmaNoTrans) {
-                        tempkn = k == B.nt-1 ? B.n-k*B.nb : B.nb;
-                        lda = BLKLDD(A, k);
-                        ldb = BLKLDD(B, m);
-                        CORE_dtrsm(
-                            side, uplo, trans, diag,
-                            tempmm, tempkn,
-                            lalpha, A(k, k), lda,
-                                    B(m, k), ldb);
-                    }
-                    /*
-                     *  PlasmaRight / PlasmaUpper / Plasma[Conj]Trans
-                     */
-                    else {
-                        tempkn = k == 0 ? B.n-(B.nt-1)*B.nb : B.nb;
-                        lda = BLKLDD(A, B.nt-1-k);
-                        ldb = BLKLDD(B, m);
-                        CORE_dtrsm(
-                            side, uplo, trans, diag,
-                            tempmm, tempkn,
-                            alpha, A(B.nt-1-k, B.nt-1-k), lda,
-                                   B(m,        B.nt-1-k), ldb);
-                    }
-                }
-                ss_cond_set(m, k, k);
-            }
-            else {
-                ss_cond_wait(m, k, k);
-                ss_cond_wait(m, n, k-1);
-                /*
-                 *  PlasmaRight / PlasmaLower / PlasmaNoTrans
-                 */
-                if (uplo == PlasmaLower) {
-                    if (trans == PlasmaNoTrans) {
-                        tempkn = k == 0 ? B.n-(B.nt-1)*B.nb : B.nb;
-                        lda = BLKLDD(A, B.nt-1-k);
-                        ldb = BLKLDD(B, m);
-                        CORE_dgemm(
-                            PlasmaNoTrans, PlasmaNoTrans,
-                            tempmm, B.mb, tempkn,
-                            mzone,  B(m,        B.nt-1-k), ldb,
-                                    A(B.nt-1-k, B.nt-1-n), lda,
-                            lalpha, B(m,        B.nt-1-n), ldb);
-                    }
-                    /*
-                     *  PlasmaRight / PlasmaLower / Plasma[Conj]Trans
-                     */
-                    else {
-                        lda = BLKLDD(A, n);
-                        ldb = BLKLDD(B, m);
-                        CORE_dgemm(
-                            PlasmaNoTrans, trans,
-                            tempmm, tempnn, B.mb,
-                            minvalpha, B(m, k), ldb,
-                                       A(n, k), lda,
-                            zone,      B(m, n), ldb);
-                    }
-                }
-                else {
-                    /*
-                     *  PlasmaRight / PlasmaUpper / PlasmaNoTrans
-                     */
-                    if (trans == PlasmaNoTrans) {
-                        lda = BLKLDD(A, k);
-                        ldb = BLKLDD(B, m);
-                        CORE_dgemm(
-                            PlasmaNoTrans, PlasmaNoTrans,
-                            tempmm, tempnn, B.mb,
-                            mzone,  B(m, k), ldb,
-                                    A(k, n), lda,
-                            lalpha, B(m, n), ldb);
-                    }
-                    /*
-                     *  PlasmaRight / PlasmaUpper / Plasma[Conj]Trans
-                     */
-                    else {
-                        tempkn = k == 0 ? B.n-(B.nt-1)*B.nb : B.nb;
-                        ldb = BLKLDD(B, m);
-                        CORE_dgemm(
-                            PlasmaNoTrans, trans,
-                            tempmm, B.nb, tempkn,
-                            minvalpha, B(m,        B.nt-1-k), ldb,
-                                       A(B.nt-1-n, B.nt-1-k), A.mb,
-                            zone,      B(m,        B.nt-1-n), ldb);
-                    }
-                }
-                ss_cond_set(m, n, k);
-            }
-            n = next_n;
-            m = next_m;
-            k = next_k;
-        }
-    }
-    ss_finalize();
-#endif
-}
 
 /***************************************************************************//**
  *  Parallel tile triangular solve - dynamic scheduling
  **/
 void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, PLASMA_enum diag,
-                         double alpha, PLASMA_desc A, PLASMA_desc B,
-                         PLASMA_sequence *sequence, PLASMA_request *request)
+                         double alpha, PLASMA_desc A, PLASMA_desc B)
 {
-    plasma_context_t *plasma;
-    /*Quark_Task_Flags task_flags = Quark_Task_Flags_Initializer;*/
-
     int k, m, n;
     int lda, ldan, ldb;
     int tempkm, tempkn, tempmm, tempnn;
@@ -365,10 +34,6 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
     double minvalpha  = (double)-1.0 / alpha;
     double lalpha;
 
-    plasma = plasma_context_self();
-    if (sequence->status != PLASMA_SUCCESS)
-        return;
-    /*QUARK_Task_Flag_Set(&task_flags, TASK_SEQUENCE, (intptr_t)sequence->quark_sequence);*/
     /*
      *  PlasmaLeft / PlasmaUpper / PlasmaNoTrans
      */
@@ -385,21 +50,13 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
                         double *dA = A(B.mt-1-k, B.mt-1-k);
                         double *dB = B(B.mt-1-k, n);
 #pragma omp task depend(in:dA[0:A.mb*A.mb]) depend(inout:dB[0:A.mb*A.mb])
-    cblas_dtrsm(
-        CblasColMajor,
-        (CBLAS_SIDE)side, (CBLAS_UPLO)uplo,
-        (CBLAS_TRANSPOSE)trans, (CBLAS_DIAG)diag,
-        tempkm, tempnn,
-        lalpha, dA, lda,
-        dB, ldb);
-                        /*
-                         *QUARK_CORE_dtrsm(
-                         *    plasma->quark, &task_flags,
-                         *    side, uplo, trans, diag,
-                         *    tempkm, tempnn, A.mb,
-                         *    lalpha, A(B.mt-1-k, B.mt-1-k), lda,  [> lda * tempkm <]
-                         *            B(B.mt-1-k,        n), ldb); [> ldb * tempnn <]
-                         */
+                        cblas_dtrsm(
+                                CblasColMajor,
+                                (CBLAS_SIDE)side, (CBLAS_UPLO)uplo,
+                                (CBLAS_TRANSPOSE)trans, (CBLAS_DIAG)diag,
+                                tempkm, tempnn,
+                                lalpha, dA, lda,
+                                dB, ldb);
                     }
                     for (m = k+1; m < B.mt; m++) {
                         for (n = 0; n < B.nt; n++) {
@@ -408,20 +65,11 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
                             double *dB = B(B.mt-1-k, n       );
                             double *dC = B(B.mt-1-m, n       );
 #pragma omp task depend(in:dA[0:A.mb*A.mb], dB[0:A.mb*A.mb]) depend(inout:dC[0:A.mb*A.mb])
-    cblas_dgemm(CblasColMajor, (CBLAS_TRANSPOSE)PlasmaNoTrans, (CBLAS_TRANSPOSE)PlasmaNoTrans,
-        B.mb, tempnn, tempkm,
-        mzone, dA, A.mb,
-        dB, ldb,
-        lalpha, dC, B.mb);
-                            /*
-                             *QUARK_CORE_dgemm(
-                             *    plasma->quark, &task_flags,
-                             *    PlasmaNoTrans, PlasmaNoTrans,
-                             *    B.mb, tempnn, tempkm, A.mb,
-                             *    mzone,  A(B.mt-1-m, B.mt-1-k), A.mb,
-                             *            B(B.mt-1-k, n       ), ldb,
-                             *    lalpha, B(B.mt-1-m, n       ), B.mb);
-                             */
+                            cblas_dgemm(CblasColMajor, (CBLAS_TRANSPOSE)PlasmaNoTrans, (CBLAS_TRANSPOSE)PlasmaNoTrans,
+                                    B.mb, tempnn, tempkm,
+                                    mzone, dA, A.mb,
+                                    dB, ldb,
+                                    lalpha, dC, B.mb);
                         }
                     }
                 }
@@ -440,21 +88,13 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
                         double *dA = A(k, k);
                         double *dB = B(k, n);
 #pragma omp task depend(in:dA[0:A.mb*A.mb]) depend(inout:dB[0:A.mb*A.mb])
-    cblas_dtrsm(
-        CblasColMajor,
-        (CBLAS_SIDE)side, (CBLAS_UPLO)uplo,
-        (CBLAS_TRANSPOSE)trans, (CBLAS_DIAG)diag,
-        tempkm, tempnn,
-        lalpha, dA, lda,
-        dB, ldb);
-                        /*
-                         *QUARK_CORE_dtrsm(
-                         *    plasma->quark, &task_flags,
-                         *    side, uplo, trans, diag,
-                         *    tempkm, tempnn, A.mb,
-                         *    lalpha, A(k, k), lda,
-                         *            B(k, n), ldb);
-                         */
+                        cblas_dtrsm(
+                                CblasColMajor,
+                                (CBLAS_SIDE)side, (CBLAS_UPLO)uplo,
+                                (CBLAS_TRANSPOSE)trans, (CBLAS_DIAG)diag,
+                                tempkm, tempnn,
+                                lalpha, dA, lda,
+                                dB, ldb);
                     }
                     for (m = k+1; m < B.mt; m++) {
                         tempmm = m == B.mt-1 ? B.m-m*B.mb : B.mb;
@@ -465,20 +105,11 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
                             double *dB = B(k, n);
                             double *dC = B(m, n);
 #pragma omp task depend(in:dA[0:A.mb*A.mb], dB[0:A.mb*A.mb]) depend(inout:dC[0:A.mb*A.mb])
-    cblas_dgemm(CblasColMajor, (CBLAS_TRANSPOSE)trans, (CBLAS_TRANSPOSE)PlasmaNoTrans,
-        tempmm, tempnn, B.mb,
-        mzone, dA, A.mb,
-        dB, B.mb,
-        lalpha, dC, ldb);
-                            /*
-                             *QUARK_CORE_dgemm(
-                             *    plasma->quark, &task_flags,
-                             *    trans, PlasmaNoTrans,
-                             *    tempmm, tempnn, B.mb, A.mb,
-                             *    mzone,  A(k, m), A.mb,
-                             *            B(k, n), B.mb,
-                             *    lalpha, B(m, n), ldb);
-                             */
+                            cblas_dgemm(CblasColMajor, (CBLAS_TRANSPOSE)trans, (CBLAS_TRANSPOSE)PlasmaNoTrans,
+                                    tempmm, tempnn, B.mb,
+                                    mzone, dA, A.mb,
+                                    dB, B.mb,
+                                    lalpha, dC, ldb);
                         }
                     }
                 }
@@ -499,21 +130,13 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
                         double *dA = A(k, k);
                         double *dB = B(k, n);
 #pragma omp task depend(in:dA[0:A.mb*A.mb]) depend(inout:dB[0:A.mb*A.mb])
-    cblas_dtrsm(
-        CblasColMajor,
-        (CBLAS_SIDE)side, (CBLAS_UPLO)uplo,
-        (CBLAS_TRANSPOSE)trans, (CBLAS_DIAG)diag,
-        tempkm, tempnn,
-        lalpha, dA, lda,
-        dB, ldb);
-                        /*
-                         *QUARK_CORE_dtrsm(
-                         *    plasma->quark, &task_flags,
-                         *    side, uplo, trans, diag,
-                         *    tempkm, tempnn, A.mb,
-                         *    lalpha, A(k, k), lda,
-                         *            B(k, n), ldb);
-                         */
+                        cblas_dtrsm(
+                                CblasColMajor,
+                                (CBLAS_SIDE)side, (CBLAS_UPLO)uplo,
+                                (CBLAS_TRANSPOSE)trans, (CBLAS_DIAG)diag,
+                                tempkm, tempnn,
+                                lalpha, dA, lda,
+                                dB, ldb);
                     }
                     for (m = k+1; m < B.mt; m++) {
                         tempmm = m == B.mt-1 ? B.m-m*B.mb : B.mb;
@@ -525,20 +148,11 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
                             double *dB = B(k, n);
                             double *dC = B(m, n);
 #pragma omp task depend(in:dA[0:A.mb*A.mb], dB[0:A.mb*A.mb]) depend(inout:dC[0:A.mb*A.mb])
-    cblas_dgemm(CblasColMajor, (CBLAS_TRANSPOSE)PlasmaNoTrans, (CBLAS_TRANSPOSE)PlasmaNoTrans,
-        tempmm, tempnn, B.mb,
-        mzone, dA, lda,
-        dB, B.mb,
-        lalpha, dC, ldb);
-                            /*
-                             *QUARK_CORE_dgemm(
-                             *    plasma->quark, &task_flags,
-                             *    PlasmaNoTrans, PlasmaNoTrans,
-                             *    tempmm, tempnn, B.mb, A.mb,
-                             *    mzone,  A(m, k), lda,
-                             *            B(k, n), B.mb,
-                             *    lalpha, B(m, n), ldb);
-                             */
+                            cblas_dgemm(CblasColMajor, (CBLAS_TRANSPOSE)PlasmaNoTrans, (CBLAS_TRANSPOSE)PlasmaNoTrans,
+                                    tempmm, tempnn, B.mb,
+                                    mzone, dA, lda,
+                                    dB, B.mb,
+                                    lalpha, dC, ldb);
                         }
                     }
                 }
@@ -557,21 +171,13 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
                         double *dA = A(B.mt-1-k, B.mt-1-k);
                         double *dB = B(B.mt-1-k,        n);
 #pragma omp task depend(in:dA[0:A.mb*A.mb]) depend(inout:dB[0:A.mb*A.mb])
-    cblas_dtrsm(
-        CblasColMajor,
-        (CBLAS_SIDE)side, (CBLAS_UPLO)uplo,
-        (CBLAS_TRANSPOSE)trans, (CBLAS_DIAG)diag,
-        tempkm, tempnn,
-        lalpha, dA, lda,
-        dB, ldb);
-                        /*
-                         *QUARK_CORE_dtrsm(
-                         *    plasma->quark, &task_flags,
-                         *    side, uplo, trans, diag,
-                         *    tempkm, tempnn, A.mb,
-                         *    lalpha, A(B.mt-1-k, B.mt-1-k), lda,
-                         *            B(B.mt-1-k,        n), ldb);
-                         */
+                        cblas_dtrsm(
+                                CblasColMajor,
+                                (CBLAS_SIDE)side, (CBLAS_UPLO)uplo,
+                                (CBLAS_TRANSPOSE)trans, (CBLAS_DIAG)diag,
+                                tempkm, tempnn,
+                                lalpha, dA, lda,
+                                dB, ldb);
                     }
                     for (m = k+1; m < B.mt; m++) {
                         tempmm = m == B.mt-1 ? B.m-m*B.mb : B.mb;
@@ -581,20 +187,11 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
                             double *dB = B(B.mt-1-k, n       );
                             double *dC = B(B.mt-1-m, n       );
 #pragma omp task depend(in:dA[0:A.mb*A.mb], dB[0:A.mb*A.mb]) depend(inout:dC[0:A.mb*A.mb])
-    cblas_dgemm(CblasColMajor, (CBLAS_TRANSPOSE)trans, (CBLAS_TRANSPOSE)PlasmaNoTrans,
-        B.mb, tempnn, tempkm,
-        mzone, dA, lda,
-        dB, ldb,
-        lalpha, dC, B.mb);
-                            /*
-                             *QUARK_CORE_dgemm(
-                             *    plasma->quark, &task_flags,
-                             *    trans, PlasmaNoTrans,
-                             *    B.mb, tempnn, tempkm, A.mb,
-                             *    mzone,  A(B.mt-1-k, B.mt-1-m), lda,
-                             *            B(B.mt-1-k, n       ), ldb,
-                             *    lalpha, B(B.mt-1-m, n       ), B.mb);
-                             */
+                            cblas_dgemm(CblasColMajor, (CBLAS_TRANSPOSE)trans, (CBLAS_TRANSPOSE)PlasmaNoTrans,
+                                    B.mb, tempnn, tempkm,
+                                    mzone, dA, lda,
+                                    dB, ldb,
+                                    lalpha, dC, B.mb);
                         }
                     }
                 }
@@ -605,222 +202,6 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
      *  PlasmaRight / PlasmaUpper / PlasmaNoTrans
      */
     else {
-        if (uplo == PlasmaUpper) {
-            if (trans == PlasmaNoTrans) {
-                for (k = 0; k < B.nt; k++) {
-                    tempkn = k == B.nt-1 ? B.n-k*B.nb : B.nb;
-                    lda = BLKLDD(A, k);
-                    lalpha = k == 0 ? alpha : zone;
-                    for (m = 0; m < B.mt; m++) {
-                        tempmm = m == B.mt-1 ? B.m-m*B.mb : B.mb;
-                        ldb = BLKLDD(B, m);
-                        double *dA = A(k, k);
-                        double *dB = B(m, k);
-#pragma omp task depend(in:dA[0:A.mb*A.mb]) depend(inout:dB[0:A.mb*A.mb])
-    cblas_dtrsm(
-        CblasColMajor,
-        (CBLAS_SIDE)side, (CBLAS_UPLO)uplo,
-        (CBLAS_TRANSPOSE)trans, (CBLAS_DIAG)diag,
-        tempmm, tempkn,
-        lalpha, dA, lda,
-        dB, ldb);
-                        /*
-                         *QUARK_CORE_dtrsm(
-                         *    plasma->quark, &task_flags,
-                         *    side, uplo, trans, diag,
-                         *    tempmm, tempkn, A.mb,
-                         *    lalpha, A(k, k), lda,  [> lda * tempkn <]
-                         *            B(m, k), ldb); [> ldb * tempkn <]
-                         */
-                    }
-                    for (m = 0; m < B.mt; m++) {
-                        tempmm = m == B.mt-1 ? B.m-m*B.mb : B.mb;
-                        ldb = BLKLDD(B, m);
-                        for (n = k+1; n < B.nt; n++) {
-                            tempnn = n == B.nt-1 ? B.n-n*B.nb : B.nb;
-                            double *dA = B(m, k);
-                            double *dB = A(k, n);
-                            double *dC = B(m, n);
-#pragma omp task depend(in:dA[0:A.mb*A.mb], dB[0:A.mb*A.mb]) depend(inout:dC[0:A.mb*A.mb])
-    cblas_dgemm(CblasColMajor, (CBLAS_TRANSPOSE)PlasmaNoTrans, (CBLAS_TRANSPOSE)PlasmaNoTrans,
-        tempmm, tempnn, B.mb,
-        mzone, dA, ldb,
-        dB, lda,
-        lalpha, dC, ldb);
-                            /*
-                             *QUARK_CORE_dgemm(
-                             *    plasma->quark, &task_flags,
-                             *    PlasmaNoTrans, PlasmaNoTrans,
-                             *    tempmm, tempnn, B.mb, A.mb,
-                             *    mzone,  B(m, k), ldb,  [> ldb * B.mb   <]
-                             *            A(k, n), lda,  [> lda * tempnn <]
-                             *    lalpha, B(m, n), ldb); [> ldb * tempnn <]
-                             */
-                        }
-                    }
-                }
-            }
-            /*
-             *  PlasmaRight / PlasmaUpper / Plasma[Conj]Trans
-             */
-            else {
-                for (k = 0; k < B.nt; k++) {
-                    tempkn = k == 0 ? B.n-(B.nt-1)*B.nb : B.nb;
-                    lda = BLKLDD(A, B.nt-1-k);
-                    for (m = 0; m < B.mt; m++) {
-                        tempmm = m == B.mt-1 ? B.m-m*B.mb : B.mb;
-                        ldb = BLKLDD(B, m);
-                        double *dA = A(B.nt-1-k, B.nt-1-k);
-                        double *dB = B(       m, B.nt-1-k);
-#pragma omp task depend(in:dA[0:A.mb*A.mb]) depend(inout:dB[0:A.mb*A.mb])
-    cblas_dtrsm(
-        CblasColMajor,
-        (CBLAS_SIDE)side, (CBLAS_UPLO)uplo,
-        (CBLAS_TRANSPOSE)trans, (CBLAS_DIAG)diag,
-        tempmm, tempkn,
-        alpha, dA, lda,
-        dB, ldb);
-                        /*
-                         *QUARK_CORE_dtrsm(
-                         *    plasma->quark, &task_flags,
-                         *    side, uplo, trans, diag,
-                         *    tempmm, tempkn, A.mb,
-                         *    alpha, A(B.nt-1-k, B.nt-1-k), lda,  [> lda * tempkn <]
-                         *           B(       m, B.nt-1-k), ldb); [> ldb * tempkn <]
-                         */
-
-                        for (n = k+1; n < B.nt; n++) {
-                            double *dA = B(m,        B.nt-1-k);
-                            double *dB = A(B.nt-1-n, B.nt-1-k);
-                            double *dC = B(m,        B.nt-1-n);
-#pragma omp task depend(in:dA[0:A.mb*A.mb], dB[0:A.mb*A.mb]) depend(inout:dC[0:A.mb*A.mb])
-    cblas_dgemm(CblasColMajor, (CBLAS_TRANSPOSE)PlasmaNoTrans, (CBLAS_TRANSPOSE)trans,
-        tempmm, B.nb, tempkn,
-        minvalpha, dA, ldb,
-        dB, A.mb,
-        zone, dC, ldb);
-                            /*
-                             *QUARK_CORE_dgemm(
-                             *    plasma->quark, &task_flags,
-                             *    PlasmaNoTrans, trans,
-                             *    tempmm, B.nb, tempkn, A.mb,
-                             *    minvalpha, B(m,        B.nt-1-k), ldb,  [> ldb  * tempkn <]
-                             *               A(B.nt-1-n, B.nt-1-k), A.mb, [> A.mb * tempkn (Never last row) <]
-                             *    zone,      B(m,        B.nt-1-n), ldb); [> ldb  * B.nb   <]
-                             */
-                        }
-                    }
-                }
-            }
-        }
-        /*
-         *  PlasmaRight / PlasmaLower / PlasmaNoTrans
-         */
-        else {
-            if (trans == PlasmaNoTrans) {
-                for (k = 0; k < B.nt; k++) {
-                    tempkn = k == 0 ? B.n-(B.nt-1)*B.nb : B.nb;
-                    lda = BLKLDD(A, B.nt-1-k);
-                    lalpha = k == 0 ? alpha : zone;
-                    for (m = 0; m < B.mt; m++) {
-                        tempmm = m == B.mt-1 ? B.m-m*B.mb : B.mb;
-                        ldb = BLKLDD(B, m);
-                        double *dA = A(B.nt-1-k, B.nt-1-k);
-                        double *dB = B(       m, B.nt-1-k);
-#pragma omp task depend(in:dA[0:A.mb*A.mb]) depend(inout:dB[0:A.mb*A.mb])
-    cblas_dtrsm(
-        CblasColMajor,
-        (CBLAS_SIDE)side, (CBLAS_UPLO)uplo,
-        (CBLAS_TRANSPOSE)trans, (CBLAS_DIAG)diag,
-        tempmm, tempkn,
-        lalpha, dA, lda,
-        dB, ldb);
-                        /*
-                         *QUARK_CORE_dtrsm(
-                         *    plasma->quark, &task_flags,
-                         *    side, uplo, trans, diag,
-                         *    tempmm, tempkn, A.mb,
-                         *    lalpha, A(B.nt-1-k, B.nt-1-k), lda,  [> lda * tempkn <]
-                         *            B(       m, B.nt-1-k), ldb); [> ldb * tempkn <]
-                         */
-
-                        for (n = k+1; n < B.nt; n++) {
-                            double *dA = B(m,        B.nt-1-k);
-                            double *dB = A(B.nt-1-k, B.nt-1-n);
-                            double *dC = B(m,        B.nt-1-n);
-#pragma omp task depend(in:dA[0:A.mb*A.mb], dB[0:A.mb*A.mb]) depend(inout:dC[0:A.mb*A.mb])
-    cblas_dgemm(CblasColMajor, (CBLAS_TRANSPOSE)PlasmaNoTrans, (CBLAS_TRANSPOSE)PlasmaNoTrans,
-        tempmm, B.nb, tempkn,
-        mzone, dA, ldb,
-        dB, lda,
-        lalpha, dC, ldb);
-                            /*
-                             *QUARK_CORE_dgemm(
-                             *    plasma->quark, &task_flags,
-                             *    PlasmaNoTrans, PlasmaNoTrans,
-                             *    tempmm, B.nb, tempkn, A.mb,
-                             *    mzone,  B(m,        B.nt-1-k), ldb,  [> ldb * tempkn <]
-                             *            A(B.nt-1-k, B.nt-1-n), lda,  [> lda * B.nb   <]
-                             *    lalpha, B(m,        B.nt-1-n), ldb); [> ldb * B.nb   <]
-                             */
-                        }
-                    }
-                }
-            }
-            /*
-             *  PlasmaRight / PlasmaLower / Plasma[Conj]Trans
-             */
-            else {
-                for (k = 0; k < B.nt; k++) {
-                    tempkn = k == B.nt-1 ? B.n-k*B.nb : B.nb;
-                    lda = BLKLDD(A, k);
-                    for (m = 0; m < B.mt; m++) {
-                        tempmm = m == B.mt-1 ? B.m-m*B.mb : B.mb;
-                        ldb = BLKLDD(B, m);
-                        double *dA = A(k, k);
-                        double *dB = B(m, k);
-#pragma omp task depend(in:dA[0:A.mb*A.mb]) depend(inout:dB[0:A.mb*A.mb])
-    cblas_dtrsm(
-        CblasColMajor,
-        (CBLAS_SIDE)side, (CBLAS_UPLO)uplo,
-        (CBLAS_TRANSPOSE)trans, (CBLAS_DIAG)diag,
-        tempmm, tempkn,
-        alpha, dA, lda,
-        dB, ldb);
-                        /*
-                         *QUARK_CORE_dtrsm(
-                         *    plasma->quark, &task_flags,
-                         *    side, uplo, trans, diag,
-                         *    tempmm, tempkn, A.mb,
-                         *    alpha, A(k, k), lda,  [> lda * tempkn <]
-                         *           B(m, k), ldb); [> ldb * tempkn <]
-                         */
-
-                        for (n = k+1; n < B.nt; n++) {
-                            tempnn = n == B.nt-1 ? B.n-n*B.nb : B.nb;
-                            ldan = BLKLDD(A, n);
-                            double *dA = B(m, k);
-                            double *dB = A(n, k);
-                            double *dC = B(m, n);
-#pragma omp task depend(in:dA[0:A.mb*A.mb], dB[0:A.mb*A.mb]) depend(inout:dC[0:A.mb*A.mb])
-    cblas_dgemm(CblasColMajor, (CBLAS_TRANSPOSE)PlasmaNoTrans, (CBLAS_TRANSPOSE)trans,
-        tempmm, tempnn, B.nb,
-        minvalpha, dA, ldb,
-        dB, ldan,
-        zone, dC, ldb);
-                            /*
-                             *QUARK_CORE_dgemm(
-                             *    plasma->quark, &task_flags,
-                             *    PlasmaNoTrans, trans,
-                             *    tempmm, tempnn, B.mb, A.mb,
-                             *    minvalpha, B(m, k), ldb,  [> ldb  * tempkn <]
-                             *               A(n, k), ldan, [> ldan * tempkn <]
-                             *    zone,      B(m, n), ldb); [> ldb  * tempnn <]
-                             */
-                        }
-                    }
-                }
-            }
-        }
+        abort();
     }
 }

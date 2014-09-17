@@ -28,23 +28,23 @@ RunTest(int *iparam, double *dparam, real_Double_t *t_)
     PASTE_CODE_ALLOCATE_MATRIX_TILE( descA, 1, double, PlasmaRealDouble, LDA, M, N );
     PASTE_CODE_ALLOCATE_MATRIX( piv, 1, int, min(M, N), 1 );
 
-    PLASMA_dplrnt_Tile(descA, 3456);
+    plasma_pdpltmg_quark(PlasmaMatrixRandom, *descA, 3456);
 
     /* Save AT in lapack layout for check */
     PASTE_TILE_TO_LAPACK( descA, A, check, double, LDA, N );
 
     START_TIMING();
-    PLASMA_dgetrf_Tile( descA, piv );
+    PLASMA_dgetrf_Tile_Async( descA, piv );
     STOP_TIMING();
 
     /* Check the solution */
     if ( check )
     {
         PASTE_CODE_ALLOCATE_MATRIX_TILE( descB, 1, double, PlasmaRealDouble, LDB, N, NRHS );
-        PLASMA_dplrnt_Tile( descB, 7732 );
+        plasma_pdpltmg_quark(PlasmaMatrixRandom, * descB, 7732 );
         PASTE_TILE_TO_LAPACK( descB, b, check, double, LDB, NRHS );
 
-        PLASMA_dgetrs_Tile( PlasmaNoTrans, descA, piv, descB );
+        PLASMA_dgetrs_Tile_Async( PlasmaNoTrans, descA, piv, descB );
 
         PASTE_TILE_TO_LAPACK( descB, x, check, double, LDB, NRHS );
         dparam[IPARAM_RES] = d_check_solution(M, N, NRHS, A, LDA, b, x, LDB,

@@ -6,7 +6,6 @@ typedef double real_Double_t;
 enum iparam_t {
     IPARAM_THRDNBR,        /* Number of cores                            */
     IPARAM_THRDNBR_SUBGRP, /* Number of cores in a subgroup (NUMA node)  */
-    IPARAM_SCHEDULER,      /* What scheduler do we choose (dyn, stat)    */
     IPARAM_M,              /* Number of rows of the matrix               */
     IPARAM_N,              /* Number of columns of the matrix            */
     IPARAM_K,              /* RHS or K                                   */
@@ -20,7 +19,6 @@ enum iparam_t {
     IPARAM_WARMUP,         /* Run one test to load dynamic libraries     */
     IPARAM_CHECK,          /* Checking activated or not                  */
     IPARAM_VERBOSE,        /* How much noise do we want?                 */
-    IPARAM_AUTOTUNING,     /* Disable/enable autotuning                  */
     IPARAM_INPUTFMT,       /* Input format (Use only for getmi/gecfi)    */
     IPARAM_OUTPUTFMT,      /* Output format (Use only for getmi/gecfi)   */
     IPARAM_TRACE,          /* Generate trace on the first non warmup run */
@@ -28,10 +26,8 @@ enum iparam_t {
     IPARAM_ASYNC,          /* Asynchronous calls                         */
     IPARAM_MX,             /* */
     IPARAM_NX,             /* */
-    IPARAM_RHBLK,          /* Householder reduction parameter for QR/LQ  */
     IPARAM_TNTPIV_MODE,    /* Tournament pivoting LU mode (LU or QR)     */
     IPARAM_TNTPIV_SIZE,    /* Tournament pivoting LU group size          */
-    IPARAM_INPLACE,        /* InPlace/OutOfPlace translation mode        */
     IPARAM_SIZEOF
 };
 
@@ -92,7 +88,7 @@ enum dparam_timing {
             fprintf(stderr, "Our of Memory for %s\n", #_name_);         \
             return -1;                                                  \
         }                                                               \
-        PLASMA_Tile_to_Lapack(_desc_, (void*)_name_, _lda_);            \
+        plasma_pdtile_to_lapack_quark(*_desc_, (void*)_name_, _lda_);     \
     }
 
 #define PASTE_CODE_ALLOCATE_MATRIX(_name_, _cond_, _type_, _lda_, _n_)  \
@@ -118,55 +114,14 @@ enum dparam_timing {
 
 /*********************
  *
- * Macro for trace generation
- *
- */
-#if defined(PLASMA_EZTRACE)
-#define START_TRACING()                         \
-    if(iparam[IPARAM_TRACE] == 2)               \
-      eztrace_start();
-
-#define STOP_TRACING()                         \
-    if(iparam[IPARAM_TRACE] == 2)              \
-        eztrace_stop();
-
-#else /* defined(PLASMA_TRACE) */
-
-#define START_TRACING()                         \
-  if( 0 ) {};
-
-#define STOP_TRACING()                          \
-  if( 0 ) {};
-
-#endif /* defined(PLASMA_TRACE) */
-
-/*********************
- *
- * Macro for DAG generation
- *
- */
-#define START_DAG()                   \
-    if ( iparam[IPARAM_DAG] == 2 )    \
-        PLASMA_Enable(PLASMA_DAG);
-
-#define STOP_DAG()                             \
-    if ( iparam[IPARAM_DAG] == 2 )             \
-        PLASMA_Disable(PLASMA_DAG);
-
-/*********************
- *
  * General Macros for timing
  *
  */
 #define START_TIMING()                          \
-  START_DAG();                                  \
-  START_TRACING();                              \
   t = -cWtime();
 
 #define STOP_TIMING()                           \
   t += cWtime();                                \
-  STOP_TRACING();                               \
-  STOP_DAG();                                   \
   *t_ = t;
 
 #endif /* IPARAM_H */

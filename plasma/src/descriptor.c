@@ -17,53 +17,6 @@
 #include "auxiliary.h"
 
 /***************************************************************************//**
- *  Check for descriptor correctness
- **/
-int plasma_desc_check(PLASMA_desc *desc)
-{
-    if (desc == NULL) {
-        plasma_error("plasma_desc_check", "NULL descriptor");
-        return PLASMA_ERR_NOT_INITIALIZED;
-    }
-    if (desc->mat == NULL) {
-        plasma_error("plasma_desc_check", "NULL matrix pointer");
-        return PLASMA_ERR_UNALLOCATED;
-    }
-    if (desc->dtyp != PlasmaRealFloat &&
-        desc->dtyp != PlasmaRealDouble &&
-        desc->dtyp != PlasmaComplexFloat &&
-        desc->dtyp != PlasmaComplexDouble  ) {
-        plasma_error("plasma_desc_check", "invalid matrix type");
-        return PLASMA_ERR_ILLEGAL_VALUE;
-    }
-    if (desc->mb <= 0 || desc->nb <= 0) {
-        plasma_error("plasma_desc_check", "negative tile dimension");
-        return PLASMA_ERR_ILLEGAL_VALUE;
-    }
-    if (desc->bsiz < desc->mb*desc->nb) {
-        plasma_error("plasma_desc_check", "tile memory size smaller than the product of dimensions");
-        return PLASMA_ERR_ILLEGAL_VALUE;
-    }
-    if ((desc->m < 0) || (desc->n < 0)) {
-        plasma_error("plasma_desc_check", "negative matrix dimension");
-        return PLASMA_ERR_ILLEGAL_VALUE;
-    }
-    if ((desc->lm < desc->m) || (desc->ln < desc->n)) {
-        plasma_error("plasma_desc_check", "matrix dimensions larger than leading dimensions");
-        return PLASMA_ERR_ILLEGAL_VALUE;
-    }
-    if ((desc->i > 0 && desc->i >= desc->lm) || (desc->j > 0 && desc->j >= desc->ln)) {
-        plasma_error("plasma_desc_check", "beginning of the matrix out of scope");
-        return PLASMA_ERR_ILLEGAL_VALUE;
-    }
-    if (desc->i+desc->m > desc->lm || desc->j+desc->n > desc->ln) {
-        plasma_error("plasma_desc_check", "submatrix out of scope");
-        return PLASMA_ERR_ILLEGAL_VALUE;
-    }
-    return PLASMA_SUCCESS;
-}
-
-/***************************************************************************//**
  *
  **/
 int plasma_desc_mat_alloc(PLASMA_desc *desc)
@@ -148,27 +101,10 @@ int plasma_desc_mat_free(PLASMA_desc *desc)
 int PLASMA_Desc_Create(PLASMA_desc **desc, void *mat, PLASMA_enum dtyp, int mb, int nb, int bsiz,
                        int lm, int ln, int i, int j, int m, int n)
 {
-    plasma_context_t *plasma;
-    int status;
-
-    plasma = plasma_context_self();
-    if (plasma == NULL) {
-        plasma_error("PLASMA_Desc_Create", "PLASMA not initialized");
-        return PLASMA_ERR_NOT_INITIALIZED;
-    }
     /* Allocate memory and initialize the descriptor */
     *desc = (PLASMA_desc*)malloc(sizeof(PLASMA_desc));
-    if (*desc == NULL) {
-        plasma_error("PLASMA_Desc_Create", "malloc() failed");
-        return PLASMA_ERR_OUT_OF_RESOURCES;
-    }
     **desc = plasma_desc_init(dtyp, mb, nb, bsiz, lm, ln, i, j, m, n);
     (**desc).mat = mat;
-    status = plasma_desc_check(*desc);
-    if (status != PLASMA_SUCCESS) {
-        plasma_error("PLASMA_Desc_Create", "invalid descriptor");
-        return status;
-    }
     return PLASMA_SUCCESS;
 }
 
@@ -191,17 +127,6 @@ int PLASMA_Desc_Create(PLASMA_desc **desc, void *mat, PLASMA_enum dtyp, int mb, 
  ******************************************************************************/
 int PLASMA_Desc_Destroy(PLASMA_desc **desc)
 {
-    plasma_context_t *plasma;
-
-    plasma = plasma_context_self();
-    if (plasma == NULL) {
-        plasma_error("PLASMA_Desc_Destroy", "PLASMA not initialized");
-        return PLASMA_ERR_NOT_INITIALIZED;
-    }
-    if (*desc == NULL) {
-        plasma_error("PLASMA_Desc_Destroy", "attempting to destroy a NULL descriptor");
-        return PLASMA_ERR_UNALLOCATED;
-    }
     free(*desc);
     *desc = NULL;
     return PLASMA_SUCCESS;

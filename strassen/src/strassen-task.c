@@ -71,12 +71,12 @@ static void OptimizedStrassenMultiply_par(double *C, double *A, double *B,
    ** For each matrix A, B, and C, we'll want pointers to each quandrant
    ** in the matrix. These quandrants will be addressed as follows:
    **  --        --
-   **  | A11  A12 |
+   **  | A    A12 |
    **  |          |
    **  | A21  A22 |
    **  --        --
    ************************************************************************/
-  double /* *A11, *B11, *C11, */ *A12, *B12, *C12,
+  double /* *A, *B, *C, */ *A12, *B12, *C12,
          *A21, *B21, *C21, *A22, *B22, *C22;
 
   double *S1,*S2,*S3,*S4,*S5,*S6,*S7,*S8,*M2,*M5,*T1sMULT;
@@ -92,12 +92,9 @@ static void OptimizedStrassenMultiply_par(double *C, double *A, double *B,
   }
 
   /* Initialize quandrant matrices */
-#define A11 A
-#define B11 B
-#define C11 C
-  A12 = A11 + QuadrantSize;
-  B12 = B11 + QuadrantSize;
-  C12 = C11 + QuadrantSize;
+  A12 = A + QuadrantSize;
+  B12 = B + QuadrantSize;
+  C12 = C + QuadrantSize;
   A21 = A + (RowWidthA * QuadrantSize);
   B21 = B + (RowWidthB * QuadrantSize);
   C21 = C + (RowWidthC * QuadrantSize);
@@ -134,7 +131,7 @@ static void OptimizedStrassenMultiply_par(double *C, double *A, double *B,
 #pragma omp task
   for (Row = 0; Row < QuadrantSize; Row++)
     for (Column = 0; Column < QuadrantSize; Column++)
-      S2[Row * QuadrantSize + Column] = S1[Row * QuadrantSize + Column] - A11[RowWidthA * Row + Column];
+      S2[Row * QuadrantSize + Column] = S1[Row * QuadrantSize + Column] - A[RowWidthA * Row + Column];
 
 #pragma omp taskwait
 
@@ -146,7 +143,7 @@ static void OptimizedStrassenMultiply_par(double *C, double *A, double *B,
 #pragma omp task
   for (Row = 0; Row < QuadrantSize; Row++)
     for (Column = 0; Column < QuadrantSize; Column++)
-      S5[Row * QuadrantSize + Column] = B12[Row * RowWidthB + Column] - B11[Row * RowWidthB + Column];
+      S5[Row * QuadrantSize + Column] = B12[Row * RowWidthB + Column] - B[Row * RowWidthB + Column];
 
 #pragma omp taskwait
 
@@ -165,7 +162,7 @@ static void OptimizedStrassenMultiply_par(double *C, double *A, double *B,
 #pragma omp task
   for (Row = 0; Row < QuadrantSize; Row++)
     for (Column = 0; Column < QuadrantSize; Column++)
-      S3[Row * QuadrantSize + Column] = A11[RowWidthA * Row + Column] - A21[RowWidthA * Row + Column];
+      S3[Row * QuadrantSize + Column] = A[RowWidthA * Row + Column] - A21[RowWidthA * Row + Column];
 
 #pragma omp task
   for (Row = 0; Row < QuadrantSize; Row++)
@@ -174,9 +171,9 @@ static void OptimizedStrassenMultiply_par(double *C, double *A, double *B,
 
 #pragma omp taskwait
 
-    /* M2 = A11 x B11 */
+    /* M2 = A x B */
 #pragma omp task untied
-    OptimizedStrassenMultiply_par(M2, A11, B11, QuadrantSize, QuadrantSize, RowWidthA, RowWidthB, Depth+1, cutoff_depth, cutoff_size);
+    OptimizedStrassenMultiply_par(M2, A, B, QuadrantSize, QuadrantSize, RowWidthA, RowWidthB, Depth+1, cutoff_depth, cutoff_size);
 
     /* M5 = S1 * S5 */
 #pragma omp task untied
@@ -190,9 +187,9 @@ static void OptimizedStrassenMultiply_par(double *C, double *A, double *B,
 #pragma omp task untied
     OptimizedStrassenMultiply_par(C22, S3, S7, QuadrantSize, RowWidthC /*FIXME*/, QuadrantSize, QuadrantSize, Depth+1, cutoff_depth, cutoff_size);
 
-    /* Step 1 of C11 = M2 + A12 * B21 */
+    /* Step 1 of C = M2 + A12 * B21 */
 #pragma omp task untied
-    OptimizedStrassenMultiply_par(C11, A12, B21, QuadrantSize, RowWidthC, RowWidthA, RowWidthB, Depth+1, cutoff_depth, cutoff_size);
+    OptimizedStrassenMultiply_par(C, A12, B21, QuadrantSize, RowWidthC, RowWidthA, RowWidthB, Depth+1, cutoff_depth, cutoff_size);
 
     /* Step 1 of C12 = S4 x B22 + T1 + M5 */
 #pragma omp task untied
@@ -207,7 +204,7 @@ static void OptimizedStrassenMultiply_par(double *C, double *A, double *B,
 #pragma omp task
   for (Row = 0; Row < QuadrantSize; Row++)
     for (Column = 0; Column < QuadrantSize; Column += 1)
-      C11[RowWidthC * Row + Column] += M2[Row * QuadrantSize + Column];
+      C[RowWidthC * Row + Column] += M2[Row * QuadrantSize + Column];
 
 #pragma omp task
   for (Row = 0; Row < QuadrantSize; Row++)
@@ -233,24 +230,24 @@ static void OptimizedStrassenMultiply_par(double *C, double *A, double *B,
     for (Row = 0; Row < QuadrantSize; Row++)
       for (Column = 0; Column < QuadrantSize; Column++) {
         S1[Row * QuadrantSize + Column] = A21[RowWidthA * Row + Column] + A22[RowWidthA * Row + Column];
-        S2[Row * QuadrantSize + Column] = S1[Row * QuadrantSize + Column] - A11[RowWidthA * Row + Column];
+        S2[Row * QuadrantSize + Column] = S1[Row * QuadrantSize + Column] - A[RowWidthA * Row + Column];
         S4[Row * QuadrantSize + Column] = A12[Row * RowWidthA + Column] - S2[QuadrantSize * Row + Column];
-        S5[Row * QuadrantSize + Column] = B12[Row * RowWidthB + Column] - B11[Row * RowWidthB + Column];
+        S5[Row * QuadrantSize + Column] = B12[Row * RowWidthB + Column] - B[Row * RowWidthB + Column];
         S6[Row * QuadrantSize + Column] = B22[Row * RowWidthB + Column] - S5[Row * QuadrantSize + Column];
         S8[Row * QuadrantSize + Column] = S6[Row * QuadrantSize + Column] - B21[Row * RowWidthB + Column];
-        S3[Row * QuadrantSize + Column] = A11[RowWidthA * Row + Column] - A21[RowWidthA * Row + Column];
+        S3[Row * QuadrantSize + Column] = A[RowWidthA * Row + Column] - A21[RowWidthA * Row + Column];
         S7[Row * QuadrantSize + Column] = B22[Row * RowWidthB + Column] - B12[Row * RowWidthB + Column];
       }
-    /* M2 = A11 x B11 */
-    OptimizedStrassenMultiply_par(M2, A11, B11, QuadrantSize, QuadrantSize, RowWidthA, RowWidthB, Depth+1, cutoff_depth, cutoff_size);
+    /* M2 = A x B */
+    OptimizedStrassenMultiply_par(M2, A, B, QuadrantSize, QuadrantSize, RowWidthA, RowWidthB, Depth+1, cutoff_depth, cutoff_size);
     /* M5 = S1 * S5 */
     OptimizedStrassenMultiply_par(M5, S1, S5, QuadrantSize, QuadrantSize, QuadrantSize, QuadrantSize, Depth+1, cutoff_depth, cutoff_size);
     /* Step 1 of T1 = S2 x S6 + M2 */
     OptimizedStrassenMultiply_par(T1sMULT, S2, S6,  QuadrantSize, QuadrantSize, QuadrantSize, QuadrantSize, Depth+1, cutoff_depth, cutoff_size);
     /* Step 1 of T2 = T1 + S3 x S7 */
     OptimizedStrassenMultiply_par(C22, S3, S7, QuadrantSize, RowWidthC /*FIXME*/, QuadrantSize, QuadrantSize, Depth+1, cutoff_depth, cutoff_size);
-    /* Step 1 of C11 = M2 + A12 * B21 */
-    OptimizedStrassenMultiply_par(C11, A12, B21, QuadrantSize, RowWidthC, RowWidthA, RowWidthB, Depth+1, cutoff_depth, cutoff_size);
+    /* Step 1 of C = M2 + A12 * B21 */
+    OptimizedStrassenMultiply_par(C, A12, B21, QuadrantSize, RowWidthC, RowWidthA, RowWidthB, Depth+1, cutoff_depth, cutoff_size);
     /* Step 1 of C12 = S4 x B22 + T1 + M5 */
     OptimizedStrassenMultiply_par(C12, S4, B22, QuadrantSize, RowWidthC, QuadrantSize, RowWidthB, Depth+1, cutoff_depth, cutoff_size);
     /* Step 1 of C21 = T2 - A22 * S8 */
@@ -258,7 +255,7 @@ static void OptimizedStrassenMultiply_par(double *C, double *A, double *B,
 
     for (Row = 0; Row < QuadrantSize; Row++) {
       for (Column = 0; Column < QuadrantSize; Column += 1) {
-        C11[RowWidthC * Row + Column] += M2[Row * QuadrantSize + Column];
+        C[RowWidthC * Row + Column] += M2[Row * QuadrantSize + Column];
         C12[RowWidthC * Row + Column] += M5[Row * QuadrantSize + Column] + T1sMULT[Row * QuadrantSize + Column] + M2[Row * QuadrantSize + Column];
         C21[RowWidthC * Row + Column] = -C21[RowWidthC * Row + Column] + C22[RowWidthC * Row + Column] + T1sMULT[Row * QuadrantSize + Column] + M2[Row * QuadrantSize + Column];
         C22[RowWidthC * Row + Column] += M5[Row * QuadrantSize + Column] + T1sMULT[Row * QuadrantSize + Column] + M2[Row * QuadrantSize + Column];

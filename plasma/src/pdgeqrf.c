@@ -18,131 +18,13 @@
 
 #define A(m,n) BLKADDR(A, double, m, n)
 #define T(m,n) BLKADDR(T, double, m, n)
-/***************************************************************************//**
- *  Parallel tile QR factorization - static scheduling
- **/
-void plasma_pdgeqrf(plasma_context_t *plasma)
-{
-    /*
-     *fprintf(stderr, "Warning, you are not using the actual OpenMP plasma version\n");
-     *abort();
-     */
-    PLASMA_desc A;
-    PLASMA_desc T;
-    PLASMA_sequence *sequence;
-    PLASMA_request *request;
-
-    int k, m, n;
-    int next_k;
-    int next_m;
-    int next_n;
-    int ldak, ldam;
-    int tempkm, tempkn, tempnn, tempmm;
-    int ib = PLASMA_IB;
-    double *work, *tau;
-
-    plasma_unpack_args_4(A, T, sequence, request);
-    if (sequence->status != PLASMA_SUCCESS)
-        return;
-    work = (double*)plasma_private_alloc(plasma, ib*T.nb, T.dtyp);
-    tau  = (double*)plasma_private_alloc(plasma, A.nb, A.dtyp);
-    ss_init(A.mt, A.nt, -1);
-
-    k = 0;
-    n = PLASMA_RANK;
-    while (n >= A.nt) {
-        k++;
-        n = n-A.nt+k;
-    }
-    m = k;
-
-    while (k < min(A.mt, A.nt) && n < A.nt) {
-        next_n = n;
-        next_m = m;
-        next_k = k;
-
-        next_m++;
-        if (next_m == A.mt) {
-            next_n += PLASMA_SIZE;
-            while (next_n >= A.nt && next_k < min(A.mt, A.nt)) {
-                next_k++;
-                next_n = next_n-A.nt+next_k;
-            }
-            next_m = next_k;
-        }
-
-        tempkm = k == A.mt-1 ? A.m-k*A.mb : A.mb;
-        tempkn = k == A.nt-1 ? A.n-k*A.nb : A.nb;
-        tempnn = n == A.nt-1 ? A.n-n*A.nb : A.nb;
-        tempmm = m == A.mt-1 ? A.m-m*A.mb : A.mb;
-
-        ldak = BLKLDD(A, k);
-        ldam = BLKLDD(A, m);
-
-        if (n == k) {
-            if (m == k) {
-                ss_cond_wait(k, k, k-1);
-                CORE_dgeqrt(
-                    tempkm, tempkn, ib,
-                    A(k, k), ldak,
-                    T(k, k), T.mb,
-                    tau, work);
-                ss_cond_set(k, k, k);
-            }
-            else {
-                ss_cond_wait(m, k, k-1);
-                CORE_dtsqrt(
-                    tempmm, tempkn, ib,
-                    A(k, k), ldak,
-                    A(m, k), ldam,
-                    T(m, k), T.mb,
-                    tau, work);
-                ss_cond_set(m, k, k);
-            }
-        }
-        else {
-            if (m == k) {
-                ss_cond_wait(k, k, k);
-                ss_cond_wait(k, n, k-1);
-                CORE_dormqr(
-                    PlasmaLeft, PlasmaTrans,
-                    tempkm, tempnn, tempkm, ib,
-                    A(k, k), ldak,
-                    T(k, k), T.mb,
-                    A(k, n), ldak,
-                    work, T.nb);
-            }
-            else {
-                ss_cond_wait(m, k, k);
-                ss_cond_wait(m, n, k-1);
-                CORE_dtsmqr(
-                    PlasmaLeft, PlasmaTrans,
-                    A.nb, tempnn, tempmm, tempnn, A.nb, ib,
-                    A(k, n), ldak,
-                    A(m, n), ldam,
-                    A(m, k), ldam,
-                    T(m, k), T.mb,
-                    work, ib);
-                ss_cond_set(m, n, k);
-            }
-        }
-        n = next_n;
-        m = next_m;
-        k = next_k;
-    }
-    plasma_private_free(plasma, work);
-    plasma_private_free(plasma, tau);
-    ss_finalize();
-}
 
 /***************************************************************************//**
  *  Parallel tile QR factorization - dynamic scheduling
  **/
-void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T,
-                          PLASMA_sequence *sequence, PLASMA_request *request)
+void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T)
 {
     plasma_context_t *plasma;
-    /*Quark_Task_Flags task_flags = Quark_Task_Flags_Initializer;*/
 
     int k, m, n;
     int ldak, ldam;
@@ -150,11 +32,7 @@ void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T,
     int ib;
 
     plasma = plasma_context_self();
-    if (sequence->status != PLASMA_SUCCESS)
-        return;
-    /*QUARK_Task_Flag_Set(&task_flags, TASK_SEQUENCE, (intptr_t)sequence->quark_sequence);*/
-
-    ib = PLASMA_IB;
+    ib = 32;
     for (k = 0; k < min(A.mt, A.nt); k++) {
         tempkm = k == A.mt-1 ? A.m-k*A.mb : A.mb;
         tempkn = k == A.nt-1 ? A.n-k*A.nb : A.nb;
@@ -162,18 +40,11 @@ void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T,
         double *dA = A(k, k);
         double *dT = T(k, k);
 #pragma omp task depend(inout: dA[0:T.nb*T.nb]) depend(out:dT[0:ib*T.nb])
-    {
-        double *tau = (double *)alloca(T.nb * sizeof(double));
-        double *work = (double *)alloca(ib * T.nb * sizeof(double));
-        CORE_dgeqrt(tempkm, tempkn, ib, dA, ldak, dT, T.mb, tau, work);
-    }
-        /*
-         *QUARK_CORE_dgeqrt(
-         *    plasma->quark, &task_flags,
-         *    tempkm, tempkn, ib, T.nb,
-         *    A(k, k), ldak,
-         *    T(k, k), T.mb);
-         */
+        {
+            double tau[T.nb];
+            double work[ib * T.nb];
+            CORE_dgeqrt(tempkm, tempkn, ib, dA, ldak, dT, T.mb, &tau, &work);
+        }
 
         for (n = k+1; n < A.nt; n++) {
             tempnn = n == A.nt-1 ? A.n-n*A.nb : A.nb;
@@ -181,24 +52,15 @@ void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T,
             double *dT = T(k, k);
             double *dC = A(k, n);
 #pragma omp task depend(in: dA[0:T.nb*T.nb], dT[0:ib*T.nb]) depend(inout:dC[0:T.nb*T.nb])
-    {
-        double *work = (double *)alloca(sizeof(double) * T.nb * ib);
-        CORE_dormqr(PlasmaLeft, PlasmaTrans,
-                    tempkm, tempnn, tempkm, ib,
-                    dA, ldak,
-                    dT, T.mb,
-                    dC, ldak,
-                    work, T.nb);
-    }
-            /*
-             *QUARK_CORE_dormqr(
-             *    plasma->quark, &task_flags,
-             *    PlasmaLeft, PlasmaTrans,
-             *    tempkm, tempnn, tempkm, ib, T.nb,
-             *    A(k, k), ldak,
-             *    T(k, k), T.mb,
-             *    A(k, n), ldak);
-             */
+            {
+                double work[T.nb * ib];
+                CORE_dormqr(PlasmaLeft, PlasmaTrans,
+                        tempkm, tempnn, tempkm, ib,
+                        dA, ldak,
+                        dT, T.mb,
+                        dC, ldak,
+                        &work, T.nb);
+            }
         }
         for (m = k+1; m < A.mt; m++) {
             tempmm = m == A.mt-1 ? A.m-m*A.mb : A.mb;
@@ -208,21 +70,13 @@ void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T,
             double *dT = T(m, k);
 #pragma omp task depend(inout:dA[0:T.nb*T.nb], dB[0:T.nb*T.nb]) depend(out:dT[0:ib*T.nb])
             {
-                double *tau = (double *)alloca(T.nb * sizeof(double));
-                double *work = (double *)alloca(ib * T.nb * sizeof(double));
+                double tau[T.nb];
+                double work[ib * T.nb];
                 CORE_dtsqrt(tempmm, tempkn, ib,
-                            dA, ldak,
-                            dB, ldam,
-                            dT, T.mb, tau, work);
+                        dA, ldak,
+                        dB, ldam,
+                        dT, T.mb, &tau, &work);
             }
-            /*
-             *QUARK_CORE_dtsqrt(
-             *    plasma->quark, &task_flags,
-             *    tempmm, tempkn, ib, T.nb,
-             *    A(k, k), ldak,
-             *    A(m, k), ldam,
-             *    T(m, k), T.mb);
-             */
 
             for (n = k+1; n < A.nt; n++) {
                 tempnn = n == A.nt-1 ? A.n-n*A.nb : A.nb;
@@ -231,25 +85,15 @@ void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T,
                 double *dV = A(m, k);
                 double *dT = T(m, k);
 #pragma omp task depend(inout:dA[0:T.nb*T.nb], dB[0:T.nb*T.nb]) depend(in:dV[0:T.nb*T.nb], dT[0:ib*T.nb])
-    {
-        double *work = (double *)alloca(ib * T.nb * sizeof(double));
-        CORE_dtsmqr(PlasmaLeft, PlasmaTrans,
-                    A.mb, tempnn, tempmm, tempnn, A.nb, ib,
-                    dA, ldak,
-                    dB, ldam,
-                    dV, ldam,
-                    dT, T.mb, work, ib);
-    }
-                /*
-                 *QUARK_CORE_dtsmqr(
-                 *    plasma->quark, &task_flags,
-                 *    PlasmaLeft, PlasmaTrans,
-                 *    A.mb, tempnn, tempmm, tempnn, A.nb, ib, T.nb,
-                 *    A(k, n), ldak,
-                 *    A(m, n), ldam,
-                 *    A(m, k), ldam,
-                 *    T(m, k), T.mb);
-                 */
+                {
+                    double work[ib * T.nb];
+                    CORE_dtsmqr(PlasmaLeft, PlasmaTrans,
+                            A.mb, tempnn, tempmm, tempnn, A.nb, ib,
+                            dA, ldak,
+                            dB, ldam,
+                            dV, ldam,
+                            dT, T.mb, &work, ib);
+                }
             }
         }
     }
