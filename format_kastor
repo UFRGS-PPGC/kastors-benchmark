@@ -1,0 +1,87 @@
+#!/usr/bin/env python
+""" Formater for kastor output. """
+
+import numpy as np
+import argparse
+
+parser = argparse.ArgumentParser(prog='formater',
+                                 description='formater for kastor output')
+
+parser.add_argument('input_file', type=str, help='output data from kastors')
+parser.add_argument('--fmt', dest='fmt', choices=("csv", "full"),
+                    default="full", help='input format')
+parser.add_argument('--out', dest='out', choices=("csv", "stat"),
+                    default="stat", help='output format')
+
+
+args = parser.parse_args()
+
+result = dict()
+data_set = list()
+mesure = None
+
+if args.fmt == "full":
+    with open(args.input_file) as f_:
+        for line in f_:
+            if "Program" in line:
+                program = line.strip().split("/")[-1].split("_")
+                bench_name, mode = "_".join(program[:-1]), program[-1]
+                if bench_name not in result:
+                    result[bench_name] = dict()
+                    result[bench_name][mode] = dict()
+                elif mode not in result[bench_name]:
+                    result[bench_name][mode] = dict()
+            elif line.startswith("Time : "):
+                mesure = mesure or line.split()[-2]
+            elif line.startswith("Gflops"):
+                mesure = line.split()[-1]
+            elif line.startswith("Time"):
+                continue
+            elif line.strip():
+                data_set.append(str(line.split()[-1]))
+            else:
+                data_str = "-".join(data_set)
+                if data_str not in result[bench_name][mode]:
+                    result[bench_name][mode][data_str] = list()
+                result[bench_name][mode][data_str].append(mesure)
+                data_set = list()
+                mesure = None
+elif args.fmt == "csv":
+    import csv
+    with open(args.input_file) as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=";")
+        for [bench, mode, data, time] in spamreader:
+            if bench not in result:
+                result[bench] = dict()
+                result[bench][mode] = dict()
+                result[bench][mode][data] = list()
+            elif mode not in result[bench]:
+                result[bench][mode] = dict()
+                result[bench][mode][data] = list()
+            elif data not in result[bench][mode]:
+                result[bench][mode][data] = list()
+            result[bench][mode][data].append(time)
+else:
+    raise ValueError("unknow format '{}'".format(args.fmt))
+
+
+if args.out == "csv":
+    # To csv
+    for benchs in result.iteritems():
+        for modes in benchs[1].iteritems():
+            for datas in modes[1].iteritems():
+                for time in datas[1]:
+                    print ";".join((benchs[0], modes[0], datas[0], time))
+elif args.out == "stat":
+    # To stat
+    print "{:<40} {:^10} {:^10} {:^10}".format("bench name", "mean", "std",
+                                               "median")
+    for benchs in result.iteritems():
+        for modes in benchs[1].iteritems():
+            for datas in modes[1].iteritems():
+                times = np.array(map(float, datas[1]))
+                content = (" ".join((benchs[0], modes[0], datas[0])),
+                           np.mean(times), np.std(times), np.median(times))
+                print "{:<40} {:>10f} {:>10f} {:>10f}".format(*content)
+else:
+    raise ValueError("unknow output format '{}'".format(args.out))
