@@ -55,7 +55,8 @@ int PLASMA_dgetrs_Tile_Async(PLASMA_enum trans, PLASMA_desc *A, const int *IPIV,
     if ( trans == PlasmaNoTrans )
     {
 
-        plasma_pdbarrier_tl2pnl_quark(descB);
+        // Not done in parallel...
+        // plasma_pdbarrier_tl2pnl_quark(descB);
 
         /* swap */
         plasma_pdlaswp_quark(descB, IPIV, 1);

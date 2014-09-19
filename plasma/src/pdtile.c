@@ -32,7 +32,8 @@ void plasma_pdtile_to_lapack_quark(PLASMA_desc A, double *Af77, int lda)
     int X1, Y1;
     int X2, Y2;
     int n, m, ldt;
-
+#pragma omp parallel
+#pragma omp master
     for (m = 0; m < A.mt; m++)
     {
         ldt = BLKLDD(A, m);
@@ -45,7 +46,7 @@ void plasma_pdtile_to_lapack_quark(PLASMA_desc A, double *Af77, int lda)
 
             f77 = AF77(m, n);
             bdl = ABDL(m, n);
-#pragma omp task depend(in:f77[X1*lda+Y1:A.mb*A.mb]) depend(out:bdl[X1*lda+Y1:A.mb*A.mb])
+#pragma omp task depend(in:f77[X1*lda+Y1:A.mb*A.mb]) depend(out:bdl[X1*lda+Y1:A.mb*A.mb]) firstprivate(m, n, f77, bdl)
             LAPACKE_dlacpy_work(
                 LAPACK_COL_MAJOR,
                 lapack_const(PlasmaUpperLower),

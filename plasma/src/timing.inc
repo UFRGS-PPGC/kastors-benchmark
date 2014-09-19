@@ -132,7 +132,6 @@ Test(int *iparam, struct user_parameters* params) {
 double run(struct user_parameters* params)
 {
     params->succeed = 0;
-    int i, m, mx, nx;
     int start =  2048;
     int stop  = 2048;
     int step  =  1;
@@ -146,9 +145,9 @@ double run(struct user_parameters* params)
     iparam[IPARAM_M             ] = -1;
     iparam[IPARAM_N             ] = 500;
     iparam[IPARAM_K             ] = 1;
-    iparam[IPARAM_LDA           ] = 500;
-    iparam[IPARAM_LDB           ] = 500;
-    iparam[IPARAM_LDC           ] = 500;
+    iparam[IPARAM_LDA           ] = -1;
+    iparam[IPARAM_LDB           ] = -1;
+    iparam[IPARAM_LDC           ] = -1;
     iparam[IPARAM_MB            ] = 128;
     iparam[IPARAM_NB            ] = 128;
     iparam[IPARAM_IB            ] = 32;
@@ -165,10 +164,6 @@ double run(struct user_parameters* params)
     iparam[IPARAM_NX            ] = -1;
     iparam[IPARAM_TNTPIV_SIZE   ] = 4;
 
-
-    m  = iparam[IPARAM_M];
-    mx = iparam[IPARAM_MX];
-    nx = iparam[IPARAM_NX];
 
     if (params->matrix_size > 0) {
         start = params->matrix_size;
@@ -195,24 +190,12 @@ double run(struct user_parameters* params)
 
     if (step < 1) step = 1;
     double timing = 0;
-    for (i = start; i <= stop; i += step)
-    {
-        if ( nx > 0 ) {
-            iparam[IPARAM_M] = i;
-            iparam[IPARAM_N] = max(1, i/nx);
-        } else if ( mx > 0 ) {
-            iparam[IPARAM_M] = max(1, i/mx);
-            iparam[IPARAM_N] = i;
-        } else {
-            if ( m == -1 )
-                iparam[IPARAM_M] = i;
-            iparam[IPARAM_N] = i;
-        }
-        printf("M : %d\n", iparam[IPARAM_M]);
-        printf("N : %d\n", iparam[IPARAM_N]);
-        printf("NB : %d\n", iparam[IPARAM_NB]);
-        timing = Test(iparam, params);
-    }
+    iparam[IPARAM_M] = start;
+    iparam[IPARAM_N] = start;
+    printf("M : %d\n", iparam[IPARAM_M]);
+    printf("N : %d\n", iparam[IPARAM_N]);
+    printf("NB : %d\n", iparam[IPARAM_NB]);
+    timing = Test(iparam, params);
 
     PLASMA_Finalize();
 

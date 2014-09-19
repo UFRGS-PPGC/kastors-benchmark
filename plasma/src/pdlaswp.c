@@ -38,17 +38,7 @@ void plasma_pdlaswp_quark(PLASMA_desc B, const int *IPIV, int inc)
                 double *fakepanel = B(B.mt - 1, n);
                 const int *dipiv = IPIV(m);
                 PLASMA_desc descA = plasma_desc_submatrix(B, tempi, n*B.nb, tempm, tempnn);
-                if (Aij == fakepanel) {
-#pragma omp task depend(inout:Aij[0:1]) depend(in:dipiv[0:tempmm*inc])
-                    {
-                        CORE_dlaswp_ontile(descA, 1, tempmm, dipiv, inc);
-                    }
-                } else {
-#pragma omp task depend(inout:Aij[0:1], fakepanel[0:1]) depend(in:dipiv[0:tempmm*inc])
-                    {
-                        CORE_dlaswp_ontile(descA, 1, tempmm, dipiv, inc);
-                    }
-                }
+                CORE_dlaswp_ontile(descA, 1, tempmm, dipiv, inc);
             }
         }
     }

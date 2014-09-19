@@ -49,7 +49,6 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
                         tempnn = n == B.nt-1 ? B.n-n*B.nb : B.nb;
                         double *dA = A(B.mt-1-k, B.mt-1-k);
                         double *dB = B(B.mt-1-k, n);
-#pragma omp task depend(in:dA[0:A.mb*A.mb]) depend(inout:dB[0:A.mb*A.mb])
                         cblas_dtrsm(
                                 CblasColMajor,
                                 (CBLAS_SIDE)side, (CBLAS_UPLO)uplo,
@@ -64,7 +63,6 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
                             double *dA = A(B.mt-1-m, B.mt-1-k);
                             double *dB = B(B.mt-1-k, n       );
                             double *dC = B(B.mt-1-m, n       );
-#pragma omp task depend(in:dA[0:A.mb*A.mb], dB[0:A.mb*A.mb]) depend(inout:dC[0:A.mb*A.mb])
                             cblas_dgemm(CblasColMajor, (CBLAS_TRANSPOSE)PlasmaNoTrans, (CBLAS_TRANSPOSE)PlasmaNoTrans,
                                     B.mb, tempnn, tempkm,
                                     mzone, dA, A.mb,
@@ -87,7 +85,6 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
                         tempnn = n == B.nt-1 ? B.n-n*B.nb : B.nb;
                         double *dA = A(k, k);
                         double *dB = B(k, n);
-#pragma omp task depend(in:dA[0:A.mb*A.mb]) depend(inout:dB[0:A.mb*A.mb])
                         cblas_dtrsm(
                                 CblasColMajor,
                                 (CBLAS_SIDE)side, (CBLAS_UPLO)uplo,
@@ -104,7 +101,6 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
                             double *dA = A(k, m);
                             double *dB = B(k, n);
                             double *dC = B(m, n);
-#pragma omp task depend(in:dA[0:A.mb*A.mb], dB[0:A.mb*A.mb]) depend(inout:dC[0:A.mb*A.mb])
                             cblas_dgemm(CblasColMajor, (CBLAS_TRANSPOSE)trans, (CBLAS_TRANSPOSE)PlasmaNoTrans,
                                     tempmm, tempnn, B.mb,
                                     mzone, dA, A.mb,
@@ -129,7 +125,6 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
                         tempnn = n == B.nt-1 ? B.n-n*B.nb : B.nb;
                         double *dA = A(k, k);
                         double *dB = B(k, n);
-#pragma omp task depend(in:dA[0:A.mb*A.mb]) depend(inout:dB[0:A.mb*A.mb])
                         cblas_dtrsm(
                                 CblasColMajor,
                                 (CBLAS_SIDE)side, (CBLAS_UPLO)uplo,
@@ -147,7 +142,6 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
                             double *dA = A(m, k);
                             double *dB = B(k, n);
                             double *dC = B(m, n);
-#pragma omp task depend(in:dA[0:A.mb*A.mb], dB[0:A.mb*A.mb]) depend(inout:dC[0:A.mb*A.mb])
                             cblas_dgemm(CblasColMajor, (CBLAS_TRANSPOSE)PlasmaNoTrans, (CBLAS_TRANSPOSE)PlasmaNoTrans,
                                     tempmm, tempnn, B.mb,
                                     mzone, dA, lda,
@@ -170,7 +164,6 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
                         tempnn = n == B.nt-1 ? B.n-n*B.nb : B.nb;
                         double *dA = A(B.mt-1-k, B.mt-1-k);
                         double *dB = B(B.mt-1-k,        n);
-#pragma omp task depend(in:dA[0:A.mb*A.mb]) depend(inout:dB[0:A.mb*A.mb])
                         cblas_dtrsm(
                                 CblasColMajor,
                                 (CBLAS_SIDE)side, (CBLAS_UPLO)uplo,
@@ -186,7 +179,6 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
                             double *dA = A(B.mt-1-k, B.mt-1-m);
                             double *dB = B(B.mt-1-k, n       );
                             double *dC = B(B.mt-1-m, n       );
-#pragma omp task depend(in:dA[0:A.mb*A.mb], dB[0:A.mb*A.mb]) depend(inout:dC[0:A.mb*A.mb])
                             cblas_dgemm(CblasColMajor, (CBLAS_TRANSPOSE)trans, (CBLAS_TRANSPOSE)PlasmaNoTrans,
                                     B.mb, tempnn, tempkm,
                                     mzone, dA, lda,
