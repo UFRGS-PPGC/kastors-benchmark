@@ -1,4 +1,5 @@
-** Configure warning and error messages:
+Configure warning and error messages
+------------------------------------
 
     - "it appears your xxx compiler does not support OpenMP.": the
       configure script did not manage to figure out how to compile
@@ -21,3 +22,13 @@
         benchmarks need cblas_dgemm() and friends, that can be found
         in the libcblas library. "libatlas-base-dev" is an example of
         libraries providing libcblas.
+
+Tests
+-----
+
+The usual::
+
+    $> make check
+
+can be use to check if backend compiler correctly compile KaStORS benchmarks.
+Results are checked with some relative error specific for each codes.

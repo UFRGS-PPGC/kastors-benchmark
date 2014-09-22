@@ -28,6 +28,8 @@ Usage : $0 [ OPTIONS ]
   ignored.
  -bench : bench to run (Default: strassen jacobi sparselu dgetrf dpotrf dgeqrf)
   Possible benchs are : strassen jacobi sparselu dgetrf dpotrf dgeqrf.
+ -build_dir : Directory where build happened.
+  Need to be specify if multiple build dir exists
 Strassen
 --------
  -n_strassen : matrix size (Default: 4096)
@@ -140,6 +142,9 @@ case $1 in
   "-bench")
     bench_names="$bench_names $2";
     shift 2;;
+  "-build_dir")
+    build_dir=$2;
+    shift 2;;
   *)
     echo "unknown parameter : $1";
     shift 1;;
@@ -159,6 +164,7 @@ repeat_seq=-1
 repeat=1
 bench_names=""
 modes=""
+build_dir="."
 
 n_strassen=4096
 cutoff_depth=5
@@ -221,7 +227,7 @@ do
     eval v_value=\${$v_name}
     for i in `seq $v_value`;
     do
-      cmd_line=`find . -name ${bench_name}_${mode}`
+      cmd_line=`find $build_dir -name ${bench_name}_${mode}`
       if [ $cmd_line ]
         then
         if $check

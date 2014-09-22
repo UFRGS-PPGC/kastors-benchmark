@@ -1,6 +1,17 @@
 
 include ../common/common.am
 
+check_SCRIPTS = check_jacobi_taskdep.sh\
+				check_jacobi_task.sh\
+				check_jacobi_block_task.sh\
+				check_jacobi_block_taskdep.sh\
+				check_jacobi_seq.sh
+TESTS= $(check_SCRIPTS)
+
+check_%.sh:
+	python -c "print './' + '$@'[6:-3] + ' -c'" > $@
+	chmod +x $@
+
 bin_PROGRAMS = jacobi_seq jacobi_task jacobi_taskdep jacobi_block_task jacobi_block_taskdep jacobi_block_for
 
 jacobi_common_HDRS = include/poisson.h $(COMMON_HDRS)

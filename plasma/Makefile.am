@@ -1,6 +1,19 @@
 
 include ../common/common.am
 
+check_SCRIPTS = check_dgetrf_seq.sh\
+				check_dgetrf_taskdep.sh\
+				check_dgeqrf_seq.sh\
+				check_dgeqrf_taskdep.sh\
+				check_dpotrf_seq.sh\
+				check_dpotrf_taskdep.sh
+TESTS= $(check_SCRIPTS)
+
+check_%.sh:
+	python -c "print './' + '$@'[6:-3] + ' -c'" > $@
+	chmod +x $@
+
+
 bin_PROGRAMS = dpotrf_seq dpotrf_taskdep dgetrf_seq dgetrf_taskdep dgeqrf_seq dgeqrf_taskdep
 
 # Get all source files from ./src except the one called time_xxx

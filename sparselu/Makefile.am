@@ -1,6 +1,15 @@
 
 include ../common/common.am
 
+check_SCRIPTS = check_sparselu_taskdep.sh\
+				check_sparselu_task.sh\
+				check_sparselu_seq.sh
+TESTS= $(check_SCRIPTS)
+
+check_%.sh:
+	python -c "print './' + '$@'[6:-3] + ' -c'" > $@
+	chmod +x $@
+
 bin_PROGRAMS = sparselu_seq sparselu_task sparselu_taskdep
 
 sparselu_common_HDRS = include/sparselu.h $(COMMON_HDRS)

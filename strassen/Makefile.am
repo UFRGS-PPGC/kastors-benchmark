@@ -1,6 +1,15 @@
 
 include ../common/common.am
 
+check_SCRIPTS = check_strassen_taskdep.sh\
+				check_strassen_task.sh\
+				check_strassen_seq.sh
+TESTS= $(check_SCRIPTS)
+
+check_%.sh:
+	python -c "print './' + '$@'[6:-3] + ' -c'" > $@
+	chmod +x $@
+
 bin_PROGRAMS = strassen_seq strassen_task strassen_taskdep
 
 strassen_common_HDRS = include/strassen.h $(COMMON_HDRS)
