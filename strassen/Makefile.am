@@ -35,3 +35,8 @@ strassen_parLDFLAGS = $(strassen_comLDFLAGS) $(COMMON_parLDFLAGS)
 strassen_task_LDFLAGS    = $(strassen_parLDFLAGS)
 strassen_taskdep_LDFLAGS = $(strassen_parLDFLAGS)
 
+run:
+	sh ../run.sh -mode seq -bench strassen -n_strassen 4096 | tee -a $(OUT)
+	sh ../run.sh -mode seq -bench strassen -n_strassen 8192 | tee -a $(OUT)
+	sh ../run.sh -rs 0 -n_strassen 4096 -rt 10 -rtd 10 -bench strassen | tee -a $(OUT)
+	sh ../run.sh -rs 0 -n_strassen 8192 -rt 10 -rtd 10 -bench strassen | tee -a $(OUT)

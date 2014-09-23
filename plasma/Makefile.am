@@ -101,3 +101,9 @@ dgetrf_seq_LDFLAGS      = $(plasma_seqLDFLAGS)
 dgetrf_taskdep_LDFLAGS  = $(plasma_parLDFLAGS)
 dgeqrf_seq_LDFLAGS      = $(plasma_seqLDFLAGS)
 dgeqrf_taskdep_LDFLAGS  = $(plasma_parLDFLAGS)
+
+run:
+	sh ../run.sh -bench dpotrf -bench dgetrf -bench dgeqrf -rs 0 -n_dgetrf 2048 -b_dgetrf 128 -n_dpotrf 2048 -b_dpotrf 128 -n_dgeqrf 2048 -b_dgeqrf 128 -rt 10 -rtd 10 | tee -a $(OUT)
+	sh ../run.sh -bench dpotrf -bench dgetrf -bench dgeqrf -rs 0 -n_dgetrf 4096 -b_dgetrf 128 -n_dpotrf 4096 -b_dpotrf 128 -n_dgeqrf 4096 -b_dgeqrf 128 -rt 10 -rtd 10 | tee -a $(OUT)
+	sh ../run.sh -bench dpotrf -bench dgetrf -bench dgeqrf -rs 0 -n_dgetrf 8192 -b_dgetrf 224 -n_dpotrf 8192 -b_dpotrf 224 -n_dgeqrf 8192 -b_dgeqrf 224 -rt 10 -rtd 10 | tee -a $(OUT)
+

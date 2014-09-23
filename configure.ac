@@ -5,6 +5,8 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CANONICAL_TARGET
 AC_CONFIG_SRCDIR([sparselu/src/sparselu.c])
 AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_LINKS([run.sh:run.sh
+                 format_kastor:format_kastor])
 AM_INIT_AUTOMAKE([subdir-objects foreign 1.9 tar-pax])
 dnl Require Autoconf v2.62 for the AC_OPENMP macro
 AC_PREREQ([2.62])
@@ -14,7 +16,6 @@ AC_PROG_CC_C99
 AC_PROG_RANLIB
 
 dnl Optimistic scenario!
-KASTORS_COMPILE_JACOBI=yes
 KASTORS_COMPILE_STRASSEN=yes
 KASTORS_COMPILE_SPARSELU=yes
 KASTORS_COMPILE_PLASMA=yes
@@ -38,7 +39,7 @@ AC_COMPILE_IFELSE(
         [OMP_DEP=yes],
         [OMP_DEP=no]
 )
-CFLAGS="$saved_CFLAGS"
+CFLAGS="$saved_CFLAGS -O2 -g"
 
 if test "$OMP_DEP" = "yes";
 then
@@ -47,6 +48,34 @@ else
         AC_MSG_RESULT([no])
         AC_MSG_ERROR([it appears your $CC compiler does not support OpenMP task dependencies. Aborting.])
 fi
+
+AC_ARG_ENABLE([jacobi],
+              AS_HELP_STRING([--disable-jacobi], [Disable jacobi benchs]))
+
+
+dnl Add possibility to disable jacobi
+KASTORS_COMPILE_JACOBI=no
+AS_IF([test "x$enable_jacobi" != "xno"], [
+KASTORS_COMPILE_JACOBI=yes
+     ])
+
+dnl Add possibility to disable strassen
+KASTORS_COMPILE_STRASSEN=no
+AS_IF([test "x$enable_strassen" != "xno"], [
+KASTORS_COMPILE_STRASSEN=yes
+     ])
+
+dnl Add possibility to disable sparselu
+KASTORS_COMPILE_SPARSELU=no
+AS_IF([test "x$enable_sparselu" != "xno"], [
+KASTORS_COMPILE_SPARSELU=yes
+     ])
+
+dnl Add possibility to disable plasma
+KASTORS_COMPILE_PLASMA=no
+AS_IF([test "x$enable_plasma" != "xno"], [
+KASTORS_COMPILE_PLASMA=yes
+     ])
 
 dnl PLASMA-related checks
 
@@ -82,16 +111,9 @@ dnl '
 );;
 esac
 
-ACX_PTHREAD([],[
-                AC_MSG_WARN([couldn't find pthread_create in -lpthread. Deactivating compilation of the PLASMA benchmarks.])
-dnl '
-                KASTORS_COMPILE_PLASMA=no
-                KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lpthread"
-])
-
-AM_CONDITIONAL([COMPILE_JACOBI],[:])
-AM_CONDITIONAL([COMPILE_STRASSEN],[:])
-AM_CONDITIONAL([COMPILE_SPARSELU],[:])
+AM_CONDITIONAL([COMPILE_JACOBI],[test "$KASTORS_COMPILE_JACOBI" != "no"])
+AM_CONDITIONAL([COMPILE_STRASSEN],[test "$KASTORS_COMPILE_STRASSEN" != "no"])
+AM_CONDITIONAL([COMPILE_SPARSELU],[test "$KASTORS_COMPILE_SPARSELU" != "no"])
 AM_CONDITIONAL([COMPILE_PLASMA],[test "$KASTORS_COMPILE_PLASMA" != "no"])
 
 dnl AC_SEARCH_LIBS(pthread_create, pthread)
@@ -105,34 +127,10 @@ echo -e ""
 echo -e "===== KaStORS configuration summary ====="
 echo -e "Compiler: ""$CC"
 echo -e "Flags:    ""$CFLAGS"
-
-if test "$KASTORS_COMPILE_JACOBI" = "yes";
-then
-        echo -e "\twill compile JACOBI?\tyes"
-else
-        echo -e "\twill compile JACOBI?\tno"
-fi
-
-if test "$KASTORS_COMPILE_STRASSEN" = "yes";
-then
-        echo -e "\twill compile STRASSEN?\tyes"
-else
-        echo -e "\twill compile STRASSEN?\tno"
-fi
-
-if test "$KASTORS_COMPILE_SPARSELU" = "yes";
-then
-        echo -e "\twill compile SPARSELU?\tyes"
-else
-        echo -e "\twill compile SPARSELU?\tno"
-fi
-
-if test "$KASTORS_COMPILE_PLASMA" = "yes";
-then
-        echo -e "\twill compile PLASMA?\tyes"
-else
-        echo -e "\twill compile PLASMA?\tno (missing $KASTORS_MISSING_DEPS)"
-fi
+echo -e "\twill compile JACOBI?\t$KASTORS_COMPILE_JACOBI"
+echo -e "\twill compile STRASSEN?\t$KASTORS_COMPILE_STRASSEN"
+echo -e "\twill compile SPARSELU?\t$KASTORS_COMPILE_SPARSELU"
+echo -e "\twill compile PLASMA?\t$KASTORS_COMPILE_PLASMA"
 echo "========================================="
 
 AC_CONFIG_FILES([

@@ -35,3 +35,9 @@ sparselu_parLDFLAGS = $(sparselu_comLDFLAGS) $(COMMON_parLDFLAGS)
 sparselu_task_LDFLAGS    = $(sparselu_parLDFLAGS)
 sparselu_taskdep_LDFLAGS = $(sparselu_parLDFLAGS)
 
+run:
+	sh ../run.sh -mode seq -bench sparselu -n_sparselu 128 -m_sparselu 64 | tee -a $(OUT)
+	sh ../run.sh -mode seq -bench sparselu -n_sparselu 64 -m_sparselu 128 | tee -a $(OUT)
+	sh ../run.sh -rs 0 -n_sparselu 128 -m_sparselu 64 -rt 10 -rtd 10 -bench sparselu | tee -a $(OUT)
+	sh ../run.sh -rs 0 -n_sparselu 64 -m_sparselu 128 -rt 10 -rtd 10 -bench sparselu | tee -a $(OUT)
+

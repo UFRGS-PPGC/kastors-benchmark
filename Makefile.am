@@ -22,3 +22,13 @@ if COMPILE_PLASMA
 SUBDIRS += plasma
 endif
 
+OUT=./measures_$(CXX)
+
+run:
+	@rm $(OUT) -rfi || true;
+	@for folder in ${SUBDIRS};\
+	do\
+		OUT=../$(OUT) make -C $$folder run;\
+	done
+	@echo -e "\n\n RESULTS\n -------\n Plain data can be found in : $(OUT)\n \n";
+	@./format_kastor $(OUT);

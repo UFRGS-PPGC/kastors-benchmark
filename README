@@ -32,3 +32,10 @@ The usual::
 
 can be use to check if backend compiler correctly compile KaStORS benchmarks.
 Results are checked with some relative error specific for each codes.
+
+Run
+---
+
+To run the current compiler on the same exemple than in the IWOMP2014 paper::
+
+    $> make run

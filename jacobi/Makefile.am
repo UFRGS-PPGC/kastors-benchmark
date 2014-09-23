@@ -45,3 +45,10 @@ jacobi_taskdep_LDFLAGS       = $(jacobi_parLDFLAGS)
 jacobi_block_task_LDFLAGS    = $(jacobi_parLDFLAGS)
 jacobi_block_taskdep_LDFLAGS = $(jacobi_parLDFLAGS)
 jacobi_block_for_LDFLAGS     = $(jacobi_parLDFLAGS)
+
+run:
+	sh ../run.sh -mode seq -bench jacobi -n_jacobi 8192 | tee -a $(OUT)
+	sh ../run.sh -mode seq -bench jacobi -n_jacobi 16384 | tee -a $(OUT)
+	sh ../run.sh -rs 0 -n_jacobi 8192 -rt 10 -rtd 10 -bench jacobi | tee -a $(OUT)
+	sh ../run.sh -rs 0 -n_jacobi 16384 -rt 10 -rtd 10 -bench jacobi | tee -a $(OUT)
+
