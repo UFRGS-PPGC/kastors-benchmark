@@ -7,8 +7,10 @@ check_SCRIPTS = check_sparselu_taskdep.sh\
 TESTS= $(check_SCRIPTS)
 
 check_%.sh:
-	python -c "print './' + '$@'[6:-3] + ' -c'" > $@
-	chmod +x $@
+	@python -c "print './' + '$@'[6:-3] + ' -c'" > $@
+	@chmod +x $@
+
+CLEANFILES=$(check_SCRIPTS)
 
 bin_PROGRAMS = sparselu_seq sparselu_task sparselu_taskdep
 

@@ -31,7 +31,7 @@
 
 #include <cblas.h>
 #include <lapacke.h>
-#include <plasma.h>
+#include "plasma.h"
 #include <core_blas.h>
 #include "flops.h"
 #include "timing.h"

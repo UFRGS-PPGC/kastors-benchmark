@@ -20,7 +20,7 @@
 #ifndef _PLASMA_GLOBAL_H_
 #define _PLASMA_GLOBAL_H_
 
-#include <plasma.h>
+#include "plasma.h"
 
 #include <assert.h>
 #include <string.h>

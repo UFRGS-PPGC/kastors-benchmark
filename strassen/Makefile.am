@@ -7,8 +7,10 @@ check_SCRIPTS = check_strassen_taskdep.sh\
 TESTS= $(check_SCRIPTS)
 
 check_%.sh:
-	python -c "print './' + '$@'[6:-3] + ' -c'" > $@
-	chmod +x $@
+	@python -c "print './' + '$@'[6:-3] + ' -c'" > $@
+	@chmod +x $@
+
+CLEANFILES=$(check_SCRIPTS)
 
 bin_PROGRAMS = strassen_seq strassen_task strassen_taskdep
 

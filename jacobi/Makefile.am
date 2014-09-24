@@ -9,8 +9,10 @@ check_SCRIPTS = check_jacobi_taskdep.sh\
 TESTS= $(check_SCRIPTS)
 
 check_%.sh:
-	python -c "print './' + '$@'[6:-3] + ' -c'" > $@
-	chmod +x $@
+	@python -c "print './' + '$@'[6:-3] + ' -c'" > $@
+	@chmod +x $@
+
+CLEANFILES=$(check_SCRIPTS)
 
 bin_PROGRAMS = jacobi_seq jacobi_task jacobi_taskdep jacobi_block_task jacobi_block_taskdep jacobi_block_for
 

@@ -10,8 +10,10 @@ check_SCRIPTS = check_dgetrf_seq.sh\
 TESTS= $(check_SCRIPTS)
 
 check_%.sh:
-	python -c "print './' + '$@'[6:-3] + ' -c'" > $@
-	chmod +x $@
+	@python -c "print './' + '$@'[6:-3] + ' -c'" > $@
+	@chmod +x $@
+
+CLEANFILES=$(check_SCRIPTS)
 
 
 bin_PROGRAMS = dpotrf_seq dpotrf_taskdep dgetrf_seq dgetrf_taskdep dgeqrf_seq dgeqrf_taskdep
@@ -52,7 +54,31 @@ plasma_SRCS = \
 	src/pdtrsm.c 			\
 	src/workspace.c
 
-plasma_common_HDRS = $(COMMON_HDRS)
+plasma_common_HDRS = include/common.h\
+					 include/global.h\
+					 include/plasma.h\
+					 include/plasmatypes.h\
+					 include/plasma_d.h\
+					 include/plasma_ds.h\
+					 include/context.h\
+					 include/control.h\
+					 include/core_blas.h\
+					 include/descriptor.h\
+					 include/core_dblas.h\
+					 include/core_dsblas.h\
+					 include/core_blas_dag.h\
+					 include/allocate.h\
+					 include/auxiliary.h\
+					 include/dauxiliary.h\
+					 include/tile.h\
+					 include/bulge.h\
+					 include/compute_d.h\
+					 include/random.h\
+					 include/workspace.h\
+					 src/timing.inc\
+					 include/flops.h\
+					 include/timing.h\
+					 $(COMMON_HDRS)
 plasma_common_SRCS = $(plasma_SRCS) $(COMMON_SRCS) $(plasma_common_HDRS)
 
 plasma_comLIBS		= -lcblas -llapacke -llapack -lblas -lm
