@@ -43,7 +43,7 @@ void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T)
         {
             double tau[T.nb];
             double work[ib * T.nb];
-            CORE_dgeqrt(tempkm, tempkn, ib, dA, ldak, dT, T.mb, &tau, &work);
+            CORE_dgeqrt(tempkm, tempkn, ib, dA, ldak, dT, T.mb, &tau[0], &work[0]);
         }
 
         for (n = k+1; n < A.nt; n++) {
@@ -59,7 +59,7 @@ void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T)
                         dA, ldak,
                         dT, T.mb,
                         dC, ldak,
-                        &work, T.nb);
+                        &work[0], T.nb);
             }
         }
         for (m = k+1; m < A.mt; m++) {
@@ -75,7 +75,7 @@ void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T)
                 CORE_dtsqrt(tempmm, tempkn, ib,
                         dA, ldak,
                         dB, ldam,
-                        dT, T.mb, &tau, &work);
+                        dT, T.mb, &tau[0], &work[0]);
             }
 
             for (n = k+1; n < A.nt; n++) {
@@ -92,7 +92,7 @@ void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T)
                             dA, ldak,
                             dB, ldam,
                             dV, ldam,
-                            dT, T.mb, &work, ib);
+                            dT, T.mb, &work[0], ib);
                 }
             }
         }

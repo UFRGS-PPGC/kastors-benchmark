@@ -37,6 +37,7 @@
 #include "timing.h"
 #include "auxiliary.h"
 #include "main.h"
+#include "workspace.h"
 #define EPSILON 1.0E-9
 
 static int RunTest(int *iparam, _PREC *dparam, double *t_);
