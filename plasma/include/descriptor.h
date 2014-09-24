@@ -71,30 +71,6 @@ inline static void *plasma_getaddr(PLASMA_desc A, int m, int n)
     return (void*)((char*)A.mat + (offset*eltsize) );
 }
 
-/***************************************************************************//**
- *  Internal function to return adress of element A(m,n)
- **/
-inline static void *plasma_geteltaddr( const PLASMA_desc *A, int m, int n, int eltsize)
-{
-    size_t mm = m/A->mb;
-    size_t nn = n/A->nb;
-    size_t offset = 0;
-
-    if (mm < (size_t)(A->lm1)) {
-        if (nn < (size_t)(A->ln1))
-            offset = A->bsiz*(mm+A->lm1*nn) + m%A->mb + A->mb * (size_t)(n%A->nb);
-        else
-            offset = A->A12 + (A->mb*(A->ln%A->nb)*mm) + m%A->mb + A->mb * (size_t)(n%A->nb);
-    }
-    else {
-        if (nn < (size_t)(A->ln1))
-            offset = A->A21 + ((A->lm%A->mb)*A->nb*nn) + m%A->mb + (A->lm%A->mb) * (size_t)(n%A->nb);
-        else
-            offset = A->A22 + m%A->mb  + (A->lm%A->mb) * (size_t)(n%A->nb);
-    }
-    return (void*)((char*)A->mat + (offset*eltsize) );
-}
-
 #ifdef __cplusplus
 }
 #endif

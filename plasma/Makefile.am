@@ -20,10 +20,7 @@ bin_PROGRAMS = dpotrf_seq dpotrf_taskdep dgetrf_seq dgetrf_taskdep dgeqrf_seq dg
 
 # Get all source files from ./src except the one called time_xxx
 plasma_SRCS = \
-	src/allocate.c 			\
 	src/auxiliary.c 		\
-	src/context.c 			\
-	src/control.c 			\
 	src/core_dgeqrt.c		\
 	src/core_dgetrf_rectil.c	\
 	src/core_dlaswp.c 		\
@@ -55,29 +52,21 @@ plasma_SRCS = \
 	src/workspace.c
 
 plasma_common_HDRS = include/common.h\
-					 include/global.h\
-					 include/plasma.h\
-					 include/plasmatypes.h\
-					 include/plasma_d.h\
-					 include/plasma_ds.h\
-					 include/context.h\
-					 include/control.h\
-					 include/core_blas.h\
-					 include/descriptor.h\
-					 include/core_dblas.h\
-					 include/core_dsblas.h\
-					 include/core_blas_dag.h\
-					 include/allocate.h\
 					 include/auxiliary.h\
-					 include/dauxiliary.h\
-					 include/tile.h\
-					 include/bulge.h\
 					 include/compute_d.h\
+					 include/core_blas.h\
+					 include/core_dblas.h\
+					 include/dauxiliary.h\
+					 include/descriptor.h\
+					 include/flops.h\
+					 include/plasma.h\
+					 include/plasma_d.h\
+					 include/plasmatypes.h\
 					 include/random.h\
+					 include/tile.h\
+					 include/timing.h\
 					 include/workspace.h\
 					 src/timing.inc\
-					 include/flops.h\
-					 include/timing.h\
 					 $(COMMON_HDRS)
 plasma_common_SRCS = $(plasma_SRCS) $(COMMON_SRCS) $(plasma_common_HDRS)
 

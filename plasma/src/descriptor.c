@@ -34,18 +34,6 @@ int plasma_desc_mat_alloc(PLASMA_desc *desc)
 
 /***************************************************************************//**
  *
- **/
-int plasma_desc_mat_free(PLASMA_desc *desc)
-{
-    if (desc->mat != NULL) {
-        free(desc->mat);
-        desc->mat = NULL;
-    }
-    return PLASMA_SUCCESS;
-}
-
-/***************************************************************************//**
- *
  * @ingroup Auxiliary
  *
  *  PLASMA_Desc_Create - Create matrix descriptor.

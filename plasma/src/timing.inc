@@ -40,7 +40,7 @@
 #include "workspace.h"
 #define EPSILON 1.0E-9
 
-static int RunTest(int *iparam, _PREC *dparam, double *t_);
+static double RunTest(double *t_, struct user_parameters*);
 
 double cWtime(void);
 
@@ -56,149 +56,60 @@ double cWtime(void)
     return tp.tv_sec + 1e-6 * tp.tv_usec;
 }
 
-static double
-Test(int *iparam, struct user_parameters* params) {
-    int      iter;
-    int      niter;
-    int64_t M, N, K, NRHS;
+
+double run(struct user_parameters* params)
+{
     double  *t;
-    _PREC    dparam[IPARAM_DNBPARAM];
-    double   fmuls, fadds, fp_per_mul, fp_per_add;
+    double   fmuls, fadds;
     double   sumgf, sumt, flops, gflops;
+    int iter;
+    int niter    = 2;
+    int64_t N    = params->blocksize;
+    int64_t M    = params->blocksize;
 
-    memset( &dparam, 0, IPARAM_DNBPARAM * sizeof(_PREC) );
-
-    niter   = iparam[IPARAM_NITER];
-
-    M    = iparam[IPARAM_M];
-    N    = iparam[IPARAM_N];
-    K    = iparam[IPARAM_K];
-    NRHS = K;
+    params->succeed = 1;
 
     t = (double*)calloc(niter, sizeof(double));
 
-    if (sizeof(_TYPE) == sizeof(_PREC)) {
-        fp_per_mul = 1;
-        fp_per_add = 1;
-    } else {
-        fp_per_mul = 6;
-        fp_per_add = 2;
-    }
-
     fadds = (double)(_FADDS);
     fmuls = (double)(_FMULS);
-    flops = 1e-9 * (fmuls * fp_per_mul + fadds * fp_per_add);
+    flops = 1e-9 * (fmuls + fadds);
     gflops = 0.0;
 
-    if ( iparam[IPARAM_WARMUP] ) {
-        RunTest( iparam, dparam, &(t[0]));
+    if (params->matrix_size <= 0) {
+        params->matrix_size = 2048;
     }
+
+    if (params->blocksize <= 0) {
+        params->blocksize = 128;
+    }
+
+    printf("N : %d\n", params->matrix_size);
+    printf("NB : %d\n", params->blocksize);
+
+    // Warm up
+    if (params->check && RunTest(&(t[0]), params) > EPSILON)
+        params->succeed = 0;
 
     sumgf  = 0.0;
     sumt   = 0.0;
 
     for (iter = 0; iter < niter; iter++)
     {
-        if( iter == 0 ) {
-          if ( iparam[IPARAM_TRACE] )
-            iparam[IPARAM_TRACE] = 2;
-          if ( iparam[IPARAM_DAG] )
-            iparam[IPARAM_DAG] = 2;
-
-          RunTest( iparam, dparam, &(t[iter]));
-
-          iparam[IPARAM_TRACE] = 0;
-          iparam[IPARAM_DAG] = 0;
-        }
-        else
-            RunTest( iparam, dparam, &(t[iter]));
+        if (params->check && RunTest(&(t[iter]), params) > EPSILON)
+            params->succeed = 0;
 
         gflops = flops / t[iter];
-
         sumt   += t[iter];
         sumgf  += gflops;
     }
 
+    // Average Gflops
     gflops = sumgf / niter;
     printf("Gflops : %f\n", gflops);
 
     free(t);
 
-    if (params->check && dparam[IPARAM_RES] < EPSILON)
-        params->succeed = 1;
-
-    return sumt/niter;
-}
-
-double run(struct user_parameters* params)
-{
-    params->succeed = 0;
-    int start =  2048;
-    int stop  = 2048;
-    int step  =  1;
-    int iparam[IPARAM_SIZEOF];
-
-
-    memset(iparam, 0, IPARAM_SIZEOF*sizeof(int));
-
-    iparam[IPARAM_THRDNBR       ] = 1;
-    iparam[IPARAM_THRDNBR_SUBGRP] = 1;
-    iparam[IPARAM_M             ] = -1;
-    iparam[IPARAM_N             ] = 500;
-    iparam[IPARAM_K             ] = 1;
-    iparam[IPARAM_LDA           ] = -1;
-    iparam[IPARAM_LDB           ] = -1;
-    iparam[IPARAM_LDC           ] = -1;
-    iparam[IPARAM_MB            ] = 128;
-    iparam[IPARAM_NB            ] = 128;
-    iparam[IPARAM_IB            ] = 32;
-    iparam[IPARAM_NITER         ] = 2;
-    iparam[IPARAM_WARMUP        ] = 1;
-    iparam[IPARAM_CHECK         ] = params->check;
-    iparam[IPARAM_VERBOSE       ] = 0;
-    iparam[IPARAM_INPUTFMT      ] = 0;
-    iparam[IPARAM_OUTPUTFMT     ] = 0;
-    iparam[IPARAM_TRACE         ] = 0;
-    iparam[IPARAM_DAG           ] = 0;
-    iparam[IPARAM_ASYNC         ] = 1;
-    iparam[IPARAM_MX            ] = -1;
-    iparam[IPARAM_NX            ] = -1;
-    iparam[IPARAM_TNTPIV_SIZE   ] = 4;
-
-
-    if (params->matrix_size > 0) {
-        start = params->matrix_size;
-        stop = start;
-    } else {
-        params->matrix_size = start;
-    }
-
-    if (params->blocksize > 0) {
-        iparam[IPARAM_MB] = params->blocksize;
-        iparam[IPARAM_NB] = params->blocksize;
-    } else {
-        params->blocksize = iparam[IPARAM_NB];
-    }
-
-    /* Initialize Plasma */
-    PLASMA_Init( iparam[IPARAM_THRDNBR] );
-
-    PLASMA_Set(PLASMA_TILE_SIZE,        iparam[IPARAM_NB] );
-    PLASMA_Set(PLASMA_INNER_BLOCK_SIZE, iparam[IPARAM_IB] );
-
-    /* Tournament pivoting */
-    PLASMA_Set(PLASMA_TNTPIVOTING_SIZE, iparam[IPARAM_TNTPIV_SIZE]);
-
-    if (step < 1) step = 1;
-    double timing = 0;
-    iparam[IPARAM_M] = start;
-    iparam[IPARAM_N] = start;
-    printf("M : %d\n", iparam[IPARAM_M]);
-    printf("N : %d\n", iparam[IPARAM_N]);
-    printf("NB : %d\n", iparam[IPARAM_NB]);
-    timing = Test(iparam, params);
-
-    PLASMA_Finalize();
-
-    return timing;
+    // Average time
+    return sumt / niter;
 }

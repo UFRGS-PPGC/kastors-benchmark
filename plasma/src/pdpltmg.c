@@ -19,7 +19,7 @@
 /***************************************************************************//**
  *  Parallel tile matrix generation - dynamic scheduling
  **/
-void plasma_pdpltmg_quark( PLASMA_enum mtxtype, PLASMA_desc A, unsigned long long int seed)
+void plasma_pdpltmg_quark(PLASMA_desc A, unsigned long long int seed)
 {
     int m, n;
     int ldam;

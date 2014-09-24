@@ -22,17 +22,13 @@
 /***************************************************************************//**
  *  Parallel tile QR factorization - dynamic scheduling
  **/
-void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T)
+void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T, int ib)
 {
-    plasma_context_t *plasma;
 
     int k, m, n;
     int ldak, ldam;
     int tempkm, tempkn, tempnn, tempmm;
-    int ib;
 
-    plasma = plasma_context_self();
-    ib = 32;
     for (k = 0; k < min(A.mt, A.nt); k++) {
         tempkm = k == A.mt-1 ? A.m-k*A.mb : A.mb;
         tempkn = k == A.nt-1 ? A.n-k*A.nb : A.nb;

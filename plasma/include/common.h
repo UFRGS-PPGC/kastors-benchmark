@@ -20,15 +20,9 @@
 #ifndef _PLASMA_COMMON_H_
 #define _PLASMA_COMMON_H_
 
-#include "global.h"
-#include "context.h"
-#include "control.h"
 #include "core_blas.h"
-#include "core_blas_dag.h"
-#include "allocate.h"
 #include "auxiliary.h"
 #include "tile.h"
-#include "bulge.h"
 
 # include <unistd.h>
 
@@ -41,46 +35,6 @@
 #define PLASMA_HAVE_WEAK 1
 #endif
 #endif
-
-/** ****************************************************************************
- *  Determine FORTRAN names
- */
-#if defined(ADD_)
-#define PLASMA_FNAME(lcname, UCNAME)        plasma_##lcname##_
-#define PLASMA_TILE_FNAME(lcname, UCNAME)   plasma_##lcname##_tile_
-#define PLASMA_ASYNC_FNAME(lcname, UCNAME)  plasma_##lcname##_tile_async_
-#define PLASMA_WS_FNAME(lcname, UCNAME)     plasma_alloc_workspace_##lcname##_
-#define PLASMA_WST_FNAME(lcname, UCNAME)    plasma_alloc_workspace_##lcname##_tile_
-#elif defined(NOCHANGE)
-#define PLASMA_FNAME(lcname, UCNAME)        plasma_##lcname
-#define PLASMA_TILE_FNAME(lcname, UCNAME)   plasma_##lcname##_tile
-#define PLASMA_ASYNC_FNAME(lcname, UCNAME)  plasma_##lcname##_tile_async
-#define PLASMA_WS_FNAME(lcname, UCNAME)     plasma_alloc_workspace_##lcname
-#define PLASMA_WST_FNAME(lcname, UCNAME)    plasma_alloc_workspace_##lcname##_tile
-#elif defined(UPCASE)
-#define PLASMA_FNAME(lcname, UCNAME)        PLASMA_##UCNAME
-#define PLASMA_TILE_FNAME(lcname, UCNAME)   PLASMA_##UCNAME##_TILE
-#define PLASMA_ASYNC_FNAME(lcname, UCNAME)  PLASMA_##UCNAME##_TILE_ASYNC
-#define PLASMA_WS_FNAME(lcname, UCNAME)     PLASMA_ALLOC_WORKSPACE_##UCNAME
-#define PLASMA_WST_FNAME(lcname, UCNAME)    PLASMA_ALLOC_WORKSPACE_##UCNAME##_TILE
-#endif
-
-/***************************************************************************//**
- *  Global shortcuts
- **/
-#define PLASMA_GRPSIZE     plasma->group_size
-#define PLASMA_NB          plasma->nb
-#define PLASMA_IB          plasma->ib
-#define PLASMA_NBNBSIZE    plasma->nbnbsize
-#define PLASMA_IBNBSIZE    plasma->ibnbsize
-#define PLASMA_TNT_SIZE    plasma->tntsize
-
-/***************************************************************************//**
- *  IPT internal define
- **/
-#define PlasmaIPT_NoDep   0
-#define PlasmaIPT_Panel   1
-#define PlasmaIPT_All     2
 
 /***************************************************************************//**
  *  Global utilities
@@ -96,44 +50,10 @@
 #endif
 
 /***************************************************************************//**
- *  Static scheduler
- **/
-#define ss_init(m, n, init_val) \
-{ \
-    plasma->ss_progress = (volatile int *)plasma_shared_alloc(plasma, (m)*(n), PlasmaInteger); \
-    plasma_memset_int((int*)plasma->ss_progress, (m)*(n), (init_val)); \
-    plasma->ss_ld = (m); \
-    plasma->ss_abort = 0; \
-}
-
-#define ss_abort()   plasma->ss_abort = 1;
-#define ss_aborted() plasma->ss_abort
-
-#define ss_cond_set(m, n, val) \
-{ \
-    plasma->ss_progress[(m)+plasma->ss_ld*(n)] = (val); \
-}
-
-#define ss_cond_wait(m, n, val) \
-{ \
-    while (!plasma->ss_abort && \
-            plasma->ss_progress[(m)+plasma->ss_ld*(n)] != (val)) \
-    if (plasma->ss_abort) \
-        break; \
-}
-
-#define ss_finalize() \
-{ \
-    plasma_shared_free(plasma, (void*)plasma->ss_progress); \
-}
-
-/***************************************************************************//**
  *  Additional Internal routines to handle descriptors not available in coreblas
  *  library
  **/
-int plasma_desc_check(PLASMA_desc *desc);
 int plasma_desc_mat_alloc(PLASMA_desc *desc);
-int plasma_desc_mat_free(PLASMA_desc *desc);
 
 /***************************************************************************//**
  *  Global array of LAPACK constants
@@ -145,13 +65,6 @@ extern "C" {
 #endif
 
 #include "compute_d.h"
-
-void plasma_pdlag2s(plasma_context_t *plasma);
-/*
- *void plasma_pzlag2c(plasma_context_t *plasma);
- *void plasma_pslag2d(plasma_context_t *plasma);
- *void plasma_pclag2z(plasma_context_t *plasma);
- */
 
 #ifdef __cplusplus
 }

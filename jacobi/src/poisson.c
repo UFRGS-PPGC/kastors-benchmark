@@ -89,15 +89,11 @@ double run(struct user_parameters* params)
     int jj,j;
     int nx = matrix_size;
     int ny = matrix_size;
-    double x;
-    double y;
     double *f_ = malloc(nx * nx * sizeof(double));
     double (*f)[nx][ny] = (double (*)[nx][ny])f_;
     double *u_ = malloc(nx * nx * sizeof(double));
     double *unew_ = malloc(nx * ny * sizeof(double));
     double (*unew)[nx][ny] = (double (*)[nx][ny])unew_;
-    double *udiff_ = malloc(nx * ny * sizeof(double));
-    double (*udiff)[nx][ny] = (double (*)[nx][ny])udiff_;
 
     /* test if valid */
     if ( (nx % block_size) || (ny % block_size) )
@@ -157,6 +153,10 @@ double run(struct user_parameters* params)
 
 #ifdef _OPENMP
     if(params->check) {
+        double x;
+        double y;
+        double *udiff_ = malloc(nx * ny * sizeof(double));
+        double (*udiff)[nx][ny] = (double (*)[nx][ny])udiff_;
         /// CHECK OUTPUT
         // Check for convergence.
         for (j = 0; j < ny; j++) {
@@ -198,6 +198,7 @@ double run(struct user_parameters* params)
         }
         error1 = r8mat_rms(nx, ny, udiff_);
         params->succeed = fabs(error - error1) < 1.0E-6;
+        free(udiff_);
     }
 #else
     params->succeed = 1;
@@ -206,7 +207,6 @@ double run(struct user_parameters* params)
     free(f_);
     free(u_);
     free(unew_);
-    free(udiff_);
     return TIMER;
 }
 

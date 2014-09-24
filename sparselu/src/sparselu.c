@@ -28,32 +28,7 @@
 #include "timer.h"
 #include "main.h"
 
-/***********************************************************************
- * checkmat:
- **********************************************************************/
-static int checkmat (float *M, float *N, int submatrix_size)
-{
-    int i, j;
-    float r_err;
 
-    for (i = 0; i < submatrix_size; i++)
-    {
-        for (j = 0; j < submatrix_size; j++)
-        {
-            r_err = M[i*submatrix_size+j] - N[i*submatrix_size+j];
-            if ( r_err == 0.0 ) continue;
-
-            if (r_err < 0.0 ) r_err = -r_err;
-
-            if ( M[i*submatrix_size+j] == 0 )
-                return 0;
-            r_err = r_err / M[i*submatrix_size+j];
-            if(r_err > EPSILON)
-                return 0;
-        }
-    }
-    return 1;
-}
 /***********************************************************************
  * genmat:
  **********************************************************************/
@@ -182,6 +157,35 @@ static void sparselu_init (float ***pBENCH, int matrix_size, int submatrix_size)
     genmat(*pBENCH, matrix_size, submatrix_size);
 }
 
+#ifdef _OPENMP
+
+/***********************************************************************
+ * checkmat:
+ **********************************************************************/
+static int checkmat (float *M, float *N, int submatrix_size)
+{
+    int i, j;
+    float r_err;
+
+    for (i = 0; i < submatrix_size; i++)
+    {
+        for (j = 0; j < submatrix_size; j++)
+        {
+            r_err = M[i*submatrix_size+j] - N[i*submatrix_size+j];
+            if ( r_err == 0.0 ) continue;
+
+            if (r_err < 0.0 ) r_err = -r_err;
+
+            if ( M[i*submatrix_size+j] == 0 )
+                return 0;
+            r_err = r_err / M[i*submatrix_size+j];
+            if(r_err > EPSILON)
+                return 0;
+        }
+    }
+    return 1;
+}
+
 static int sparselu_check(float **BENCH_SEQ, float **BENCH, int matrix_size, int submatrix_size)
 {
     int ii,jj,ok=1;
@@ -198,6 +202,7 @@ static int sparselu_check(float **BENCH_SEQ, float **BENCH, int matrix_size, int
     }
     return ok;
 }
+#endif
 
 double run(struct user_parameters* params)
 {

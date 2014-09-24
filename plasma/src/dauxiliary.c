@@ -18,8 +18,7 @@
  */
 
 double d_check_solution(int M, int N, int NRHS, double *A, int LDA,
-                      double *B,  double *X, int LDB,
-                      double *anorm, double *bnorm, double *xnorm )
+                      double *B,  double *X, int LDB)
 {
 /*     int info_solution; */
     double Rnorm = -1.00;
@@ -27,9 +26,9 @@ double d_check_solution(int M, int N, int NRHS, double *A, int LDA,
     double mzone = -1.0;
     double *work = (double *)malloc(max(M, N)* sizeof(double));
 
-    *anorm = LAPACKE_dlange_work(LAPACK_COL_MAJOR, 'i', M, N,    A, LDA, work);
-    *xnorm = LAPACKE_dlange_work(LAPACK_COL_MAJOR, 'i', M, NRHS, X, LDB, work);
-    *bnorm = LAPACKE_dlange_work(LAPACK_COL_MAJOR, 'i', N, NRHS, B, LDB, work);
+    LAPACKE_dlange_work(LAPACK_COL_MAJOR, 'i', M, N,    A, LDA, work);
+    LAPACKE_dlange_work(LAPACK_COL_MAJOR, 'i', M, NRHS, X, LDB, work);
+    LAPACKE_dlange_work(LAPACK_COL_MAJOR, 'i', N, NRHS, B, LDB, work);
 
     cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, M, NRHS, N, (zone), A, LDA, X, LDB, (mzone), B, LDB);
 

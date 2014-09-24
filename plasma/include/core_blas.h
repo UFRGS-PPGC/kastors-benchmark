@@ -20,7 +20,6 @@
 #include "descriptor.h"
 
 #include "core_dblas.h"
-#include "core_dsblas.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,18 +43,6 @@ extern char *plasma_lapack_constants[];
 #define CBLAS_UPLO      enum CBLAS_UPLO
 #define CBLAS_DIAG      enum CBLAS_DIAG
 #define CBLAS_SIDE      enum CBLAS_SIDE
-
-/* CBLAS requires for scalar arguments to be passed by address rather than by value */
-#ifndef CBLAS_SADDR
-#define CBLAS_SADDR( _val_ ) &(_val_)
-#endif
-
- /** ****************************************************************************
-  *  External interface of the GKK algorithm for InPlace Layout Translation
-  **/
-int  GKK_minloc(int n, int *T);
-void GKK_BalanceLoad(int thrdnbr, int *Tp, int *leaders, int nleaders, int L);
-int  GKK_getLeaderNbr(int me, int ne, int *nleaders, int **leaders);
 
 #ifdef __cplusplus
 }

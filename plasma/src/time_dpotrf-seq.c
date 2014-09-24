@@ -14,21 +14,29 @@
 
 #include "./timing.inc"
 
-static int
-RunTest(int *iparam, double *dparam, real_Double_t *t_)
+static double
+RunTest(real_Double_t *t_, struct user_parameters* params)
 {
-    PASTE_CODE_IPARAM_LOCALS( iparam );
+    double  t;
+    int64_t N     = params->matrix_size;
+    int64_t NB    = params->blocksize;
+    int check     = params->check;
     int uplo = PlasmaUpper;
-
-    LDA = max(LDA, N);
+    double check_res = 0;
 
     /* Allocate Data */
-    PASTE_CODE_ALLOCATE_MATRIX_TILE( descA, 1,     double, PlasmaRealDouble, LDA, N, N );
-    PASTE_CODE_ALLOCATE_MATRIX_TILE( descB, check, double, PlasmaRealDouble, LDB, N, NRHS );
+    PLASMA_desc *descA = NULL;
+    double* ptr = malloc(N * N * sizeof(double));
+    PLASMA_Desc_Create(&descA, ptr, PlasmaRealDouble, NB, NB, NB*NB, N, N, 0, 0, N, N);
+
     plasma_pdplgsy_quark( (double)N, *descA, 51 );
 
     /* Save A for check */
-    PASTE_TILE_TO_LAPACK( descA, A, check, double, LDA, N );
+    double *A = NULL;
+    if(check) {
+        A = (double*)malloc(N * N * sizeof(double));
+        plasma_pdtile_to_lapack_quark(*descA, (void*)A, N);
+    }
 
     /* PLASMA DPOSV */
     START_TIMING();
@@ -38,17 +46,20 @@ RunTest(int *iparam, double *dparam, real_Double_t *t_)
     /* Check the solution */
     if ( check )
     {
-        plasma_pdpltmg_quark(PlasmaMatrixRandom, * descB, 7672 );
-        PASTE_TILE_TO_LAPACK( descB, B, check, double, LDB, NRHS );
+        PLASMA_desc *descB = NULL;
+        double* ptr = (double*)malloc(N * sizeof(double));
+        PLASMA_Desc_Create(&descB, ptr, PlasmaRealDouble, NB, NB, NB*NB, N, 1, 0, 0, N, 1);
+
+        plasma_pdpltmg_quark(* descB, 7672 );
+        double* B = (double*)malloc(N * sizeof(double));
+        plasma_pdtile_to_lapack_quark(*descB, (void*)B, N);
 
         PLASMA_dpotrs_Tile_Async( uplo, descA, descB );
 
-        PASTE_TILE_TO_LAPACK( descB, X, check, double, LDB, NRHS );
+        double* X = (double*)malloc(N * sizeof(double));
+        plasma_pdtile_to_lapack_quark(*descB, (void*)X, N);
 
-        dparam[IPARAM_RES] = d_check_solution(N, N, NRHS, A, LDA, B, X, LDB,
-                                              &(dparam[IPARAM_ANORM]),
-                                              &(dparam[IPARAM_BNORM]),
-                                              &(dparam[IPARAM_XNORM]));
+        check_res = d_check_solution(N, N, 1, A, N, B, X, N);
 
         PASTE_CODE_FREE_MATRIX( descB );
         free( A );
@@ -58,5 +69,5 @@ RunTest(int *iparam, double *dparam, real_Double_t *t_)
 
     PASTE_CODE_FREE_MATRIX( descA );
 
-    return 0;
+    return check_res;
 }

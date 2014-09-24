@@ -43,7 +43,7 @@
  * @sa PLASMA_dgeqrf_Tile_Async
  *
  ******************************************************************************/
-int PLASMA_dgeqrs_Tile_Async(PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B)
+int PLASMA_dgeqrs_Tile_Async(PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B, int ib)
 {
     PLASMA_desc descA;
     PLASMA_desc descT;
@@ -52,7 +52,7 @@ int PLASMA_dgeqrs_Tile_Async(PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B)
     descT = *T;
     descB = *B;
 
-    plasma_pdormqr_quark(PlasmaLeft, PlasmaTrans, descA, descB, descT);
+    plasma_pdormqr_quark(PlasmaLeft, PlasmaTrans, descA, descB, descT, ib);
 
     plasma_pdtrsm_quark(PlasmaLeft, PlasmaUpper, PlasmaNoTrans, PlasmaNonUnit,
                         1.0,

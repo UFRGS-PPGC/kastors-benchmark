@@ -59,38 +59,10 @@ typedef struct plasma_desc_t {
     int nt;             /**< number of tile columns of the submatrix - derived parameter      */
 } PLASMA_desc;
 
-#define plasma_const_neg(const) (((const-1)^0x01)+1)
-
-/** ****************************************************************************
- *  PLASMA constants - boolean
- **/
-#define PLASMA_FALSE 0
-#define PLASMA_TRUE  1
-
-/** ****************************************************************************
- *  State machine switches
- **/
-#define PLASMA_WARNINGS   1
-#define PLASMA_ERRORS     2
-#define PLASMA_DAG        4
-
-/** ****************************************************************************
- *  PLASMA constants - configuration parameters
- **/
-#define PLASMA_CONCURRENCY      1
-#define PLASMA_TILE_SIZE        2
-#define PLASMA_INNER_BLOCK_SIZE 3
-#define PLASMA_TNTPIVOTING_SIZE 9
-
 /** ****************************************************************************
  *  Math function prototypes
  **/
-/*#include <plasma_z.h>*/
 #include "plasma_d.h"
-/*#include <plasma_c.h>*/
-/*#include <plasma_s.h>*/
-/*#include <plasma_zc.h>*/
-#include "plasma_ds.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -99,17 +71,8 @@ extern "C" {
 /** ****************************************************************************
  *  Auxiliary function prototypes
  **/
-int PLASMA_Version(int *ver_major, int *ver_minor, int *ver_micro);
-int PLASMA_Enable(PLASMA_enum lever);
-int PLASMA_Disable(PLASMA_enum lever);
-int PLASMA_Set(PLASMA_enum param, int value);
-int PLASMA_Get(PLASMA_enum param, int *value);
-int PLASMA_Init(int cores);
-int PLASMA_Finalize();
 int PLASMA_Desc_Create(PLASMA_desc **desc, void *mat, PLASMA_enum dtyp, int mb, int nb, int bsiz, int lm, int ln, int i, int j, int m, int n);
 int PLASMA_Desc_Destroy(PLASMA_desc **desc);
-int PLASMA_Lapack_to_Tile(void *Af77, int LDA, PLASMA_desc *A);
-int PLASMA_Tile_to_Lapack(PLASMA_desc *A, void *Af77, int LDA);
 
 /** ****************************************************************************
  *  Workspace deallocation

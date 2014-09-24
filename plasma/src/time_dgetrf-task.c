@@ -14,51 +14,56 @@
 
 #include "./timing.inc"
 
-static int
-RunTest(int *iparam, double *dparam, real_Double_t *t_)
+static double
+RunTest(real_Double_t *t_, struct user_parameters* params)
 {
-    PASTE_CODE_IPARAM_LOCALS( iparam );
-
-    if ( M != N && check ) {
-        fprintf(stderr, "Check cannot be perfomed with M != N\n");
-        check = 0;
-    }
+    double  t;
+    int64_t N     = params->matrix_size;
+    int64_t NB    = params->blocksize;
+    int check     = params->check;
+    double check_res = 0;
 
     /* Allocate Data */
-    PASTE_CODE_ALLOCATE_MATRIX_TILE( descA, 1, double, PlasmaRealDouble, LDA, M, N );
-    PASTE_CODE_ALLOCATE_MATRIX( piv, 1, int, min(M, N), 1 );
+    PLASMA_desc *descA = NULL;
+    double* ptr = malloc(N * N * sizeof(double));
+    PLASMA_Desc_Create(&descA, ptr, PlasmaRealDouble, NB, NB, NB*NB, N, N, 0, 0, N, N);
+
+    int* piv = (int*)malloc(N * sizeof(double));
 
 #pragma omp parallel
 #pragma omp master
-    {
-    plasma_pdpltmg_quark(PlasmaMatrixRandom, *descA, 3456);
-    }
+    plasma_pdpltmg_quark(*descA, 3456);
 
     /* Save AT in lapack layout for check */
-    PASTE_TILE_TO_LAPACK( descA, A, check, double, LDA, N );
+    double *A = NULL;
+    if(check) {
+        A = (double*)malloc(N * N * sizeof(double));
+        plasma_pdtile_to_lapack_quark(*descA, (void*)A, N);
+    }
 
     START_TIMING();
 #pragma omp parallel
 #pragma omp master
-    {
     PLASMA_dgetrf_Tile_Async( descA, piv );
-    }
     STOP_TIMING();
 
     /* Check the solution */
     if ( check )
     {
-        PASTE_CODE_ALLOCATE_MATRIX_TILE( descB, 1, double, PlasmaRealDouble, LDB, N, NRHS );
-        plasma_pdpltmg_quark(PlasmaMatrixRandom, * descB, 7732 );
-        PASTE_TILE_TO_LAPACK( descB, b, check, double, LDB, NRHS );
+        PLASMA_desc *descB = NULL;
+        double* ptr = (double*)malloc(N * sizeof(double));
+        PLASMA_Desc_Create(&descB, ptr, PlasmaRealDouble, NB, NB, NB*NB, N, 1, 0, 0, N, 1);
+
+        plasma_pdpltmg_quark(*descB, 7732 );
+        double* b = (double*)malloc(N * sizeof(double));
+        plasma_pdtile_to_lapack_quark(*descB, (void*)b, N);
 
         PLASMA_dgetrs_Tile_Async( PlasmaNoTrans, descA, piv, descB );
 
-        PASTE_TILE_TO_LAPACK( descB, x, check, double, LDB, NRHS );
-        dparam[IPARAM_RES] = d_check_solution(M, N, NRHS, A, LDA, b, x, LDB,
-                                              &(dparam[IPARAM_ANORM]),
-                                              &(dparam[IPARAM_BNORM]),
-                                              &(dparam[IPARAM_XNORM]));
+        double* x = (double*)malloc(N * sizeof(double));
+        plasma_pdtile_to_lapack_quark(*descB, (void*)x, N);
+
+        check_res = d_check_solution(N, N, 1, A, N, b, x, N);
 
         PASTE_CODE_FREE_MATRIX( descB );
         free(A); free(b); free(x);
@@ -67,5 +72,5 @@ RunTest(int *iparam, double *dparam, real_Double_t *t_)
     PASTE_CODE_FREE_MATRIX( descA );
     free( piv );
 
-    return 0;
+    return check_res;
 }

@@ -26,12 +26,11 @@ void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, 
                          double alpha, PLASMA_desc A, PLASMA_desc B)
 {
     int k, m, n;
-    int lda, ldan, ldb;
-    int tempkm, tempkn, tempmm, tempnn;
+    int lda, ldb;
+    int tempkm, tempmm, tempnn;
 
     double zone       = (double) 1.0;
     double mzone      = (double)-1.0;
-    double minvalpha  = (double)-1.0 / alpha;
     double lalpha;
 
     /*

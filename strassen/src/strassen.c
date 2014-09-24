@@ -377,7 +377,6 @@ for(i=0; i<matrix_size; i++)
 
 double run(struct user_parameters* params)
 {
-    double error;
     double *A, *B, *C;
     int matrix_size = params->matrix_size;
     int cutoff_size = params->cutoff_size;

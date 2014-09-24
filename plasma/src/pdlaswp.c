@@ -34,8 +34,6 @@ void plasma_pdlaswp_quark(PLASMA_desc B, const int *IPIV, int inc)
 
             for (n = 0; n < B.nt; n++) {
                 tempnn = n == B.nt-1 ? B.n - n * B.nb : B.nb;
-                double *Aij = B(m, n);
-                double *fakepanel = B(B.mt - 1, n);
                 const int *dipiv = IPIV(m);
                 PLASMA_desc descA = plasma_desc_submatrix(B, tempi, n*B.nb, tempm, tempnn);
                 CORE_dlaswp_ontile(descA, 1, tempmm, dipiv, inc);

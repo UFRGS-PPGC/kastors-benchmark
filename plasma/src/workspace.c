@@ -12,7 +12,6 @@
  *
  **/
 #include "common.h"
-#include "allocate.h"
 #include "auxiliary.h"
 #include "workspace.h"
 
@@ -22,21 +21,11 @@
 /***************************************************************************//**
  *
  **/
-int plasma_alloc_ibnb_tile(int M, int N, PLASMA_enum func, int type, PLASMA_desc **desc)
+int plasma_alloc_ibnb_tile(int M, int N, int type, PLASMA_desc **desc, int IB, int NB)
 {
-    int status;
-    int IB, NB, MT, NT;
-    plasma_context_t *plasma;
-
-    plasma = plasma_context_self();
-    if (plasma == NULL) {
-        plasma_fatal_error("plasma_alloc_ibnb_tile", "PLASMA not initialized");
-        return PLASMA_ERR_NOT_INITIALIZED;
-    }
+    int MT, NT;
 
     /* Set MT & NT & allocate */
-    NB = PLASMA_NB;
-    IB = PLASMA_IB;
     MT = (M%NB==0) ? (M/NB) : (M/NB+1);
     NT = (N%NB==0) ? (N/NB) : (N/NB+1);
 

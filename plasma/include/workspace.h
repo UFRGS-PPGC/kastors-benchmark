@@ -22,7 +22,7 @@ extern "C" {
  *  Internal routines
  **/
 int plasma_alloc_ibnb(int M, int N, PLASMA_enum func, int type, void **memptr);
-int plasma_alloc_ibnb_tile(int M, int N, PLASMA_enum func, int type, PLASMA_desc **desc);
+int plasma_alloc_ibnb_tile(int M, int N, int type, PLASMA_desc **desc, int IB, int NB);
 int plasma_alloc_ipiv(int M, int N, PLASMA_enum func, void **memptr);
 
 #ifdef __cplusplus

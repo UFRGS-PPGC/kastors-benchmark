@@ -58,7 +58,7 @@
 **
 *****************************************************************************/
 static void OptimizedStrassenMultiply_seq(double *C, double *A, double *B, unsigned MatrixSize,
-     unsigned RowWidthC, unsigned RowWidthA, unsigned RowWidthB, int Depth,
+     unsigned RowWidthC, unsigned RowWidthA, unsigned RowWidthB,
      unsigned int cutoff_size)
 {
     unsigned QuadrantSize = MatrixSize / 2;
@@ -130,25 +130,25 @@ static void OptimizedStrassenMultiply_seq(double *C, double *A, double *B, unsig
       }
 
     /* M2 = A x B */
-    OptimizedStrassenMultiply_seq(M2, A, B, QuadrantSize, QuadrantSize, RowWidthA, RowWidthB, Depth+1, cutoff_size);
+    OptimizedStrassenMultiply_seq(M2, A, B, QuadrantSize, QuadrantSize, RowWidthA, RowWidthB, cutoff_size);
 
     /* M5 = S1 * S5 */
-    OptimizedStrassenMultiply_seq(M5, S1, S5, QuadrantSize, QuadrantSize, QuadrantSize, QuadrantSize, Depth+1, cutoff_size);
+    OptimizedStrassenMultiply_seq(M5, S1, S5, QuadrantSize, QuadrantSize, QuadrantSize, QuadrantSize, cutoff_size);
 
     /* Step 1 of T1 = S2 x S6 + M2 */
-    OptimizedStrassenMultiply_seq(T1sMULT, S2, S6,  QuadrantSize, QuadrantSize, QuadrantSize, QuadrantSize, Depth+1, cutoff_size);
+    OptimizedStrassenMultiply_seq(T1sMULT, S2, S6,  QuadrantSize, QuadrantSize, QuadrantSize, QuadrantSize, cutoff_size);
 
     /* Step 1 of T2 = T1 + S3 x S7 */
-    OptimizedStrassenMultiply_seq(C22, S3, S7, QuadrantSize, RowWidthC /*FIXME*/, QuadrantSize, QuadrantSize, Depth+1, cutoff_size);
+    OptimizedStrassenMultiply_seq(C22, S3, S7, QuadrantSize, RowWidthC /*FIXME*/, QuadrantSize, QuadrantSize, cutoff_size);
 
     /* Step 1 of C = M2 + A12 * B21 */
-    OptimizedStrassenMultiply_seq(C, A12, B21, QuadrantSize, RowWidthC, RowWidthA, RowWidthB, Depth+1, cutoff_size);
+    OptimizedStrassenMultiply_seq(C, A12, B21, QuadrantSize, RowWidthC, RowWidthA, RowWidthB, cutoff_size);
 
     /* Step 1 of C12 = S4 x B22 + T1 + M5 */
-    OptimizedStrassenMultiply_seq(C12, S4, B22, QuadrantSize, RowWidthC, QuadrantSize, RowWidthB, Depth+1, cutoff_size);
+    OptimizedStrassenMultiply_seq(C12, S4, B22, QuadrantSize, RowWidthC, QuadrantSize, RowWidthB, cutoff_size);
 
     /* Step 1 of C21 = T2 - A22 * S8 */
-    OptimizedStrassenMultiply_seq(C21, A22, S8, QuadrantSize, RowWidthC, RowWidthA, QuadrantSize, Depth+1, cutoff_size);
+    OptimizedStrassenMultiply_seq(C21, A22, S8, QuadrantSize, RowWidthC, RowWidthA, QuadrantSize, cutoff_size);
 
     for (Row = 0; Row < QuadrantSize; Row++) {
       for (Column = 0; Column < QuadrantSize; Column += 1) {
@@ -164,5 +164,5 @@ static void OptimizedStrassenMultiply_seq(double *C, double *A, double *B, unsig
 
 void strassen_main_seq(double *A, double *B, double *C, int n, unsigned int cutoff_size)
 {
-	OptimizedStrassenMultiply_seq(C, A, B, n, n, n, n, 1, cutoff_size);
+	OptimizedStrassenMultiply_seq(C, A, B, n, n, n, n, cutoff_size);
 }

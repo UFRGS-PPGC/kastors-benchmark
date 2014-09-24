@@ -5,9 +5,11 @@ void sweep (int nx, int ny, double dx, double dy, double *f_,
         int itold, int itnew, double *u_, double *unew_, int block_size)
 {
     int it;
+#ifdef _OPENMP
     double (*f)[nx][ny] = (double (*)[nx][ny])f_;
     double (*u)[nx][ny] = (double (*)[nx][ny])u_;
     double (*unew)[nx][ny] = (double (*)[nx][ny])unew_;
+#endif
     int block_x, block_y;
 
     if (block_size == 0)

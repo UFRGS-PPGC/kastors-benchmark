@@ -186,37 +186,8 @@ enum matrix_type_e {
  **/
 #define PLASMA_HAS_COMPLEX_H 1
 
-#if defined(_WIN32)
-# include <float.h>
-# if defined(__INTEL_COMPILER)
-    /* Fix name conflict within the cabs prototype (_Complex) that
-     * conflicts with a C99 keyword.  */
-    #define _Complex __ConflictingComplex
-    #include <math.h>
-    #undef _Complex
-    #undef complex
-    typedef float  _Complex PLASMA_Complex32_t;
-    typedef double _Complex PLASMA_Complex64_t;
-# else
-    /* Use MS VC complex class */
-    #include <complex>
-    typedef std::complex<float> PLASMA_Complex32_t;
-    typedef std::complex<double> PLASMA_Complex64_t;
-    /* For LAPACKE lapacke.h force usage of Windows C++ Complex types */
-    #define LAPACK_COMPLEX_CUSTOM
-    #define lapack_complex_float std::complex<float>
-    #define lapack_complex_double std::complex<double>
-    #undef PLASMA_HAS_COMPLEX_H
-# endif
-# define isnan _isnan
-# define isinf !_finite
-
-#else /* defined(_WIN32) */
-
-    typedef float  _Complex PLASMA_Complex32_t;
-    typedef double _Complex PLASMA_Complex64_t;
-
-#endif /* defined(_WIN32) */
+typedef float  _Complex PLASMA_Complex32_t;
+typedef double _Complex PLASMA_Complex64_t;
 
 /* Sun doesn't ship the complex.h header. Sun Studio doesn't have it and older GCC compilers don't have it either. */
 #if defined(__SUNPRO_C) || defined(__SUNPRO_CC) || defined(sun) || defined(__sun)
@@ -239,10 +210,8 @@ extern "C" {
 #endif
 
 /* These declarations will not clash with what C++ provides because the names in C++ are name-mangled. */
-#if !defined(_WIN32)
 extern double cabs(PLASMA_Complex64_t z);
 extern PLASMA_Complex64_t conj(PLASMA_Complex64_t z);
-#endif
 extern float cabsf(PLASMA_Complex32_t z);
 extern double cimag(PLASMA_Complex64_t z);
 extern double creal(PLASMA_Complex64_t z);

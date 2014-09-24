@@ -26,18 +26,13 @@
  *  Parallel application of Q using tile V - QR factorization - dynamic scheduling
  **/
 void plasma_pdormqr_quark(PLASMA_enum side, PLASMA_enum trans,
-                          PLASMA_desc A, PLASMA_desc B, PLASMA_desc T)
+                          PLASMA_desc A, PLASMA_desc B, PLASMA_desc T, int ib)
 {
-    plasma_context_t *plasma;
-
     int k, m, n;
     int ldak, ldbk, ldam, ldan, ldbm;
     int tempkm, tempnn, tempkmin, tempmm, tempkn;
-    int ib, minMT, minM;
+    int minMT, minM;
 
-    plasma = plasma_context_self();
-
-    ib = PLASMA_IB;
     if (A.m > A.n) {
         minM  = A.n;
         minMT = A.nt;
