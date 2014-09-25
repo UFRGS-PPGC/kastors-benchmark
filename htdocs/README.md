@@ -1,15 +1,17 @@
-#KaStORS benchmarks
+#KASTORS benchmarks
 
 This page is still a WIP
 
 ##Overview
 
-KaStORS is composed of four small kernels :
+KASTORS is composed of six small kernels :
 
 * Poisson2D (aka Jacobi)
 * SparseLU
 * Strassen
-* Plasma
+* LU matrix factorization (dgetrf)
+* QR matrix factorization (dgeqrf)
+* Cholesky factorization (dpotrf)
 
 
 ###Poisson2D
@@ -44,9 +46,10 @@ architectures. Several implementations of each algorithm are
 available, either using static or dynamic scheduling. Dynamic
 scheduled algorithms are built on top of the QUARK
 runtime system, which uses a data-flow dependency model to schedule
-tasks. The two algorithms we selected are a Cholesky decomposition and
-a QR decomposition, respectively known as DPOTRF and DGEQRF in PLASMA,
-which all operate on double precision floating point matrices.
+tasks. The three algorithms we selected are a Cholesky decomposition,
+a QR decomposition and LU decomposition, respectively known as DPOTRF, DGEQRF
+and DGETRF in PLASMA, which all operate on double precision floating point
+matrices.
 
 
 ##Dependencies
@@ -54,12 +57,12 @@ which all operate on double precision floating point matrices.
 You will need an OpenMP 4.0 compiler, like GCC 4.9 or the Intel fork of Clang 3.4 [here](http://clang-omp.github.io/).
 
 ###Plasma
-You will need additional dependencies for plasma's kernel : they rely on blas and lapack library, so you will need them too.
+You will need additional dependencies for plasma's kernel : they rely on blas and lapacke library, so you will need them too.
 
 
 ##Usage
 
-Just type "make test" and everything should go fine.
+Just type "make check" to check compiler behavior and "make run" to run the same experiement than in the paper with the configured compiler
 You can edit compilation flags in config/config or create your own config/config.user file, and edit the variables you want.
 
 All programs come with their help ("-h" flag), and executing a kernel without arguments will run
