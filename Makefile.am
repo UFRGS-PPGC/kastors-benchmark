@@ -38,4 +38,4 @@ htdoc_dir=${top_srcdir}/htdocs
 deploy: dist
 	cp kastors-$(PACKAGE_VERSION).tar.gz $(htdoc_dir)
 	sed -i -r -e "s/kastors-([0-9]*.[0-9]*).tar.gz/kastors-$(PACKAGE_VERSION).tar.gz/g" $(htdoc_dir)/*.md
-	rsync -az $(htdoc_dir) scm.gforge.inria.fr:/home/groups/kastors || true
+	rsync -az --no-perms --no-times --no-group $(htdoc_dir) scm.gforge.inria.fr:/home/groups/kstar
