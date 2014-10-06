@@ -88,7 +88,7 @@ double run(struct user_parameters* params)
     printf("NB : %d\n", params->blocksize);
 
     // Warm up
-    if (params->check && RunTest(&(t[0]), params) > EPSILON)
+    if (RunTest(&(t[0]), params) > EPSILON && params->check)
         params->succeed = 0;
 
     sumgf  = 0.0;
@@ -96,7 +96,7 @@ double run(struct user_parameters* params)
 
     for (iter = 0; iter < niter; iter++)
     {
-        if (params->check && RunTest(&(t[iter]), params) > EPSILON)
+        if (RunTest(&(t[iter]), params) > EPSILON && params->check)
             params->succeed = 0;
 
         gflops = flops / t[iter];
