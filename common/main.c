@@ -113,6 +113,9 @@ int main(int argc, char* argv[])
     num_threads = omp_get_num_threads();
 #endif
 
+    // warmup
+    run(&params);
+
     double timing = run(&params);
 
     printf("Program : %s\n", argv[0]);

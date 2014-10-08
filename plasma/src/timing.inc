@@ -87,10 +87,6 @@ double run(struct user_parameters* params)
     printf("N : %d\n", params->matrix_size);
     printf("NB : %d\n", params->blocksize);
 
-    // Warm up
-    if (RunTest(&(t[0]), params) > EPSILON && params->check)
-        params->succeed = 0;
-
     sumgf  = 0.0;
     sumt   = 0.0;
 
