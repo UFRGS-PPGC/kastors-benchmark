@@ -70,7 +70,7 @@ plasma_common_HDRS = include/common.h\
 					 $(COMMON_HDRS)
 plasma_common_SRCS = $(plasma_SRCS) $(COMMON_SRCS) $(plasma_common_HDRS)
 
-plasma_comLIBS		= -lcblas -llapacke -llapack -lblas -lm
+plasma_comLIBS		= -lcblas -llapacke -llapack -lblas
 
 
 noinst_LIBRARIES = libplasma-seq.a libplasma-par.a
@@ -92,7 +92,7 @@ dgeqrf_seq_LDADD      = libplasma-seq.a $(plasma_comLIBS)
 dgeqrf_taskdep_LDADD  = libplasma-par.a $(plasma_comLIBS)
 
 plasma_comCFLAGS	= -I$(srcdir)/include $(COMMON_comCFLAGS) \
-		-DADD_ -DMSIZE -DBSIZE $(PTHREAD_CFLAGS)
+		-DADD_ -DMSIZE -DBSIZE $(PTHREAD_CFLAGS) -DGFLOPS
 plasma_seqCFLAGS	= $(plasma_comCFLAGS) $(COMMON_seqCFLAGS)
 plasma_parCFLAGS	= $(plasma_comCFLAGS) $(COMMON_parCFLAGS)
 

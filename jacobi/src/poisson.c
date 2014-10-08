@@ -77,7 +77,7 @@ double run(struct user_parameters* params)
         block_size = 128;
         params->blocksize = block_size;
     }
-    int niter = params->niter;
+    int niter = params->titer;
     if (niter <= 0) {
         niter = 4;
         params->niter = niter;

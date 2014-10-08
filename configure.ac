@@ -5,8 +5,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CANONICAL_TARGET
 AC_CONFIG_SRCDIR([sparselu/src/sparselu.c])
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_LINKS([run.sh:run.sh
-                 format_kastor:format_kastor])
+AC_CONFIG_LINKS([run.sh:run.sh])
 AM_INIT_AUTOMAKE([subdir-objects foreign 1.9 tar-pax])
 dnl Require Autoconf v2.62 for the AC_OPENMP macro
 AC_PREREQ([2.62])
@@ -76,6 +75,15 @@ KASTORS_COMPILE_PLASMA=no
 AS_IF([test "x$enable_plasma" != "xno"], [
 KASTORS_COMPILE_PLASMA=yes
      ])
+
+dnl Check math support
+AC_CHECK_LIB([m], [sqrt],
+             [],
+             [
+                AC_MSG_ERROR([couldn't find sqrt in -lm])
+dnl '
+	     ]
+)
 
 dnl PLASMA-related checks
 

@@ -59,22 +59,11 @@ double cWtime(void)
 
 double run(struct user_parameters* params)
 {
-    double  *t;
+    double   t;
     double   fmuls, fadds;
-    double   sumgf, sumt, flops, gflops;
-    int iter;
-    int niter    = 2;
-    int64_t N    = params->matrix_size;
-    int64_t M    = params->matrix_size;
+    double   flops;
 
     params->succeed = 1;
-
-    t = (double*)calloc(niter, sizeof(double));
-
-    fadds = (double)(_FADDS);
-    fmuls = (double)(_FMULS);
-    flops = 1e-9 * (fmuls + fadds);
-    gflops = 0.0;
 
     if (params->matrix_size <= 0) {
         params->matrix_size = 2048;
@@ -84,28 +73,15 @@ double run(struct user_parameters* params)
         params->blocksize = 128;
     }
 
-    printf("N : %d\n", params->matrix_size);
-    printf("NB : %d\n", params->blocksize);
+    int64_t N    = params->matrix_size;
+    int64_t M    = params->matrix_size;
+    fadds = (double)(_FADDS);
+    fmuls = (double)(_FMULS);
+    flops = 1e-9 * (fmuls + fadds);
 
-    sumgf  = 0.0;
-    sumt   = 0.0;
+    if (RunTest(&t, params) > EPSILON && params->check)
+        params->succeed = 0;
 
-    for (iter = 0; iter < niter; iter++)
-    {
-        if (RunTest(&(t[iter]), params) > EPSILON && params->check)
-            params->succeed = 0;
-
-        gflops = flops / t[iter];
-        sumt   += t[iter];
-        sumgf  += gflops;
-    }
-
-    // Average Gflops
-    gflops = sumgf / niter;
-    printf("Gflops : %f\n", gflops);
-
-    free(t);
-
-    // Average time
-    return sumt / niter;
+    // return gflops
+    return flops / t;
 }

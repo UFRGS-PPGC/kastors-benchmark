@@ -30,8 +30,7 @@ run:
 	do\
 		OUT=../$(OUT) make -C $$folder run;\
 	done
-	@echo -e "\n\n RESULTS\n -------\n Plain data can be found in : $(OUT)\n \n";
-	@./format_kastor $(OUT);
+	@echo -e "\n\nPlain data can be found in : $(OUT)\n \n";
 
 htdoc_dir=${top_srcdir}/htdocs
 

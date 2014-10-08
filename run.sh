@@ -214,7 +214,7 @@ fi
 
 strassen_args="-n $n_strassen -d $cutoff_depth -s $cutoff_size"
 sparselu_args="-n $n_sparselu -m $m_sparselu"
-jacobi_args="-n $n_jacobi -b $b_jacobi -i $nbiter"
+jacobi_args="-n $n_jacobi -b $b_jacobi -r $nbiter"
 dgetrf_args="-n $n_dgetrf -b $b_dgetrf"
 dpotrf_args="-n $n_dpotrf -b $b_dpotrf"
 dgeqrf_args="-n $n_dgeqrf -b $b_dgeqrf"
@@ -225,19 +225,16 @@ do
   do
     v_name="repeat_${mode}"
     eval v_value=\${$v_name}
-    for i in `seq $v_value`;
-    do
-      cmd_line=`find $build_dir -name ${bench_name}_${mode}`
-      if [ $cmd_line ]
-        then
+    cmd_line=`find $build_dir -name ${bench_name}_${mode}`
+    if [ $cmd_line ]
+      then
         if $check
         then
           cmd_line="$cmd_line -c";
         fi
-        eval value=\${${bench_name}_args}
-        cmd_line="$cmd_line $value";
-        eval $cmd_line 
-      fi;
-    done;
+      eval value=\${${bench_name}_args}
+      cmd_line="$cmd_line $value -i ${v_value}";
+      eval $cmd_line 
+    fi;
   done;
 done

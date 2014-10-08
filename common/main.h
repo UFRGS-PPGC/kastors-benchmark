@@ -5,6 +5,10 @@ struct user_parameters {
     int check;
     int succeed;
     char* string2display;
+    int niter;
+#ifdef TITER
+    int titer;
+#endif
 #ifdef MSIZE
     int matrix_size;
 #endif
@@ -13,9 +17,6 @@ struct user_parameters {
 #endif
 #ifdef BSIZE
     int blocksize;
-#endif
-#ifdef NITER
-    int niter;
 #endif
 #ifdef CUTOFF_DEPTH
     int cutoff_depth;
