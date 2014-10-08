@@ -90,12 +90,13 @@ dnl '
 	     ]
 )
 
+dnl Check blas availability
 dnl PLASMA-related checks
 
 AC_CHECK_HEADER([lapacke.h],
                 [],
                 [
-        		AC_MSG_WARN([couldn[']t find lapacke.h header. Deactivating compilation of the PLASMA benchmarks.])
+        		AC_MSG_WARN([couldn't find lapacke.h header. Deactivating compilation of the PLASMA benchmarks.])
 dnl '
         		KASTORS_COMPILE_PLASMA=no
         		KASTORS_MISSING_DEPS=lapacke.h
@@ -103,7 +104,9 @@ dnl '
 )
 
 AC_CHECK_LIB([cblas], [cblas_dgemm],
-             [],
+             [
+                PLASMA_comLIBS="-lcblas"
+              ],
              [
                 AC_MSG_WARN([couldn't find cblas_dgemm in -lcblas. Deactivating compilation of the PLASMA benchmarks.])
 dnl '
@@ -111,6 +114,8 @@ dnl '
                 KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lcblas"
 	     ]
 )
+
+AC_SUBST([plasma_comLIBS], ["$PLASMA_comLIBS"])
 
 case $host in
     *linux*)
