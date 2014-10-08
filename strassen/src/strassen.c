@@ -329,13 +329,14 @@ void MultiplyByDivideAndConquer(REAL *C, REAL *A, REAL *B,
  * Set an n by n matrix A to random values.  The distance between
  * rows is an
  */
-static void init_matrix(int n, REAL *A, int an)
+static void init_matrix(int n, REAL *A, int an, unsigned int * seed)
 {
      int i, j;
 
+#pragma omp parallel for collapse(2)
      for (i = 0; i < n; ++i)
 	  for (j = 0; j < n; ++j)
-	       ELEM(A, an, i, j) = ((double) rand()) / (double) RAND_MAX;
+	    ELEM(A, an, i, j) = ((double) rand_r(seed) / RAND_MAX);
 }
 
 /*
@@ -397,8 +398,10 @@ double run(struct user_parameters* params)
     A = (double *) malloc (matrix_size * matrix_size * sizeof(double));
     B = (double *) malloc (matrix_size * matrix_size * sizeof(double));
     C = (double *) malloc (matrix_size * matrix_size * sizeof(double));
-    init_matrix(matrix_size,A,matrix_size);
-    init_matrix(matrix_size,B,matrix_size);
+
+    unsigned int seed;
+    init_matrix(matrix_size,A,matrix_size, &seed);
+    init_matrix(matrix_size,B,matrix_size, &seed);
 
     /// KERNEL INTENSIVE COMPUTATION
     START_TIMER;
