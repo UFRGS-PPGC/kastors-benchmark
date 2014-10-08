@@ -64,8 +64,8 @@ double run(struct user_parameters* params)
     double   sumgf, sumt, flops, gflops;
     int iter;
     int niter    = 2;
-    int64_t N    = params->blocksize;
-    int64_t M    = params->blocksize;
+    int64_t N    = params->matrix_size;
+    int64_t M    = params->matrix_size;
 
     params->succeed = 1;
 
