@@ -38,7 +38,6 @@ AC_COMPILE_IFELSE(
         [OMP_DEP=yes],
         [OMP_DEP=no]
 )
-CFLAGS="$saved_CFLAGS -O2 -g"
 
 if test "$OMP_DEP" = "yes";
 then
@@ -48,29 +47,35 @@ else
         AC_MSG_ERROR([it appears your $CC compiler does not support OpenMP task dependencies. Aborting.])
 fi
 
-AC_ARG_ENABLE([jacobi],
-              AS_HELP_STRING([--disable-jacobi], [Disable jacobi benchs]))
-
+CFLAGS="$saved_CFLAGS -O2 -g"
 
 dnl Add possibility to disable jacobi
+AC_ARG_ENABLE([jacobi],
+              AS_HELP_STRING([--disable-jacobi], [Disable jacobi benchs]))
 KASTORS_COMPILE_JACOBI=no
 AS_IF([test "x$enable_jacobi" != "xno"], [
 KASTORS_COMPILE_JACOBI=yes
      ])
 
 dnl Add possibility to disable strassen
+AC_ARG_ENABLE([strassen],
+              AS_HELP_STRING([--disable-strassen], [Disable strassen benchs]))
 KASTORS_COMPILE_STRASSEN=no
 AS_IF([test "x$enable_strassen" != "xno"], [
 KASTORS_COMPILE_STRASSEN=yes
      ])
 
 dnl Add possibility to disable sparselu
+AC_ARG_ENABLE([sparselu],
+              AS_HELP_STRING([--disable-sparselu], [Disable sparselu benchs]))
 KASTORS_COMPILE_SPARSELU=no
 AS_IF([test "x$enable_sparselu" != "xno"], [
 KASTORS_COMPILE_SPARSELU=yes
      ])
 
 dnl Add possibility to disable plasma
+AC_ARG_ENABLE([plasma],
+              AS_HELP_STRING([--disable-plasma], [Disable plasma benchs]))
 KASTORS_COMPILE_PLASMA=no
 AS_IF([test "x$enable_plasma" != "xno"], [
 KASTORS_COMPILE_PLASMA=yes
