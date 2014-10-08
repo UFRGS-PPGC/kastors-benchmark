@@ -103,17 +103,86 @@ dnl '
 		]
 )
 
+
+dnl Add possibility to choose blas
+AC_ARG_WITH([blas],
+            [AS_HELP_STRING([--with-blas],
+                            [specifity blas you want to use(def=best)])],
+            [],
+            [with_blas=best])
+
+#AC_CHECK_LIB([cblas], [cblas_dgemm],
+#             [
+#                PLASMA_comLIBS="-lcblas"
+#              ],
+#             [
+#                AC_MSG_WARN([couldn't find cblas_dgemm in -lcblas. Deactivating compilation of the PLASMA benchmarks.])
+#dnl '
+#                KASTORS_COMPILE_PLASMA=no
+#                KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lcblas"
+#	     ]
+#)
+
+AS_IF( [test "x$with_blas" == "xbest" ],
+      [
+        saved_LIBS=$LIBS
+        LIBS=
+        AC_SEARCH_LIBS([cblas_dgemm], [openblas atlas cblas],
+                       [
+                        echo "Use ${ac_cv_search_cblas_dgemm}"
+                        PLASMA_comLIBS=$LIBS
+                        ],
+                       [
+                        AC_MSG_WARN([couldn't find cblas_dgemm in openblas, atlas or cblas. Deactivating compilation of the PLASMA benchmarks.])
+dnl '
+                        KASTORS_COMPILE_PLASMA=no
+                        KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lcblas"
+                        ])
+        LIBS=$saved_LIBS
+      ], [
+AS_IF( [test "x$with_blas" == "xcblas" ],
+      [
 AC_CHECK_LIB([cblas], [cblas_dgemm],
              [
                 PLASMA_comLIBS="-lcblas"
               ],
              [
-                AC_MSG_WARN([couldn't find cblas_dgemm in -lcblas. Deactivating compilation of the PLASMA benchmarks.])
+                AC_MSG_WARN([couldn't find cblas_dgemm in -cblas. Deactivating compilation of the PLASMA benchmarks.])
 dnl '
                 KASTORS_COMPILE_PLASMA=no
                 KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lcblas"
-	     ]
+         ]
 )
+       ],[])
+AS_IF( [test "x$with_blas" == "xatlas" ],
+      [
+AC_CHECK_LIB([atlas], [cblas_dgemm],
+             [
+                PLASMA_comLIBS="-latlas"
+              ],
+             [
+                AC_MSG_WARN([couldn't find cblas_dgemm in -atlas. Deactivating compilation of the PLASMA benchmarks.])
+dnl '
+                KASTORS_COMPILE_PLASMA=no
+                KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -latlas"
+         ]
+)
+       ],[])
+AS_IF( [test "x$with_blas" == "xopenblas" ],
+      [
+AC_CHECK_LIB([openblas], [cblas_dgemm],
+             [
+                PLASMA_comLIBS="-lopenblas"
+              ],
+             [
+                AC_MSG_WARN([couldn't find cblas_dgemm in -openblas. Deactivating compilation of the PLASMA benchmarks.])
+dnl '
+                KASTORS_COMPILE_PLASMA=no
+                KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lopenblas"
+         ]
+)
+       ],[])
+      ])
 
 AC_SUBST([plasma_comLIBS], ["$PLASMA_comLIBS"])
 
