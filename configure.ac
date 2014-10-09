@@ -111,29 +111,17 @@ AC_ARG_WITH([blas],
             [],
             [with_blas=best])
 
-#AC_CHECK_LIB([cblas], [cblas_dgemm],
-#             [
-#                PLASMA_comLIBS="-lcblas"
-#              ],
-#             [
-#                AC_MSG_WARN([couldn't find cblas_dgemm in -lcblas. Deactivating compilation of the PLASMA benchmarks.])
-#dnl '
-#                KASTORS_COMPILE_PLASMA=no
-#                KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lcblas"
-#	     ]
-#)
-
 AS_IF( [test "x$with_blas" == "xbest" ],
       [
         saved_LIBS=$LIBS
         LIBS=
-        AC_SEARCH_LIBS([cblas_dgemm], [openblas atlas cblas],
+        AC_SEARCH_LIBS([cblas_dgemm], [openblas cblas],
                        [
                         echo "Use ${ac_cv_search_cblas_dgemm}"
                         PLASMA_comLIBS=$LIBS
                         ],
                        [
-                        AC_MSG_WARN([couldn't find cblas_dgemm in openblas, atlas or cblas. Deactivating compilation of the PLASMA benchmarks.])
+                        AC_MSG_WARN([couldn't find cblas_dgemm in openblas or cblas. Deactivating compilation of the PLASMA benchmarks.])
 dnl '
                         KASTORS_COMPILE_PLASMA=no
                         KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lcblas"
@@ -147,45 +135,33 @@ AC_CHECK_LIB([cblas], [cblas_dgemm],
                 PLASMA_comLIBS="-lcblas"
               ],
              [
-                AC_MSG_WARN([couldn't find cblas_dgemm in -cblas. Deactivating compilation of the PLASMA benchmarks.])
+            AC_MSG_WARN([couldn't find cblas_dgemm in -cblas. Deactivating compilation of the PLASMA benchmarks.])
 dnl '
-                KASTORS_COMPILE_PLASMA=no
-                KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lcblas"
-         ]
-)
-       ],[])
-AS_IF( [test "x$with_blas" == "xatlas" ],
-      [
-AC_CHECK_LIB([atlas], [cblas_dgemm],
-             [
-                PLASMA_comLIBS="-latlas"
-              ],
-             [
-                AC_MSG_WARN([couldn't find cblas_dgemm in -atlas. Deactivating compilation of the PLASMA benchmarks.])
-dnl '
-                KASTORS_COMPILE_PLASMA=no
-                KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -latlas"
-         ]
-)
-       ],[])
+            KASTORS_COMPILE_PLASMA=no
+            KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lcblas"
+         ])
+       ],[
 AS_IF( [test "x$with_blas" == "xopenblas" ],
-      [
+        [
 AC_CHECK_LIB([openblas], [cblas_dgemm],
-             [
-                PLASMA_comLIBS="-lopenblas"
-              ],
-             [
-                AC_MSG_WARN([couldn't find cblas_dgemm in -openblas. Deactivating compilation of the PLASMA benchmarks.])
+           [
+              PLASMA_comLIBS="-lopenblas"
+            ],
+           [
+              AC_MSG_WARN([couldn't find cblas_dgemm in -openblas. Deactivating compilation of the PLASMA benchmarks.])
 dnl '
-                KASTORS_COMPILE_PLASMA=no
-                KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lopenblas"
-         ]
-)
-       ],[])
+              KASTORS_COMPILE_PLASMA=no
+              KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lopenblas"
+           ])
+          ],[
+          PLASMA_comLIBS=$with_blas
+          ])
+        ])
       ])
 
 AC_SUBST([plasma_comLIBS], ["$PLASMA_comLIBS"])
 
+dnl Check clock_gettime exist on unix systems
 case $host in
     *linux*)
 AC_CHECK_LIB([rt], [clock_gettime],
@@ -202,13 +178,6 @@ AM_CONDITIONAL([COMPILE_JACOBI],[test "$KASTORS_COMPILE_JACOBI" != "no"])
 AM_CONDITIONAL([COMPILE_STRASSEN],[test "$KASTORS_COMPILE_STRASSEN" != "no"])
 AM_CONDITIONAL([COMPILE_SPARSELU],[test "$KASTORS_COMPILE_SPARSELU" != "no"])
 AM_CONDITIONAL([COMPILE_PLASMA],[test "$KASTORS_COMPILE_PLASMA" != "no"])
-
-dnl AC_SEARCH_LIBS(pthread_create, pthread)
-dnl AC_SEARCH_LIBS(cblas_dgemm, cblas lapacke lapack blas m)
-
-dnl -lcblas -llapacke -llapack -lblas -lpthread -lm -lgfortran
-
-#AC_SUBST([abs_srcdir], [$(cd $srcdir && pwd)])
 
 echo -e ""
 echo -e "===== KaStORS configuration summary ====="
