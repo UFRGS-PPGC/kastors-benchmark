@@ -80,7 +80,7 @@ double run(struct user_parameters* params)
     int niter = params->titer;
     if (niter <= 0) {
         niter = 4;
-        params->niter = niter;
+        params->titer = niter;
     }
     double dx;
     double dy;
