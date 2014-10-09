@@ -39,3 +39,36 @@ Run
 To run the current compiler on the same exemple than in the IWOMP2014 paper::
 
     $> make run
+
+Blas installation
+-----------------
+Configure will try to find cblas/openBlas implementation for blas.
+If you have a specific implementation to use, please concider using the
+-with-blas flag::
+
+    $> mkdir build && cd build
+    $> ../configure --with-blas=/usr/lib/libgslcblas.a
+    $> ../configure --with-blas="/usr/lib/libcblas.a /usr/lib/libatlas.a"
+
+Default dynamic flags detection is possible for cblas and openblas::
+
+    $> ../configure --with-blas=cblas
+    $> ../configure --with-blas=openblas
+
+If not Blas implementation exists on your computer, you can install openBlas::
+
+    $> mkdir /path/to/kastors/third_party && cd /path/to/kastors/third_party
+    $> git clone git://github.com/xianyi/OpenBLAS
+    $> cd OpenBLAS
+    $> make USE_THREAD=0
+
+and run configure::
+    $> cd /path/to/kastors/build
+    $> ../configure --with-blas=/path/to/kastors/third_party/OpenBLAS/libopenblas.a
+
+Enjoy!!
+
+Warning: Default openblas implementation may create multiple threads. To fix it,
+you can compile OpenBLAS with USE_THREAD=0 or use::
+
+    $> export OPENBLAS_NUM_THREADS=1
