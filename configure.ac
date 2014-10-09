@@ -82,8 +82,7 @@ KASTORS_COMPILE_PLASMA=yes
      ])
 
 dnl Check math support
-AC_CHECK_LIB([m], [sqrt],
-             [],
+AC_CHECK_LIB([m], [sqrt], [],
              [
                 AC_MSG_ERROR([couldn't find sqrt in -lm])
 dnl '
@@ -91,19 +90,10 @@ dnl '
 )
 
 dnl Check blas availability
-dnl PLASMA-related checks
 
-AC_CHECK_HEADER([lapacke.h],
-                [],
-                [
-        		AC_MSG_WARN([couldn't find lapacke.h header. Deactivating compilation of the PLASMA benchmarks.])
-dnl '
-        		KASTORS_COMPILE_PLASMA=no
-        		KASTORS_MISSING_DEPS=lapacke.h
-		]
-)
-
-
+dnl Checked library are requiered only for plasma benchs
+saved_LIBS=$LIBS
+LIBS=
 dnl Add possibility to choose blas
 AC_ARG_WITH([blas],
             [AS_HELP_STRING([--with-blas],
@@ -112,52 +102,35 @@ AC_ARG_WITH([blas],
             [with_blas=best])
 
 AS_IF( [test "x$with_blas" == "xbest" ],
-      [
-        saved_LIBS=$LIBS
-        LIBS=
-        AC_SEARCH_LIBS([cblas_dgemm], [openblas cblas],
-                       [
-                        echo "Use ${ac_cv_search_cblas_dgemm}"
-                        PLASMA_comLIBS=$LIBS
-                        ],
-                       [
-                        AC_MSG_WARN([couldn't find cblas_dgemm in openblas or cblas. Deactivating compilation of the PLASMA benchmarks.])
+	[
+	AC_CHECK_LIB([openblas], [cblas_dgemm],
+		[
+		PLASMA_comLIBS="${PLASMA_comLIBS} -lopenblas"
+                ACX_LAPACKE
+		], [ ACX_BLAS ])
+	], [
+	AS_IF( [test "x$with_blas" == "xcblas" ],
+		[ ACX_BLAS ],[
+		AS_IF( [test "x$with_blas" == "xopenblas" ],
+			[
+			AC_CHECK_LIB([openblas], [cblas_dgemm],
+				[
+					PLASMA_comLIBS="${PLASMA_comLIBS} -lopenblas"
+					ACX_LAPACKE
+				],
+				[
+					AC_MSG_WARN([couldn't find cblas_dgemm in -openblas. Deactivating compilation of the PLASMA benchmarks.])
 dnl '
-                        KASTORS_COMPILE_PLASMA=no
-                        KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lcblas"
-                        ])
-        LIBS=$saved_LIBS
-      ], [
-AS_IF( [test "x$with_blas" == "xcblas" ],
-      [
-AC_CHECK_LIB([cblas], [cblas_dgemm],
-             [
-                PLASMA_comLIBS="-lcblas"
-              ],
-             [
-            AC_MSG_WARN([couldn't find cblas_dgemm in -cblas. Deactivating compilation of the PLASMA benchmarks.])
-dnl '
-            KASTORS_COMPILE_PLASMA=no
-            KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lcblas"
-         ])
-       ],[
-AS_IF( [test "x$with_blas" == "xopenblas" ],
-        [
-AC_CHECK_LIB([openblas], [cblas_dgemm],
-           [
-              PLASMA_comLIBS="-lopenblas"
-            ],
-           [
-              AC_MSG_WARN([couldn't find cblas_dgemm in -openblas. Deactivating compilation of the PLASMA benchmarks.])
-dnl '
-              KASTORS_COMPILE_PLASMA=no
-              KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lopenblas"
-           ])
-          ],[
-          PLASMA_comLIBS=$with_blas
-          ])
-        ])
-      ])
+					KASTORS_COMPILE_PLASMA=no
+					KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lopenblas"
+				])
+			],[
+				PLASMA_comLIBS="${PLASMA_comLIBS} $with_blas"
+				ACX_LAPACKE
+			])
+		])
+	])
+LIBS=$saved_LIBS
 
 AC_SUBST([plasma_comLIBS], ["$PLASMA_comLIBS"])
 

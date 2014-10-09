@@ -70,7 +70,7 @@ plasma_common_HDRS = include/common.h\
 					 $(COMMON_HDRS)
 plasma_common_SRCS = $(plasma_SRCS) $(COMMON_SRCS) $(plasma_common_HDRS)
 
-plasma_comLIBS		= @plasma_comLIBS@ -llapacke
+plasma_comLIBS		= @plasma_comLIBS@
 
 
 noinst_LIBRARIES = libplasma-seq.a libplasma-par.a
