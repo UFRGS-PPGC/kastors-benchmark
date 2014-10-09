@@ -226,15 +226,18 @@ do
     v_name="repeat_${mode}"
     eval v_value=\${$v_name}
     cmd_line=`find $build_dir -name ${bench_name}_${mode}`
-    if [ $cmd_line ]
-      then
-        if $check
+    if [ "x${v_value}" != "x0" ]
+    then
+      if [ $cmd_line ]
         then
-          cmd_line="$cmd_line -c";
-        fi
-      eval value=\${${bench_name}_args}
-      cmd_line="$cmd_line $value -i ${v_value}";
-      eval $cmd_line 
+          if $check
+          then
+            cmd_line="$cmd_line -c";
+          fi
+        eval value=\${${bench_name}_args}
+        cmd_line="$cmd_line $value -i ${v_value}";
+        eval $cmd_line 
+      fi;
     fi;
   done;
 done
