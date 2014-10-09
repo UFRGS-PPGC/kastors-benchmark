@@ -110,19 +110,12 @@ double run(struct user_parameters* params)
 
 
     // Set the right hand side array F.
-    {
-        START_TIMER;
-        rhs(nx, ny, f_, block_size);
-        END_TIMER;
-        printf("Time rhs: %lf\n", TIMER);
-    }
+    rhs(nx, ny, f_, block_size);
 
     /*
        Set the initial solution estimate UNEW.
        We are "allowed" to pick up the boundary conditions exactly.
        */
-    {
-        START_TIMER;
 #pragma omp parallel
 #pragma omp master
         //for collapse(2)
@@ -138,9 +131,6 @@ double run(struct user_parameters* params)
                             (*unew)[ii][jj] = 0.0;
                         }
                     }
-        END_TIMER;
-        printf("Time init: %lf\n", TIMER);
-    }
 
     /// KERNEL INTENSIVE COMPUTATION
     START_TIMER;
