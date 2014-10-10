@@ -116,10 +116,11 @@ AS_IF( [test "x$with_blas" == "xbest" ],
 			AC_CHECK_LIB([openblas], [cblas_dgemm],
 				[
 					PLASMA_comLIBS="${PLASMA_comLIBS} -lopenblas"
-					ACX_LAPACKE
+					LIBS="$LIBS -lopenblas"
+					ACX_LAPACKE([openblas])
 				],
 				[
-					AC_MSG_WARN([couldn't find cblas_dgemm in -openblas. Deactivating compilation of the PLASMA benchmarks.])
+					AC_MSG_WARN([couldn't find cblas_dgemm in -lopenblas. Deactivating compilation of the PLASMA benchmarks.])
 dnl '
 					KASTORS_COMPILE_PLASMA=no
 					KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lopenblas"

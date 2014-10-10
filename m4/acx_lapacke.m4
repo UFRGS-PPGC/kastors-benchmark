@@ -7,12 +7,14 @@ dnl '
 			KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS lapacke.h"
 		])
 
-	AC_CHECK_LIB([lapacke], [LAPACKE_dlacpy_work],
+	AS_IF( [ test "x$1" == "x" ], [LAPACKE_LIB="lapacke"], [LAPACKE_LIB="$1"])
+
+	AC_CHECK_LIB([${LAPACKE_LIB}], [LAPACKE_dlacpy_work],
 		[
 			PLASMA_comLIBS="-llapacke ${PLASMA_comLIBS}"
 			LIBS="$LIBS -llapacke"
 		], [
-			AC_MSG_WARN([couldn't find LAPACKE_dlacpy_work in -llapacke. Deactivating compilation of the PLASMA benchmarks.])
+			AC_MSG_WARN([couldn't find LAPACKE_dlacpy_work in -l${LAPACKE_LIB}. Deactivating compilation of the PLASMA benchmarks.])
 dnl '
 			KASTORS_COMPILE_PLASMA=no
 			KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -llapacke"
