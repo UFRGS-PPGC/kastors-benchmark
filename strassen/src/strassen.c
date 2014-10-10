@@ -329,14 +329,24 @@ void MultiplyByDivideAndConquer(REAL *C, REAL *A, REAL *B,
  * Set an n by n matrix A to random values.  The distance between
  * rows is an
  */
-static void init_matrix(int n, REAL *A, int an, unsigned int * seed)
+static void init_matrix(int n, REAL *A, int an, unsigned int bs)
 {
      int i, j;
 
-#pragma omp parallel for collapse(2)
-     for (i = 0; i < n; ++i)
-	  for (j = 0; j < n; ++j)
-	    ELEM(A, an, i, j) = ((double) rand_r(seed) / RAND_MAX);
+#pragma omp parallel
+#pragma omp master
+     for (i = 0; i < n; i+=bs)
+        for (j = 0; j < n; j+=bs)
+        {
+#pragma omp task firstprivate(i,j,bs,an)
+          {
+            int seed = rand();
+            int ii, jj;
+            for (ii = i; ii < i+bs; ++ii)
+                 for (jj = 0; jj < j+bs; ++jj)
+                      ELEM(A, an, ii, jj) = ((double) rand_r(&seed) / RAND_MAX);
+          }
+        }
 }
 
 /*
@@ -399,9 +409,8 @@ double run(struct user_parameters* params)
     B = (double *) malloc (matrix_size * matrix_size * sizeof(double));
     C = (double *) malloc (matrix_size * matrix_size * sizeof(double));
 
-    unsigned int seed;
-    init_matrix(matrix_size,A,matrix_size, &seed);
-    init_matrix(matrix_size,B,matrix_size, &seed);
+    init_matrix(matrix_size,A,matrix_size, matrix_size/8);
+    init_matrix(matrix_size,B,matrix_size, matrix_size/8);
 
     /// KERNEL INTENSIVE COMPUTATION
     START_TIMER;
