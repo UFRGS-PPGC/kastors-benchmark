@@ -134,6 +134,7 @@ case $with_blas in
 	AC_CHECK_LIB([openblas], [cblas_dgemm],
 		[
 		PLASMA_comLIBS="${PLASMA_comLIBS} -lopenblas"
+		LIBS="$LIBS -lopenblas"
                 ACX_LAPACKE([$with_lapacke])
 		], [
 		    ACX_BLAS([$with_lapacke])
@@ -155,6 +156,7 @@ dnl '
 			]);;
   *)
 	PLASMA_comLIBS="${PLASMA_comLIBS} $with_blas"
+        LIBS="$LIBS $with_blas"
 	ACX_LAPACKE([$with_lapacke]);;
 esac
 
