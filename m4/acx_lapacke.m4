@@ -11,8 +11,10 @@ dnl '
 
 	AC_CHECK_LIB([${LAPACKE_LIB}], [LAPACKE_dlacpy_work],
 		[
-			PLASMA_comLIBS="-llapacke ${PLASMA_comLIBS}"
-			LIBS="$LIBS -llapacke"
+			AS_IF([ test "x$1" == "x" ], [], [
+				PLASMA_comLIBS="-llapacke ${PLASMA_comLIBS}"
+				LIBS="$LIBS -llapacke"
+			])
 		], [
 			AC_MSG_WARN([couldn't find LAPACKE_dlacpy_work in -l${LAPACKE_LIB}. Deactivating compilation of the PLASMA benchmarks.])
 dnl '

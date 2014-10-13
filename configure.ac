@@ -89,6 +89,24 @@ dnl '
 	     ]
 )
 
+dnl Add possibility to choose blas
+AC_ARG_WITH([include-plasma],
+            [AS_HELP_STRING([--with-include-plasma],
+                            [specifity include flags for plasma tests compilation])],
+            [],
+            [with_include_plasma=none])
+
+I_PLASMA=
+AS_IF( [test "x$with_include_plasma" != "xnone" ],
+      [
+       I_PLASMA=$with_include_plasma
+       AC_MSG_WARN(["Add $I_PLASMA as preprocessor flags for plasma."])
+dnl '
+       ],
+      [])
+
+AC_SUBST([I_PLASMA], ["$I_PLASMA"])
+
 dnl Check blas availability
 
 dnl Checked library are requiered only for plasma benchs

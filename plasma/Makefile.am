@@ -92,7 +92,7 @@ dgeqrf_seq_LDADD      = libplasma-seq.a $(plasma_comLIBS)
 dgeqrf_taskdep_LDADD  = libplasma-par.a $(plasma_comLIBS)
 
 plasma_comCFLAGS	= -I$(srcdir)/include $(COMMON_comCFLAGS) \
-		-DADD_ -DMSIZE -DBSIZE $(PTHREAD_CFLAGS) -DGFLOPS
+		-DADD_ -DMSIZE -DBSIZE $(PTHREAD_CFLAGS) -DGFLOPS @I_PLASMA@
 plasma_seqCFLAGS	= $(plasma_comCFLAGS) $(COMMON_seqCFLAGS)
 plasma_parCFLAGS	= $(plasma_comCFLAGS) $(COMMON_parCFLAGS)
 
