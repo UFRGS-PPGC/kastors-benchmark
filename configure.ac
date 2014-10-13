@@ -100,17 +100,27 @@ I_PLASMA=
 AS_IF( [test "x$with_include_plasma" != "xnone" ],
       [
        I_PLASMA=$with_include_plasma
-       AC_MSG_WARN(["Add $I_PLASMA as preprocessor flags for plasma."])
-dnl '
+       AC_MSG_RESULT([Checking for plasma specific preprocessor flags... $I_PLASMA])
        ],
       [])
 
 AC_SUBST([I_PLASMA], ["$I_PLASMA"])
 
+dnl Add possibility to choose lapacke
+AC_ARG_WITH([lapacke],
+            [AS_HELP_STRING([--with-lapacke],
+                            [specifity lapacke library(def=lapacke)])],
+            [],
+            [with_lapacke=lapacke])
+
+AC_MSG_RESULT([Checking for lapacke... $with_lapacke])
+
 dnl Check blas availability
 
 dnl Checked library are requiered only for plasma benchs
 saved_LIBS=$LIBS
+saved_CPPFLAGS=$CPPFLAGS
+CPPFLAGS=$I_PLASMA
 LIBS=
 dnl Add possibility to choose blas
 AC_ARG_WITH([blas],
@@ -119,37 +129,37 @@ AC_ARG_WITH([blas],
             [],
             [with_blas=best])
 
-AS_IF( [test "x$with_blas" == "xbest" ],
-	[
+case $with_blas in
+  best)
 	AC_CHECK_LIB([openblas], [cblas_dgemm],
 		[
 		PLASMA_comLIBS="${PLASMA_comLIBS} -lopenblas"
-                ACX_LAPACKE
-		], [ ACX_BLAS ])
-	], [
-	AS_IF( [test "x$with_blas" == "xcblas" ],
-		[ ACX_BLAS ],[
-		AS_IF( [test "x$with_blas" == "xopenblas" ],
-			[
-			AC_CHECK_LIB([openblas], [cblas_dgemm],
-				[
-					PLASMA_comLIBS="${PLASMA_comLIBS} -lopenblas"
-					LIBS="$LIBS -lopenblas"
-					ACX_LAPACKE([openblas])
-				],
-				[
-					AC_MSG_WARN([couldn't find cblas_dgemm in -lopenblas. Deactivating compilation of the PLASMA benchmarks.])
+                ACX_LAPACKE([$with_lapacke])
+		], [
+		    ACX_BLAS([$with_lapacke])
+		    ]);;
+  cblas)
+	ACX_BLAS([$with_lapacke]);;
+  openblas)
+	AC_CHECK_LIB([openblas], [cblas_dgemm],
+		     [
+		      PLASMA_comLIBS="${PLASMA_comLIBS} -lopenblas"
+		      LIBS="$LIBS -lopenblas"
+		      ACX_LAPACKE([$with_lapacke])
+		      ],
+		      [
+			AC_MSG_WARN([couldn't find cblas_dgemm in -lopenblas. Deactivating compilation of the PLASMA benchmarks.])
 dnl '
-					KASTORS_COMPILE_PLASMA=no
-					KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lopenblas"
-				])
-			],[
-				PLASMA_comLIBS="${PLASMA_comLIBS} $with_blas"
-				ACX_LAPACKE
-			])
-		])
-	])
+			KASTORS_COMPILE_PLASMA=no
+			KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lopenblas"
+			]);;
+  *)
+	PLASMA_comLIBS="${PLASMA_comLIBS} $with_blas"
+	ACX_LAPACKE([$with_lapacke]);;
+esac
+
 LIBS=$saved_LIBS
+CPPFLAGS=$saved_CPPFLAGS
 
 AC_SUBST([plasma_comLIBS], ["$PLASMA_comLIBS"])
 

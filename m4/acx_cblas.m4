@@ -35,5 +35,5 @@ dnl '
 			KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -llapack"
 		])
 
-	ACX_LAPACKE
+	ACX_LAPACKE([$1])
 ])
