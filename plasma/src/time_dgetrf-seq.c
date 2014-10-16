@@ -40,7 +40,7 @@ RunTest(real_Double_t *t_, struct user_parameters* params)
     }
 
     START_TIMING();
-    PLASMA_dgetrf_Tile_Async( descA, piv );
+    plasma_pdgetrf_rectil_quark(*descA, piv);
     STOP_TIMING();
 
     /* Check the solution */

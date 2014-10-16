@@ -20,7 +20,6 @@ KASTORS_COMPILE_SPARSELU=yes
 KASTORS_COMPILE_PLASMA=yes
 
 AC_LANG([C])
-
 dnl Check for OpenMP support
 AC_OPENMP
 if test "$ac_cv_prog_c_openmp" = "unsupported";
@@ -131,37 +130,36 @@ AC_ARG_WITH([blas],
             [],
             [with_blas=best])
 
-case $with_blas in
-  best)
-	AC_CHECK_LIB([openblas], [cblas_dgemm],
-		[
-		PLASMA_comLIBS="${PLASMA_comLIBS} -lopenblas"
-		LIBS="$LIBS -lopenblas"
-		], [
-		    ACX_BLAS([$with_lapacke])
-		    ]);;
-  cblas)
-	ACX_BLAS([$with_lapacke]);;
-  openblas)
-	AC_CHECK_LIB([openblas], [cblas_dgemm],
-		     [
-		      PLASMA_comLIBS="${PLASMA_comLIBS} -lopenblas"
-		      LIBS="$LIBS -lopenblas"
-dnl		      ACX_LAPACKE([$with_lapacke])
-		      ],
-		      [
-			AC_MSG_WARN([couldn't find cblas_dgemm in -lopenblas. Deactivating compilation of the PLASMA benchmarks.])
-dnl '
-			KASTORS_COMPILE_PLASMA=no
-			KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lopenblas"
-			]);;
-  *)
-	PLASMA_comLIBS="${PLASMA_comLIBS} $with_blas"
-        LIBS="$LIBS $with_blas"
-dnl	ACX_LAPACKE([$with_lapacke]);;
-esac
-
-ACX_LAPACKE([$with_lapacke])
+AS_CASE([$with_blas],
+        [best], [
+         AC_CHECK_LIB([openblas], [cblas_dgemm],
+                      [
+                       PLASMA_comLIBS="${PLASMA_comLIBS} -lopenblas"
+                       ACX_LAPACKE([$with_lapacke])
+                       ], [
+                           ACX_BLAS([$with_lapacke])
+                           ])
+         ],
+         [cblas], [ ACX_BLAS([$with_lapacke]) ],
+         [openblas],
+         [
+          AC_CHECK_LIB([openblas], [cblas_dgemm],
+                       [
+                        PLASMA_comLIBS="${PLASMA_comLIBS} -lopenblas"
+                        LIBS="$LIBS -lopenblas"
+                        ACX_LAPACKE([$with_lapacke])
+                        ],
+                        [
+                         AC_MSG_WARN([couldn't find cblas_dgemm in -lopenblas. Deactivating compilation of the PLASMA benchmarks.])
+                         dnl '
+                         KASTORS_COMPILE_PLASMA=no
+                         KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lopenblas"
+                         ])
+          ],
+          [
+           PLASMA_comLIBS="${PLASMA_comLIBS} $with_blas"
+           ACX_LAPACKE([$with_lapacke])
+           ])
 
 LIBS=$saved_LIBS
 CPPFLAGS=$saved_CPPFLAGS

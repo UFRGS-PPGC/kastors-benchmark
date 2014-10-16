@@ -35,11 +35,9 @@ plasma_SRCS = \
 	src/descriptor.c		\
 	src/dgeqrf.c			\
 	src/dgeqrs.c 			\
-	src/dgetrf.c 			\
 	src/dgetrs.c 			\
 	src/dpotrs.c			\
 	src/global.c			\
-	src/pdbarrier.c			\
 	src/pdgeqrf.c 			\
 	src/pdgetrf_rectil.c 		\
 	src/pdlaswp.c 			\

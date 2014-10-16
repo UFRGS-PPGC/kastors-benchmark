@@ -18,8 +18,6 @@
 /***************************************************************************//**
  *  Declarations of parallel functions (dynamic scheduling) - alphabetical order
  **/
-void plasma_pdbarrier_tl2pnl_quark(PLASMA_desc A);
-void plasma_pdbarrier_pnl2tl_quark(PLASMA_desc A);
 void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T, int ib);
 void plasma_pdgetrf_rectil_quark(PLASMA_desc A, int *IPIV);
 void plasma_pdlaswp_quark(PLASMA_desc B, const int *IPIV, int inc);
