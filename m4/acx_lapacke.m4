@@ -12,13 +12,13 @@ dnl '
 	AC_CHECK_LIB([${LAPACKE_LIB}], [LAPACKE_dlacpy_work],
 		[
 			AS_IF([ test "x$1" == "x" ], [], [
-				PLASMA_comLIBS="-llapacke ${PLASMA_comLIBS}"
-				LIBS="$LIBS -llapacke"
+				PLASMA_comLIBS="${PLASMA_comLIBS}"
+				LIBS="$LIBS"
 			])
 		], [
 			AC_MSG_WARN([couldn't find LAPACKE_dlacpy_work in -l${LAPACKE_LIB}. Deactivating compilation of the PLASMA benchmarks.])
 dnl '
 			KASTORS_COMPILE_PLASMA=no
-			KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -llapacke"
+			KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS ${LAPACKE_LIB}"
 		])
 ])
