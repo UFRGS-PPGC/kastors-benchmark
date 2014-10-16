@@ -91,7 +91,7 @@ dnl '
 dnl Add possibility to choose blas
 AC_ARG_WITH([include-plasma],
             [AS_HELP_STRING([--with-include-plasma],
-                            [specifity include flags for plasma tests compilation])],
+                            [specific include flags for plasma tests compilation])],
             [],
             [with_include_plasma=none])
 
@@ -109,7 +109,7 @@ AC_SUBST([I_PLASMA], ["$I_PLASMA"])
 dnl Add possibility to choose lapacke
 AC_ARG_WITH([lapacke],
             [AS_HELP_STRING([--with-lapacke],
-                            [specifity lapacke library(def=lapacke)])],
+                            [specific lapacke library(def=lapacke)])],
             [],
             [with_lapacke=lapacke])
 
@@ -126,7 +126,7 @@ LIBS=
 dnl Add possibility to choose blas
 AC_ARG_WITH([blas],
             [AS_HELP_STRING([--with-blas],
-                            [specifity blas you want to use(def=best)])],
+                            [specific blas you want to use(def=best)])],
             [],
             [with_blas=best])
 
