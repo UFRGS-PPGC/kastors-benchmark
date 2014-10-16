@@ -100,7 +100,8 @@ I_PLASMA=
 AS_IF( [test "x$with_include_plasma" != "xnone" ],
       [
        I_PLASMA=$with_include_plasma
-       AC_MSG_RESULT([Checking for plasma specific preprocessor flags... $I_PLASMA])
+       AC_MSG_CHECKING([for plasma specific preprocessor flags])
+       AC_MSG_RESULT([$I_PLASMA])
        ],
       [])
 
@@ -113,7 +114,8 @@ AC_ARG_WITH([lapacke],
             [],
             [with_lapacke=lapacke])
 
-AC_MSG_RESULT([Checking for lapacke... $with_lapacke])
+AC_MSG_CHECKING([for lapacke])
+AC_MSG_RESULT([$with_lapacke])
 
 dnl Check blas availability
 
@@ -135,7 +137,6 @@ case $with_blas in
 		[
 		PLASMA_comLIBS="${PLASMA_comLIBS} -lopenblas"
 		LIBS="$LIBS -lopenblas"
-                ACX_LAPACKE([$with_lapacke])
 		], [
 		    ACX_BLAS([$with_lapacke])
 		    ]);;
@@ -146,7 +147,7 @@ case $with_blas in
 		     [
 		      PLASMA_comLIBS="${PLASMA_comLIBS} -lopenblas"
 		      LIBS="$LIBS -lopenblas"
-		      ACX_LAPACKE([$with_lapacke])
+dnl		      ACX_LAPACKE([$with_lapacke])
 		      ],
 		      [
 			AC_MSG_WARN([couldn't find cblas_dgemm in -lopenblas. Deactivating compilation of the PLASMA benchmarks.])
@@ -157,8 +158,10 @@ dnl '
   *)
 	PLASMA_comLIBS="${PLASMA_comLIBS} $with_blas"
         LIBS="$LIBS $with_blas"
-	ACX_LAPACKE([$with_lapacke]);;
+dnl	ACX_LAPACKE([$with_lapacke]);;
 esac
+
+ACX_LAPACKE([$with_lapacke])
 
 LIBS=$saved_LIBS
 CPPFLAGS=$saved_CPPFLAGS
