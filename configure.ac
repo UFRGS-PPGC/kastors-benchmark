@@ -88,23 +88,71 @@ dnl '
 	     ]
 )
 
+dnl Check clock_gettime exist on unix systems
+USE_LINUX="no"
+case $host in
+    *linux*)
+      USE_LINUX="yes";;
+esac
+
+AS_IF([test "$USE_LINUX" == "yes"],
+      [
+       AC_CHECK_LIB([rt], [clock_gettime],
+                    [],
+                    [
+                     AC_MSG_ERROR([couldn't find clock_gettime in -lrt.])
+                     dnl '
+                     KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lrt"
+                     ]
+                    )
+       ])
+
 dnl Add possibility to choose blas
-AC_ARG_WITH([include-plasma],
-            [AS_HELP_STRING([--with-include-plasma],
-                            [specific include flags for plasma tests compilation])],
+AC_ARG_WITH([blas-installdir],
+            [AS_HELP_STRING([--with-blas-installdir],
+                            [specifity include flags for blas(def=none)])],
             [],
-            [with_include_plasma=none])
+            [with_blas_installdir=none])
+
+dnl Add possibility to choose lapacke
+AC_ARG_WITH([lapacke-installdir],
+            [AS_HELP_STRING([--with-lapacke-installdir],
+                            [specifity include flags for lapacke(def=none)])],
+            [],
+            [with_lapacke_installdir=none])
 
 I_PLASMA=
-AS_IF( [test "x$with_include_plasma" != "xnone" ],
+LD_PLASMA=
+AS_IF( [test "x$with_blas_installdir" != "xnone" ],
       [
-       I_PLASMA=$with_include_plasma
-       AC_MSG_CHECKING([for plasma specific preprocessor flags])
-       AC_MSG_RESULT([$I_PLASMA])
+       I_PLASMA="$I_PLASMA -I$with_blas_installdir/include"
+       LD_PLASMA="$LD_PLASMA -L$with_blas_installdir/lib"
+       AC_MSG_CHECKING([for blas directory])
+       AC_MSG_RESULT([-I$with_blas_installdir])
+       ],
+      [])
+
+AS_IF( [test "x$with_lapacke_installdir" != "xnone" ],
+      [
+       I_PLASMA="$I_PLASMA -I$with_lapacke_installdir/include"
+       LD_PLASMA="$LD_PLASMA -L$with_lapacke_installdir/lib"
+       AC_MSG_CHECKING([for lapacke directory])
+       AC_MSG_RESULT([-I$with_lapacke_installdir])
        ],
       [])
 
 AC_SUBST([I_PLASMA], ["$I_PLASMA"])
+AC_SUBST([LD_PLASMA], ["$LD_PLASMA"])
+
+PLASMA_comLIBS=
+dnl Check blas availability
+
+dnl Add possibility to choose blas
+AC_ARG_WITH([blas],
+            [AS_HELP_STRING([--with-blas],
+                            [specifity blas you want to use(def=no)])],
+            [],
+            [with_blas=no])
 
 dnl Add possibility to choose lapacke
 AC_ARG_WITH([lapacke],
@@ -113,71 +161,118 @@ AC_ARG_WITH([lapacke],
             [],
             [with_lapacke=lapacke])
 
+
+saved_LIBS=$LIBS
+saved_LDFLAGS=$LDFLAGS
+saved_CPPFLAGS=$CPPFLAGS
+LDFLAGS="$LDFLAGS $LD_PLASMA"
+CPPFLAGS="$CPPFLAGS $I_PLASMA"
+
+AS_CASE([$with_blas],
+      [no],
+          [
+           AC_MSG_WARN([No blas library are provided, please look at README for more information.])
+           KASTORS_COMPILE_PLASMA=no
+          ],
+      [atlas],
+          [
+           PLASMA_comLIBS="$PLASMA_comLIBS -lcblas -llapack -latlas"
+           AC_CHECK_HEADER([cblas.h], [],
+                           [
+                            AC_MSG_WARN([couldn't find cblas header. Deactivating compilation of the PLASMA benchmarks.])
+dnl '
+                            KASTORS_COMPILE_PLASMA=no
+                            KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS cblas.h"
+                            ])
+           AC_CHECK_LIB([atlas], [ATL_dgemm],
+                        [],
+                        [
+                         AC_MSG_WARN([couldn't find ATL_dgemm in -latlas. Deactivating compilation of the PLASMA benchmarks.])
+                         dnl '
+                         KASTORS_COMPILE_PLASMA=no
+                         KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -latlas"
+                         ])
+           AC_CHECK_LIB([lapack], [dlacpy_],
+                        [],
+                        [
+                         AC_MSG_WARN([couldn't find dlacpy_ in -llapack. Deactivating compilation of the PLASMA benchmarks.])
+                         dnl '
+                         KASTORS_COMPILE_PLASMA=no
+                         KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -llapack"
+                         ])
+           AC_CHECK_LIB([cblas], [cblas_dgemm],
+                        [],
+                        [
+                         AC_MSG_WARN([couldn't find cblas_dgemm in -lcblas. Deactivating compilation of the PLASMA benchmarks.])
+                         dnl '
+                         KASTORS_COMPILE_PLASMA=no
+                         KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lcblas"
+                         ])
+          ],
+      [openblas],
+          [
+           PLASMA_comLIBS="$PLASMA_comLIBS -lopenblas"
+           AC_CHECK_HEADER([cblas.h], [],
+                           [
+                            AC_MSG_WARN([couldn't find cblas header. Deactivating compilation of the PLASMA benchmarks.])
+dnl '
+                            KASTORS_COMPILE_PLASMA=no
+                            KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS cblas.h"
+                            ])
+           AC_CHECK_LIB([openblas], [cblas_dgemm],
+                        [],
+                         [
+                          AC_MSG_WARN([couldn't find cblas_dgemm in -lopenblas. Deactivating compilation of the PLASMA benchmarks.])
+                          dnl '
+                          KASTORS_COMPILE_PLASMA=no
+                          KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lopenblas"
+                          ])
+          ],
+      [
+       PLASMA_comLIBS="$PLASMA_comLIBS $with_blas"
+       AC_CHECK_HEADER([cblas.h], [],
+                       [
+                        AC_MSG_WARN([couldn't find cblas header. Deactivating compilation of the PLASMA benchmarks.])
+                        dnl '
+                        KASTORS_COMPILE_PLASMA=no
+                        KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS cblas.h"
+                        ])
+      ])
+
+AC_MSG_CHECKING([for blas])
+AC_MSG_RESULT([$with_blas])
+
+AC_CHECK_HEADER([lapacke.h], [],
+                [
+                 AC_MSG_WARN([couldn't find lapacke header. Deactivating compilation of the PLASMA benchmarks.])
+                 dnl '
+                 KASTORS_COMPILE_PLASMA=no
+                 KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS lapacke.h"
+                 ])
+
+AS_IF([test "$with_lapacke" == "lapacke"],
+      [
+       PLASMA_comLIBS="-llapacke $PLASMA_comLIBS"
+       AC_CHECK_LIB([lapacke], [LAPACKE_dlacpy_work],
+                    [], [
+                     AC_MSG_WARN([couldn't find LAPACKE_dlacpy_work in -llapacke. Deactivating compilation of the PLASMA benchmarks.])
+                     dnl '
+                     KASTORS_COMPILE_PLASMA=no
+                     KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -llapacke"
+                     ])
+       ],
+       [
+        PLASMA_comLIBS="$with_blas $PLASMA_comLIBS"
+        ])
+
 AC_MSG_CHECKING([for lapacke])
 AC_MSG_RESULT([$with_lapacke])
 
-dnl Check blas availability
-
-dnl Checked library are requiered only for plasma benchs
-saved_LIBS=$LIBS
-saved_CPPFLAGS=$CPPFLAGS
-CPPFLAGS=$I_PLASMA
-LIBS=
-dnl Add possibility to choose blas
-AC_ARG_WITH([blas],
-            [AS_HELP_STRING([--with-blas],
-                            [specific blas you want to use(def=best)])],
-            [],
-            [with_blas=best])
-
-AS_CASE([$with_blas],
-        [best], [
-         AC_CHECK_LIB([openblas], [cblas_dgemm],
-                      [
-                       PLASMA_comLIBS="${PLASMA_comLIBS} -lopenblas"
-                       ACX_LAPACKE([$with_lapacke])
-                       ], [
-                           ACX_BLAS([$with_lapacke])
-                           ])
-         ],
-         [cblas], [ ACX_BLAS([$with_lapacke]) ],
-         [openblas],
-         [
-          AC_CHECK_LIB([openblas], [cblas_dgemm],
-                       [
-                        PLASMA_comLIBS="${PLASMA_comLIBS} -lopenblas"
-                        LIBS="$LIBS -lopenblas"
-                        ACX_LAPACKE([$with_lapacke])
-                        ],
-                        [
-                         AC_MSG_WARN([couldn't find cblas_dgemm in -lopenblas. Deactivating compilation of the PLASMA benchmarks.])
-                         dnl '
-                         KASTORS_COMPILE_PLASMA=no
-                         KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lopenblas"
-                         ])
-          ],
-          [
-           PLASMA_comLIBS="${PLASMA_comLIBS} $with_blas"
-           ACX_LAPACKE([$with_lapacke])
-           ])
-
-LIBS=$saved_LIBS
+LDFLAGS=$saved_LDFLAGS
 CPPFLAGS=$saved_CPPFLAGS
+LIBS=$saved_LIBS
 
-AC_SUBST([plasma_comLIBS], ["$PLASMA_comLIBS"])
-
-dnl Check clock_gettime exist on unix systems
-case $host in
-    *linux*)
-AC_CHECK_LIB([rt], [clock_gettime],
-             [],
-             [
-                AC_MSG_ERROR([couldn't find clock_gettime in -lrt.])
-dnl '
-                KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lrt"
-	     ]
-);;
-esac
+AC_SUBST([PLASMA_comLIBS], ["$PLASMA_comLIBS"])
 
 AM_CONDITIONAL([COMPILE_JACOBI],[test "$KASTORS_COMPILE_JACOBI" != "no"])
 AM_CONDITIONAL([COMPILE_STRASSEN],[test "$KASTORS_COMPILE_STRASSEN" != "no"])
