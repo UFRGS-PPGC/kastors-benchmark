@@ -110,14 +110,14 @@ AS_IF([test "$USE_LINUX" == "yes"],
 dnl Add possibility to choose blas
 AC_ARG_WITH([blas-installdir],
             [AS_HELP_STRING([--with-blas-installdir],
-                            [specifity include flags for blas(def=none)])],
+                            [specify include flags for blas(def=none)])],
             [],
             [with_blas_installdir=none])
 
 dnl Add possibility to choose lapacke
 AC_ARG_WITH([lapacke-installdir],
             [AS_HELP_STRING([--with-lapacke-installdir],
-                            [specifity include flags for lapacke(def=none)])],
+                            [specify include flags for lapacke(def=none)])],
             [],
             [with_lapacke_installdir=none])
 
@@ -150,14 +150,14 @@ dnl Check blas availability
 dnl Add possibility to choose blas
 AC_ARG_WITH([blas],
             [AS_HELP_STRING([--with-blas],
-                            [specifity blas you want to use(def=no)])],
+                            [specify blas you want to use(def=no)])],
             [],
             [with_blas=no])
 
 dnl Add possibility to choose lapacke
 AC_ARG_WITH([lapacke],
             [AS_HELP_STRING([--with-lapacke],
-                            [specific lapacke library(def=lapacke)])],
+                            [specify lapacke library(def=lapacke)])],
             [],
             [with_lapacke=lapacke])
 

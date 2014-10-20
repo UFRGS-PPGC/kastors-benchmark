@@ -44,16 +44,24 @@ BLAS installation
 -----------------
 Configure will try to find cblas/OpenBLAS implementation for BLAS.
 If you have a specific implementation to use, please consider using the
---with-blas flag:
+--with-blas flag::
 
     $> mkdir build && cd build
     $> ../configure --with-blas=/usr/lib/libgslcblas.a
     $> ../configure --with-blas="/usr/lib/libcblas.a /usr/lib/libatlas.a"
 
-Default dynamic flags detection is possible for cblas and OpenBLAS:
+Default dynamic flags detection is possible for atlas and OpenBLAS:
 
-    $> ../configure --with-blas=cblas
+    $> ../configure --with-blas=atlas
     $> ../configure --with-blas=openblas
+
+OpenBlas May contains lapacke too. Specify it using::
+
+    $> ../configure --with-blas=openblas --with-lapacke=openblas
+
+If your installation is not in you Paths::
+
+    $> ../configure --with-blas=openblas --with-lapacke=openblas --with-lapacke-installdir=/path/to/install --with-blas-installdir=/path/to/install
 
 If your target platform doesn't come with any BLAS library, consider
 installing OpenBLAS:
