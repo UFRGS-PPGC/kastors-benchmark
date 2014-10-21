@@ -340,7 +340,7 @@ static void init_matrix(int n, REAL *A, int an, unsigned int bs)
         {
 #pragma omp task firstprivate(i,j,bs,an)
           {
-            int seed = rand();
+            unsigned int seed = rand();
             int ii, jj;
             for (ii = i; ii < i+bs; ++ii)
                  for (jj = 0; jj < j+bs; ++jj)
