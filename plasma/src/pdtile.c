@@ -14,7 +14,11 @@
  *
  **/
 #include "common.h"
+#ifdef USE_MKL
+#include <mkl_lapacke.h>
+#else
 #include <lapacke.h>
+#endif
 #include "auxiliary.h"
 #include "tile.h"
 /*#include "quark.h"*/

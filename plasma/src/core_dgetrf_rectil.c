@@ -17,8 +17,13 @@
  **/
 
 #include <math.h>
+#ifdef USE_MKL
+#include <mkl_cblas.h>
+#include <mkl_lapacke.h>
+#else
 #include <cblas.h>
 #include <lapacke.h>
+#endif
 #include "common.h"
 
 #define A(m, n) BLKADDR(A, double, m, n)
