@@ -54,6 +54,9 @@ RunTest(real_Double_t *t_, struct user_parameters* params)
     /* Check the solution */
     if ( check )
     {
+#pragma omp parallel
+#pragma omp master
+      {
         /* Allocate B for check */
         PLASMA_desc *descB = NULL;
         double* ptr = (double*)malloc(N * sizeof(double));
@@ -78,6 +81,7 @@ RunTest(real_Double_t *t_, struct user_parameters* params)
         free( A );
         free( B );
         free( X );
+      }
     }
 
     /* Free data */
