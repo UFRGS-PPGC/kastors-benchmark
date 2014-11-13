@@ -101,8 +101,8 @@ dpotrf_seq_CFLAGS       = $(plasma_seqCFLAGS)
 dpotrf_taskdep_CFLAGS   = $(plasma_parCFLAGS)
 dgetrf_seq_CFLAGS       = $(plasma_seqCFLAGS)
 dgetrf_taskdep_CFLAGS   = $(plasma_parCFLAGS)
-dgeqrf_seq_CFLAGS       = $(plasma_seqCFLAGS)
-dgeqrf_taskdep_CFLAGS   = $(plasma_parCFLAGS)
+dgeqrf_seq_CFLAGS       = $(plasma_seqCFLAGS) -DIBSIZE
+dgeqrf_taskdep_CFLAGS   = $(plasma_parCFLAGS) -DIBSIZE
 
 plasma_comLDFLAGS	= $(COMMON_comLDFLAGS)
 plasma_seqLDFLAGS	= $(plasma_comLDFLAGS) $(COMMON_seqLDFLAGS)
