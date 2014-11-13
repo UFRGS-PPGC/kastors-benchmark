@@ -20,7 +20,7 @@ RunTest(real_Double_t *t_, struct user_parameters* params)
     double t;
     PLASMA_desc *descT;
     int64_t N     = params->matrix_size;
-    int64_t IB    = 96;
+    int64_t IB    = params->iblocksize;
     int64_t NB    = params->blocksize;
     int check     = params->check;
     double check_res = 0;

@@ -39,6 +39,9 @@ void parse(int argc, char* argv[], struct user_parameters* params)
 #ifdef BSIZE
             printf("-b : Block size\n");
 #endif
+#ifdef IBSIZE
+            printf("-ib : Block size\n");
+#endif
 #ifdef CUTOFF_SIZE
             printf("-s : Cutoff (Size of the matrix)\n");
 #endif
@@ -86,6 +89,15 @@ void parse(int argc, char* argv[], struct user_parameters* params)
                 params->blocksize = atoi(argv[i]);
             else {
                 fprintf(stderr, "-b requires a number\n");
+                exit(EXIT_FAILURE);
+            }
+#endif
+#ifdef IBSIZE
+        } else if(!strcmp(argv[i], "-ib")) {
+            if (++i < argc)
+                params->iblocksize = atoi(argv[i]);
+            else {
+                fprintf(stderr, "-ib requires a number\n");
                 exit(EXIT_FAILURE);
             }
 #endif
@@ -175,6 +187,9 @@ int main(int argc, char* argv[])
 #endif
 #ifdef BSIZE
     printf("Blocksize : %d\n", params.blocksize);
+#endif
+#ifdef IBSIZE
+    printf("Internal Blocksize : %d\n", params.iblocksize);
 #endif
 #ifdef TITER
     printf("Iteration time : %d\n", params.titer);

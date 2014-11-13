@@ -15,6 +15,7 @@
  *
  **/
 #include "common.h"
+#define USE_OMPEXT
 #if defined(USE_OMPEXT)
 #include <omp_ext.h>
 #endif

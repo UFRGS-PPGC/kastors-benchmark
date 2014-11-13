@@ -73,14 +73,14 @@ plasma_comLIBS		= @PLASMA_comLIBS@ @LD_PLASMA@
 
 noinst_LIBRARIES = libplasma-seq.a libplasma-par.a
 libplasma_seq_a_SOURCES = $(plasma_common_SRCS)
-libplasma_par_a_SOURCES = $(plasma_common_SRCS)
+libplasma_par_a_SOURCES = 
 
 dpotrf_seq_SOURCES      = src/time_dpotrf-seq.c
-dpotrf_taskdep_SOURCES  = src/time_dpotrf-task.c
+dpotrf_taskdep_SOURCES  = src/time_dpotrf-task.c $(plasma_common_SRCS)
 dgetrf_seq_SOURCES      = src/time_dgetrf-seq.c
-dgetrf_taskdep_SOURCES  = src/time_dgetrf-task.c
+dgetrf_taskdep_SOURCES  = src/time_dgetrf-task.c $(plasma_common_SRCS)
 dgeqrf_seq_SOURCES      = src/time_dgeqrf-seq.c
-dgeqrf_taskdep_SOURCES  = src/time_dgeqrf-task.c
+dgeqrf_taskdep_SOURCES  = src/time_dgeqrf-task.c $(plasma_common_SRCS)
 
 dpotrf_seq_LDADD      = libplasma-seq.a $(plasma_comLIBS)
 dpotrf_taskdep_LDADD  = libplasma-par.a $(plasma_comLIBS)
@@ -101,8 +101,8 @@ dpotrf_seq_CFLAGS       = $(plasma_seqCFLAGS)
 dpotrf_taskdep_CFLAGS   = $(plasma_parCFLAGS)
 dgetrf_seq_CFLAGS       = $(plasma_seqCFLAGS)
 dgetrf_taskdep_CFLAGS   = $(plasma_parCFLAGS)
-dgeqrf_seq_CFLAGS       = $(plasma_seqCFLAGS)
-dgeqrf_taskdep_CFLAGS   = $(plasma_parCFLAGS)
+dgeqrf_seq_CFLAGS       = $(plasma_seqCFLAGS) -DIBSIZE
+dgeqrf_taskdep_CFLAGS   = $(plasma_parCFLAGS) -DIBSIZE
 
 plasma_comLDFLAGS	= $(COMMON_comLDFLAGS)
 plasma_seqLDFLAGS	= $(plasma_comLDFLAGS) $(COMMON_seqLDFLAGS)

@@ -19,6 +19,7 @@
 #include <mkl_lapacke.h>
 #else
 #include <lapacke.h>
+#endif
 #if defined(USE_OMPEXT)
 #include <omp_ext.h>
 #endif

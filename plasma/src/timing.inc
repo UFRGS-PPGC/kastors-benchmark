@@ -78,6 +78,12 @@ double run(struct user_parameters* params)
         params->blocksize = 128;
     }
 
+#ifdef IBSIZE
+    if (params->iblocksize <= 0) {
+        params->iblocksize = params->blocsize;
+    }
+#endif
+
     int64_t N    = params->matrix_size;
     int64_t M    = params->matrix_size;
     fadds = (double)(_FADDS);
