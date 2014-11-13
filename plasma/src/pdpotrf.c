@@ -16,6 +16,9 @@
  **/
 #include "common.h"
 #include <lapacke.h>
+#if defined(USE_OMPEXT)
+#include <omp_ext.h>
+#endif
 
 #define A(m,n) BLKADDR(A, double, m, n)
 
@@ -44,6 +47,9 @@ void plasma_pdpotrf_quark(PLASMA_enum uplo, PLASMA_desc A)
             tempkm = k == A.nt-1 ? A.n-k*A.nb : A.nb;
             ldak = BLKLDD(A, k);
             double *dA = A(k, k);
+#if defined(USE_OMPEXT)
+omp_set_task_priority(1);
+#endif
 #pragma omp task depend(inout:dA[0:A.mb*A.mb])
             {
                 LAPACKE_dpotrf_work(LAPACK_COL_MAJOR, lapack_const(PlasmaUpper), tempkm, dA, ldak);

@@ -13,6 +13,9 @@
  *
  **/
 #include "common.h"
+#if defined(USE_OMPEXT)
+#include <omp_ext.h>
+#endif
 
 #define A(m,n) BLKADDR(A, double, m, n)
 
@@ -32,6 +35,9 @@ void plasma_pdplgsy_quark( double bump, PLASMA_desc A, unsigned long long int se
         for (n = 0; n < A.nt; n++) {
             tempnn = n == A.nt-1 ? A.n-n*A.nb : A.nb;
             double *dA = A(m, n);
+#if defined(USE_OMPEXT)
+omp_set_task_affinity( (n%4)*6+(m%6) );
+#endif
 #pragma omp task depend(out:dA[0:ldam*tempnn])
             CORE_dplgsy( bump, tempmm, tempnn, dA, ldam, A.m, m*A.mb, n*A.nb, seed );
         }

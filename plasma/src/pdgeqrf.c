@@ -15,6 +15,9 @@
  *
  **/
 #include "common.h"
+#if defined(USE_OMPEXT)
+#include <omp_ext.h>
+#endif
 
 #define A(m,n) BLKADDR(A, double, m, n)
 #define T(m,n) BLKADDR(T, double, m, n)
@@ -35,6 +38,9 @@ void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T, int ib)
         ldak = BLKLDD(A, k);
         double *dA = A(k, k);
         double *dT = T(k, k);
+#if defined(USE_OMPEXT)
+omp_set_task_priority(1);
+#endif
 #pragma omp task depend(inout: dA[0:T.nb*T.nb]) depend(out:dT[0:ib*T.nb])
         {
             double tau[T.nb];
