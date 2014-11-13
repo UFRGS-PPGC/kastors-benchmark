@@ -141,6 +141,17 @@ AS_IF( [test "x$with_lapacke_installdir" != "xnone" ],
        ],
       [])
 
+AC_ARG_WITH([mkl],
+            [AS_HELP_STRING([--with-mkl],
+                            [use Intel MKL BLAS and LAPACKE (def=no)])],
+            [
+              I_PLASMA="$I_PLASMA -I$MKL_INC"
+              LD_PLASMA="$LD_PLASMA -L$MKL_LIB"
+              with_blas=mkl
+              with_lapacke=mkl
+             ],
+            [with_mkl=no])
+
 AC_SUBST([I_PLASMA], ["$I_PLASMA"])
 AC_SUBST([LD_PLASMA], ["$LD_PLASMA"])
 
@@ -228,6 +239,17 @@ dnl '
                           KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lopenblas"
                           ])
           ],
+      [mkl],
+          [
+           PLASMA_comLIBS="$PLASMA_comLIBS $BLAS_LIB"
+           AC_CHECK_HEADER([mkl_cblas.h], [],
+                           [
+                            AC_MSG_WARN([couldn't find mkl_cblas header. Deactivating compilation of the PLASMA benchmarks.])
+dnl '
+                            KASTORS_COMPILE_PLASMA=no
+                            KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS mkl_cblas.h"
+                            ])
+          ],
       [
        PLASMA_comLIBS="$PLASMA_comLIBS $with_blas"
        AC_CHECK_HEADER([cblas.h], [],
@@ -242,13 +264,29 @@ dnl '
 AC_MSG_CHECKING([for blas])
 AC_MSG_RESULT([$with_blas])
 
-AC_CHECK_HEADER([lapacke.h], [],
-                [
-                 AC_MSG_WARN([couldn't find lapacke header. Deactivating compilation of the PLASMA benchmarks.])
-                 dnl '
-                 KASTORS_COMPILE_PLASMA=no
-                 KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS lapacke.h"
-                 ])
+AS_IF([test "x$with_lapacke" != "xmkl" ],
+      [
+       AC_CHECK_HEADER([lapacke.h], [],
+                       [
+                        AC_MSG_WARN([couldn't find lapacke header. Deactivating compilation of the PLASMA benchmarks.])
+                        dnl '
+                        KASTORS_COMPILE_PLASMA=no
+                        KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS lapacke.h"
+                        ])
+       ],
+       [
+        PLASMA_comLIBS="$LAPACK_LIB $PLASMA_comLIBS"
+        AC_CHECK_HEADER([mkl_lapacke.h],
+                        [
+                         AC_DEFINE(USE_MKL, 1, [use MKL])
+                         ],
+                         [
+                          AC_MSG_WARN([couldn't find mkl_lapacke header. Deactivating compilation of the PLASMA benchmarks.])
+                          dnl '
+                          KASTORS_COMPILE_PLASMA=no
+                          KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS mkl_lapacke.h"
+                          ])
+        ])
 
 AS_CASE([$with_lapacke],
         [lapacke],
@@ -262,7 +300,7 @@ AS_CASE([$with_lapacke],
                        KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -llapacke"
                        ])
          ],
-         [openblas]
+         [openblas],
          [
           PLASMA_comLIBS="-lopenblas $PLASMA_comLIBS"
           AC_CHECK_LIB([openblas], [LAPACKE_dlacpy_work],
@@ -273,9 +311,11 @@ AS_CASE([$with_lapacke],
                         KASTORS_MISSING_DEPS="$KASTORS_MISSING_DEPS -lopenblas"
                         ])
           ],
-          [
-           PLASMA_comLIBS="$with_lapacke $PLASMA_comLIBS"
-           ])
+          [mkl], [
+           ],
+           [
+            PLASMA_comLIBS="$with_lapacke $PLASMA_comLIBS"
+            ])
 
 AC_MSG_CHECKING([for lapacke])
 AC_MSG_RESULT([$with_lapacke])

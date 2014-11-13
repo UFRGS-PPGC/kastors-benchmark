@@ -12,8 +12,13 @@
  * @generated d Tue Jan  7 11:44:49 2014
  *
  **/
+#ifdef USE_MKL
+#include <mkl_cblas.h>
+#include <mkl_lapacke.h>
+#else
 #include <cblas.h>
 #include <lapacke.h>
+#endif
 #include "common.h"
 
 static inline int CORE_dpamm_a2(PLASMA_enum side, PLASMA_enum trans, PLASMA_enum uplo,

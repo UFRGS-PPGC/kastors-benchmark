@@ -14,7 +14,11 @@
  * @generated d Tue Jan  7 11:44:45 2014
  *
  **/
+#ifdef USE_MKL
+#include <mkl_lapacke.h>
+#else
 #include <lapacke.h>
+#endif
 #include "common.h"
 
 /***************************************************************************//**

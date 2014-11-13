@@ -29,8 +29,13 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
+#ifdef USE_MKL
+#include <mkl_cblas.h>
+#include <mkl_lapacke.h>
+#else
 #include <cblas.h>
 #include <lapacke.h>
+#endif
 #include "plasma.h"
 #include <core_blas.h>
 #include "flops.h"
@@ -72,6 +77,12 @@ double run(struct user_parameters* params)
     if (params->blocksize <= 0) {
         params->blocksize = 128;
     }
+
+#ifdef IBSIZE
+    if (params->iblocksize <= 0) {
+        params->iblocksize = params->blocsize;
+    }
+#endif
 
     int64_t N    = params->matrix_size;
     int64_t M    = params->matrix_size;

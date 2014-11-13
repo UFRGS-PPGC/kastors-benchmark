@@ -15,7 +15,11 @@
 #ifndef _PLASMA_CORE_BLAS_H_
 #define _PLASMA_CORE_BLAS_H_
 
+#ifdef USE_MKL
+#include <mkl_cblas.h>
+#else
 #include <cblas.h>
+#endif
 #include "plasmatypes.h"
 #include "descriptor.h"
 
@@ -39,10 +43,14 @@ extern char *plasma_lapack_constants[];
   /*
    * CBlas enum
    */
-#define CBLAS_TRANSPOSE enum CBLAS_TRANSPOSE
-#define CBLAS_UPLO      enum CBLAS_UPLO
-#define CBLAS_DIAG      enum CBLAS_DIAG
-#define CBLAS_SIDE      enum CBLAS_SIDE
+#define CBLAS_TRANSPOSE int
+#define CBLAS_UPLO      int
+#define CBLAS_DIAG      int
+#define CBLAS_SIDE      int
+//#define CBLAS_TRANSPOSE enum CBLAS_TRANSPOSE
+//#define CBLAS_UPLO      enum CBLAS_UPLO
+//#define CBLAS_DIAG      enum CBLAS_DIAG
+//#define CBLAS_SIDE      enum CBLAS_SIDE
 
 #ifdef __cplusplus
 }

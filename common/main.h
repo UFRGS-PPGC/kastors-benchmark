@@ -18,6 +18,9 @@ struct user_parameters {
 #ifdef BSIZE
     int blocksize;
 #endif
+#ifdef IBSIZE
+    int iblocksize;
+#endif
 #ifdef CUTOFF_DEPTH
     int cutoff_depth;
 #endif
