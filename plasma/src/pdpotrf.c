@@ -15,6 +15,9 @@
  *
  **/
 #include "common.h"
+#ifdef USE_MKL
+#include <mkl_lapacke.h>
+#else
 #include <lapacke.h>
 #if defined(USE_OMPEXT)
 #include <omp_ext.h>

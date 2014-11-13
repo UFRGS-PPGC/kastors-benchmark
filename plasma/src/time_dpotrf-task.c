@@ -52,6 +52,9 @@ RunTest(real_Double_t *t_, struct user_parameters* params)
     /* Check the solution */
     if ( check )
     {
+#pragma omp parallel
+#pragma omp master
+      {
         PLASMA_desc *descB = NULL;
         double* ptr = (double*)malloc(N * sizeof(double));
         PLASMA_Desc_Create(&descB, ptr, PlasmaRealDouble, NB, NB, NB*NB, N, 1, 0, 0, N, 1);
@@ -72,6 +75,7 @@ RunTest(real_Double_t *t_, struct user_parameters* params)
         free( B );
         free( X );
       }
+    }
 
     PASTE_CODE_FREE_MATRIX( descA );
 

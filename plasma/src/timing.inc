@@ -29,8 +29,13 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
+#ifdef USE_MKL
+#include <mkl_cblas.h>
+#include <mkl_lapacke.h>
+#else
 #include <cblas.h>
 #include <lapacke.h>
+#endif
 #include "plasma.h"
 #include <core_blas.h>
 #include "flops.h"
