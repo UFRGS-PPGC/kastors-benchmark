@@ -40,7 +40,7 @@ void parse(int argc, char* argv[], struct user_parameters* params)
             printf("-b : Block size\n");
 #endif
 #ifdef IBSIZE
-            printf("-ib : Block size\n");
+            printf("-ib : Internal Block size\n");
 #endif
 #ifdef CUTOFF_SIZE
             printf("-s : Cutoff (Size of the matrix)\n");

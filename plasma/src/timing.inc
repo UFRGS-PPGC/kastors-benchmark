@@ -80,7 +80,7 @@ double run(struct user_parameters* params)
 
 #ifdef IBSIZE
     if (params->iblocksize <= 0) {
-        params->iblocksize = params->blocsize;
+        params->iblocksize = params->blocksize;
     }
 #endif
 
