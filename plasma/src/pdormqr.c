@@ -41,6 +41,7 @@ void plasma_pdormqr_quark(PLASMA_enum side, PLASMA_enum trans,
         minMT = A.mt;
     }
 
+    double *work = (double *)alloca(sizeof(double) * T.nb * ib);
     /*
      *  PlasmaLeft / PlasmaTrans
      */
@@ -56,9 +57,7 @@ void plasma_pdormqr_quark(PLASMA_enum side, PLASMA_enum trans,
                     double *dA = A(k, k);
                     double *dT = T(k, k);
                     double *dB = B(k, n);
-#pragma omp task depend(in: dA[0:T.nb*T.nb], dT[0:ib*T.nb]) depend(inout:dB[0:T.nb*T.nb])
                     {
-                        double *work = (double *)alloca(sizeof(double) * T.nb * ib);
                         CORE_dormqr(side, trans, tempkm, tempnn, tempkmin, ib,
                                 dA, ldak,
                                 dT, T.mb,
@@ -75,9 +74,7 @@ void plasma_pdormqr_quark(PLASMA_enum side, PLASMA_enum trans,
                         double *dB = B(m, n);
                         double *dV = A(m, k);
                         double *dT = T(m, k);
-#pragma omp task depend(inout:dA[0:T.nb*T.nb], dB[0:T.nb*T.nb]) depend(in:dV[0:T.nb*T.nb], dT[0:ib*T.nb])
                         {
-                            double *work = (double *)alloca(ib * T.nb * sizeof(double));
                             CORE_dtsmqr(side, trans,
                                     B.mb, tempnn, tempmm, tempnn, tempkmin, ib,
                                     dA, ldbk,
@@ -108,9 +105,7 @@ void plasma_pdormqr_quark(PLASMA_enum side, PLASMA_enum trans,
                         double *dB = B(m, n);
                         double *dV = A(m, k);
                         double *dT = T(m, k);
-#pragma omp task depend(inout:dA[0:T.nb*T.nb], dB[0:T.nb*T.nb]) depend(in:dV[0:T.nb*T.nb], dT[0:ib*T.nb])
                         {
-                            double *work = (double *)alloca(ib * T.nb * sizeof(double));
                             CORE_dtsmqr(side, trans,
                                     B.mb, tempnn, tempmm, tempnn, tempkmin, ib,
                                     dA, ldbk,
@@ -125,9 +120,7 @@ void plasma_pdormqr_quark(PLASMA_enum side, PLASMA_enum trans,
                     double *dA = A(k, k);
                     double *dT = T(k, k);
                     double *dB = B(k, n);
-#pragma omp task depend(in: dA[0:T.nb*T.nb], dT[0:ib*T.nb]) depend(inout:dB[0:T.nb*T.nb])
                     {
-                        double *work = (double *)alloca(sizeof(double) * T.nb * ib);
                         CORE_dormqr(side, trans, tempkm, tempnn, tempkmin, ib,
                                 dA, ldak,
                                 dT, T.mb,
@@ -157,9 +150,7 @@ void plasma_pdormqr_quark(PLASMA_enum side, PLASMA_enum trans,
                         double *dB = B(m, n);
                         double *dV = A(n, k);
                         double *dT = T(n, k);
-#pragma omp task depend(inout:dA[0:T.nb*T.nb], dB[0:T.nb*T.nb]) depend(in:dV[0:T.nb*T.nb], dT[0:ib*T.nb])
                         {
-                            double *work = (double *)alloca(ib * T.nb * sizeof(double));
                             CORE_dtsmqr(side, trans,
                                     tempmm, B.nb, tempmm, tempnn, tempkmin, ib,
                                     dA, ldbm,
@@ -175,9 +166,7 @@ void plasma_pdormqr_quark(PLASMA_enum side, PLASMA_enum trans,
                     double *dA = A(k, k);
                     double *dT = T(k, k);
                     double *dB = B(m, k);
-#pragma omp task depend(in: dA[0:T.nb*T.nb], dT[0:ib*T.nb]) depend(inout:dB[0:T.nb*T.nb])
                     {
-                        double *work = (double *)alloca(sizeof(double) * T.nb * ib);
                         CORE_dormqr(side, trans, tempmm, tempkn, tempkmin, ib,
                                 dA, ldak,
                                 dT, T.mb,
@@ -200,9 +189,7 @@ void plasma_pdormqr_quark(PLASMA_enum side, PLASMA_enum trans,
                     double *dA = A(k, k);
                     double *dT = T(k, k);
                     double *dB = B(m, k);
-#pragma omp task depend(in: dA[0:T.nb*T.nb], dT[0:ib*T.nb]) depend(inout:dB[0:T.nb*T.nb])
                     {
-                        double *work = (double *)alloca(sizeof(double) * T.nb * ib);
                         CORE_dormqr(side, trans, tempmm, tempkn, tempkmin, ib,
                                 dA, ldak,
                                 dT, T.mb,
@@ -219,9 +206,7 @@ void plasma_pdormqr_quark(PLASMA_enum side, PLASMA_enum trans,
                         double *dB = B(m, n);
                         double *dV = A(n, k);
                         double *dT = T(n, k);
-#pragma omp task depend(inout:dA[0:T.nb*T.nb], dB[0:T.nb*T.nb]) depend(in:dV[0:T.nb*T.nb], dT[0:ib*T.nb])
                         {
-                            double *work = (double *)alloca(ib * T.nb * sizeof(double));
                             CORE_dtsmqr(side, trans,
                                     tempmm, B.nb, tempmm, tempnn, tempkmin, ib,
                                     dA, ldbm,

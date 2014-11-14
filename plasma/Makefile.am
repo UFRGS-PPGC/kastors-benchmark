@@ -33,7 +33,6 @@ plasma_SRCS = \
 	src/core_dtsqrt.c		\
 	src/dauxiliary.c		\
 	src/descriptor.c		\
-	src/dgeqrf.c			\
 	src/dgeqrs.c 			\
 	src/dgetrs.c 			\
 	src/dpotrs.c			\
@@ -75,11 +74,11 @@ noinst_LIBRARIES = libplasma-seq.a libplasma-par.a
 libplasma_seq_a_SOURCES = $(plasma_common_SRCS)
 libplasma_par_a_SOURCES = 
 
-dpotrf_seq_SOURCES      = src/time_dpotrf-seq.c
+dpotrf_seq_SOURCES      = src/time_dpotrf-task.c
 dpotrf_taskdep_SOURCES  = src/time_dpotrf-task.c $(plasma_common_SRCS)
-dgetrf_seq_SOURCES      = src/time_dgetrf-seq.c
+dgetrf_seq_SOURCES      = src/time_dgetrf-task.c
 dgetrf_taskdep_SOURCES  = src/time_dgetrf-task.c $(plasma_common_SRCS)
-dgeqrf_seq_SOURCES      = src/time_dgeqrf-seq.c
+dgeqrf_seq_SOURCES      = src/time_dgeqrf-task.c
 dgeqrf_taskdep_SOURCES  = src/time_dgeqrf-task.c $(plasma_common_SRCS)
 
 dpotrf_seq_LDADD      = libplasma-seq.a $(plasma_comLIBS)

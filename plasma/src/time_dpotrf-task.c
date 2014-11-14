@@ -52,18 +52,15 @@ RunTest(real_Double_t *t_, struct user_parameters* params)
     /* Check the solution */
     if ( check )
     {
-#pragma omp parallel
-#pragma omp master
-      {
         PLASMA_desc *descB = NULL;
         double* ptr = (double*)malloc(N * sizeof(double));
         PLASMA_Desc_Create(&descB, ptr, PlasmaRealDouble, NB, NB, NB*NB, N, 1, 0, 0, N, 1);
 
-        plasma_pdpltmg_quark(* descB, 7672 );
+        plasma_pdpltmg_seq(* descB, 7672 );
         double* B = (double*)malloc(N * sizeof(double));
         plasma_pdtile_to_lapack_quark(*descB, (void*)B, N);
 
-        PLASMA_dpotrs_Tile_Async( uplo, descA, descB );
+        PLASMA_dpotrs_Tile( uplo, descA, descB );
 
         double* X = (double*)malloc(N * sizeof(double));
         plasma_pdtile_to_lapack_quark(*descB, (void*)X, N);
@@ -74,7 +71,6 @@ RunTest(real_Double_t *t_, struct user_parameters* params)
         free( A );
         free( B );
         free( X );
-      }
     }
 
     PASTE_CODE_FREE_MATRIX( descA );

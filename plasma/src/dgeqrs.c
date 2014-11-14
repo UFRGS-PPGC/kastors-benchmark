@@ -16,9 +16,9 @@
 
 /***************************************************************************//**
  *
- * @ingroup double_Tile_Async
+ * @ingroup double_Tile
  *
- *  PLASMA_dgeqrs_Tile_Async - Computes a minimum-norm solution using the tile
+ *  PLASMA_dgeqrs_Tile- Computes a minimum-norm solution using the tile
  *  QR factorization.
  *  Non-blocking equivalent of PLASMA_dgeqrs_Tile().
  *  May return before the computation is finished.
@@ -37,13 +37,9 @@
  *
  * @sa PLASMA_dgeqrs
  * @sa PLASMA_dgeqrs_Tile
- * @sa PLASMA_cgeqrs_Tile_Async
- * @sa PLASMA_dgeqrs_Tile_Async
- * @sa PLASMA_sgeqrs_Tile_Async
- * @sa PLASMA_dgeqrf_Tile_Async
  *
  ******************************************************************************/
-int PLASMA_dgeqrs_Tile_Async(PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B, int ib)
+int PLASMA_dgeqrs_Tile(PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B, int ib)
 {
     PLASMA_desc descA;
     PLASMA_desc descT;
