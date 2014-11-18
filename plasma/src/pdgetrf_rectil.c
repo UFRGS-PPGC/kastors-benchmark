@@ -105,6 +105,7 @@ void plasma_pdgetrf_rectil_quark(PLASMA_desc A, int *IPIV)
                     double *fake1 = A(k+1, n);
                     double *fake2 = (double *)fakedep;
 #if defined(KLANG_VERSION) && defined(KASTOR_USE_CW)
+#warning "KLANG EXTENSION USED"
 #pragma omp task depend(in:dA[0:A.mb*A.mb], dB[0:A.mb*A.mb], fake2[0:1]) depend(inout:dC[0:A.mb*A.mb]), depend(cw:fake1[0:A.mb*A.nb])
                         cblas_dgemm(CblasColMajor, (CBLAS_TRANSPOSE)PlasmaNoTrans, (CBLAS_TRANSPOSE)PlasmaNoTrans,
                                 tempmm, tempnn, A.nb,
@@ -146,6 +147,7 @@ void plasma_pdgetrf_rectil_quark(PLASMA_desc A, int *IPIV)
             int *dipiv = IPIV(k);
             PLASMA_desc descA = plasma_desc_submatrix(A, tempk, n*A.nb, tempm, tempnn);
 #if defined(KLANG_VERSION) && defined(KASTOR_USE_CW)
+#warning "KLANG EXTENSION USED"
 #pragma omp task depend(inout:Aij[0:1]) depend(cw:fakedep) depend(in:dipiv[0:mintmp], prevSwap[0:A.lm*A.nb])
             CORE_dlaswp_ontile(descA, 1, mintmp, dipiv, 1);
 #else
