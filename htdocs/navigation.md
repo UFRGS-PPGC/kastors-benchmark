@@ -7,3 +7,5 @@
 [User guide](README.md)
 
 [Performance evaluation](performances.md)
+
+[KSTAR project](http://kstar.gforge.inria.fr/)
