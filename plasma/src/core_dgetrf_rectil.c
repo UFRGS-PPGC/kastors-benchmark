@@ -161,9 +161,10 @@ int CORE_dgetrf_rectil(const PLASMA_desc A, int *IPIV, int *info)
 /*******************************************************************
  *   Additional routines
  */
-#define AMAX1BUF_SIZE (48 << 1)
+#define MAX_THREAD 256
+#define AMAX1BUF_SIZE (MAX_THREAD << 1)
 
-/* 48 threads should be enough for everybody */
+/* MAX_THREAD threads should be enough for everybody */
 static volatile double CORE_damax1buf[AMAX1BUF_SIZE];
 static double sfmin;
 
