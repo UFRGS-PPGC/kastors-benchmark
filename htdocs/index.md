@@ -22,7 +22,7 @@ We will soon provide the corresponding bibtex entry.
 
 A preliminary version of the KaStORS suite is provided below.
 
-- 2014-09-25 [kastors-1.0.tar.gz](kastors-1.0.tar.gz)
+- 2014-09-25 [kastors-1.0.tar.gz](https://gforge.inria.fr/frs/download.php/file/34339/kastors-1.0.tar.gz)
 
 We will release version 1.0 of the benchmark suite by the IWOMP2014 conference (28th-30th of September).
 
