@@ -7,3 +7,5 @@
 [User guide](README.md)
 
 [Performance evaluation](performances.md)
+
+[gimmick:theme](cerulean)
