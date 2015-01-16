@@ -48,27 +48,24 @@ RunTest(real_Double_t *t_, struct user_parameters* params)
     START_TIMING();
 #pragma omp parallel
 #pragma omp master
-    PLASMA_dgeqrf_Tile_Async( descA, descT , IB);
+    plasma_pdgeqrf_quark( *descA, *descT , IB);
     STOP_TIMING();
 
     /* Check the solution */
     if ( check )
     {
-#pragma omp parallel
-#pragma omp master
-      {
         /* Allocate B for check */
         PLASMA_desc *descB = NULL;
         double* ptr = (double*)malloc(N * sizeof(double));
         PLASMA_Desc_Create(&descB, ptr, PlasmaRealDouble, NB, NB, NB*NB, N, 1, 0, 0, N, 1);
 
         /* Initialize and save B */
-        plasma_pdpltmg_quark(*descB, 2264 );
+        plasma_pdpltmg_seq(*descB, 2264 );
         double *B = (double*)malloc(N * sizeof(double));
         plasma_pdtile_to_lapack_quark(*descB, (void*)B, N);
 
         /* Compute the solution */
-        PLASMA_dgeqrs_Tile_Async( descA, descT, descB , IB);
+        PLASMA_dgeqrs_Tile( descA, descT, descB , IB);
 
         /* Copy solution to X */
         double *X = (double*)malloc(N * sizeof(double));
@@ -81,7 +78,6 @@ RunTest(real_Double_t *t_, struct user_parameters* params)
         free( A );
         free( B );
         free( X );
-      }
     }
 
     /* Free data */

@@ -17,9 +17,9 @@
 
 /***************************************************************************//**
  *
- * @ingroup double_Tile_Async
+ * @ingroup double_Tile
  *
- *  PLASMA_dgetrs_Tile_Async - Solves a system of linear equations using previously
+ *  PLASMA_dgetrs_Tile- Solves a system of linear equations using previously
  *  computed LU factorization.
  *  Non-blocking equivalent of PLASMA_dgetrs_Tile().
  *  May return before the computation is finished.
@@ -38,13 +38,13 @@
  *
  * @sa PLASMA_dgetrs
  * @sa PLASMA_dgetrs_Tile
- * @sa PLASMA_cgetrs_Tile_Async
- * @sa PLASMA_dgetrs_Tile_Async
- * @sa PLASMA_sgetrs_Tile_Async
- * @sa PLASMA_dgetrf_Tile_Async
+ * @sa PLASMA_cgetrs_Tile
+ * @sa PLASMA_dgetrs_Tile
+ * @sa PLASMA_sgetrs_Tile
+ * @sa PLASMA_dgetrf_Tile
  *
  ******************************************************************************/
-int PLASMA_dgetrs_Tile_Async(PLASMA_enum trans, PLASMA_desc *A, const int *IPIV, PLASMA_desc *B)
+int PLASMA_dgetrs_Tile(PLASMA_enum trans, PLASMA_desc *A, const int *IPIV, PLASMA_desc *B)
 {
     PLASMA_desc descA;
     PLASMA_desc descB;

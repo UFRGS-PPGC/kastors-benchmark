@@ -23,6 +23,7 @@ void plasma_pdgetrf_rectil_quark(PLASMA_desc A, int *IPIV);
 void plasma_pdlaswp_quark(PLASMA_desc B, const int *IPIV, int inc);
 void plasma_pdplgsy_quark(double bump, PLASMA_desc A, unsigned long long int seed);
 void plasma_pdpltmg_quark(PLASMA_desc A, unsigned long long int seed);
+void plasma_pdpltmg_seq(PLASMA_desc A, unsigned long long int seed);
 void plasma_pdpotrf_quark(PLASMA_enum uplo, PLASMA_desc A);
 void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum transA, PLASMA_enum diag, double alpha, PLASMA_desc A, PLASMA_desc B);
 void plasma_pdormqr_quark(PLASMA_enum side, PLASMA_enum trans, PLASMA_desc A, PLASMA_desc B, PLASMA_desc T, int ib);

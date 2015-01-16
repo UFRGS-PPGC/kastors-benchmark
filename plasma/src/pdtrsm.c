@@ -20,7 +20,7 @@
 #define B(m,n) BLKADDR(B, double, m, n)
 
 /***************************************************************************//**
- *  Parallel tile triangular solve - dynamic scheduling
+ *  Sequential tile triangular solve 
  **/
 void plasma_pdtrsm_quark(PLASMA_enum side, PLASMA_enum uplo, PLASMA_enum trans, PLASMA_enum diag,
                          double alpha, PLASMA_desc A, PLASMA_desc B)

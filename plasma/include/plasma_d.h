@@ -25,10 +25,10 @@
 extern "C" {
 #endif
 
-int PLASMA_dgeqrf_Tile_Async(PLASMA_desc *A, PLASMA_desc *T, int ib);
-int PLASMA_dgeqrs_Tile_Async(PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B, int ib);
-int PLASMA_dgetrs_Tile_Async(PLASMA_enum trans, PLASMA_desc *A, const int *IPIV, PLASMA_desc *B);
-int PLASMA_dpotrs_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A, PLASMA_desc *B);
+int PLASMA_dgeqrf_Tile(PLASMA_desc *A, PLASMA_desc *T, int ib);
+int PLASMA_dgeqrs_Tile(PLASMA_desc *A, PLASMA_desc *T, PLASMA_desc *B, int ib);
+int PLASMA_dgetrs_Tile(PLASMA_enum trans, PLASMA_desc *A, const int *IPIV, PLASMA_desc *B);
+int PLASMA_dpotrs_Tile(PLASMA_enum uplo, PLASMA_desc *A, PLASMA_desc *B);
 
 #ifdef __cplusplus
 }

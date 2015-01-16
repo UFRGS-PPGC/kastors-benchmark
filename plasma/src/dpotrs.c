@@ -16,9 +16,9 @@
 
 /***************************************************************************//**
  *
- * @ingroup double_Tile_Async
+ * @ingroup double_Tile
  *
- *  PLASMA_dpotrs_Tile_Async - Solves a system of linear equations using previously
+ *  PLASMA_dpotrs_Tile- Solves a system of linear equations using previously
  *  computed Cholesky factorization.
  *  Non-blocking equivalent of PLASMA_dpotrs_Tile().
  *  May return before the computation is finished.
@@ -37,13 +37,9 @@
  *
  * @sa PLASMA_dpotrs
  * @sa PLASMA_dpotrs_Tile
- * @sa PLASMA_cpotrs_Tile_Async
- * @sa PLASMA_dpotrs_Tile_Async
- * @sa PLASMA_spotrs_Tile_Async
- * @sa PLASMA_dpotrf_Tile_Async
  *
  ******************************************************************************/
-int PLASMA_dpotrs_Tile_Async(PLASMA_enum uplo, PLASMA_desc *A, PLASMA_desc *B)
+int PLASMA_dpotrs_Tile(PLASMA_enum uplo, PLASMA_desc *A, PLASMA_desc *B)
 {
     PLASMA_desc descA = *A;
     PLASMA_desc descB = *B;

@@ -8,4 +8,6 @@
 
 [Performance evaluation](performances.md)
 
+[KSTAR project](http://kstar.gforge.inria.fr/)
+
 [gimmick:theme](cerulean)
