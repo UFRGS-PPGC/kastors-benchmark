@@ -82,3 +82,15 @@ precompiled version of the library and set the OPENBLAS_NUM_THREADS
 environment variable to 1.
 
     $> export OPENBLAS_NUM_THREADS=1
+
+
+Using Intel MKL
+---------------
+
+You can pass --with-mkl to the configure script in order to use the Intel MKL
+library as BLAS suppliers. To do so, you also need to set the MKL_INC and
+MKL_LIB environment variables to the location where you installed MKL, like
+the example above:
+
+    $> MKL_INC=/mkl_install_dir/include/ MKL_LIB=/mkl_install_dir/lib/ ../configure --with-mkl
+
