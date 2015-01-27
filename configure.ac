@@ -145,8 +145,7 @@ AC_ARG_WITH([mkl],
             [AS_HELP_STRING([--with-mkl],
                             [use Intel MKL BLAS and LAPACKE (def=no)])],
             [
-              I_PLASMA="$I_PLASMA -I$MKL_INC"
-              LD_PLASMA="$LD_PLASMA -L$MKL_LIB"
+              AS_IF( [test "x$CC" == "xicc" ], [CFLAGS="$CFLAGS -mkl=sequential"], [] )
               with_blas=mkl
               with_lapacke=mkl
              ],
