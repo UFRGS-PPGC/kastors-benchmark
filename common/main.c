@@ -178,36 +178,69 @@ int main(int argc, char* argv[])
 
     free(all_times);
 
-    printf("Program : %s\n", argv[0]);
+    char *progname = argv[0], *slash;
+    while ((slash = strchr(progname, '/'))) {
+        progname = slash + 1;
+    }
+    printf("#Output follows this header :\n");
+    printf("##Progname ");
 #ifdef MSIZE
-    printf("Size : %d\n", params.matrix_size);
+    printf("Size ");
 #endif
 #ifdef SMSIZE
-    printf("Submatrix size : %d\n", params.submatrix_size);
+    printf("Submatrix_size ");
 #endif
 #ifdef BSIZE
-    printf("Blocksize : %d\n", params.blocksize);
+    printf("Blocksize ");
 #endif
 #ifdef IBSIZE
-    printf("Internal Blocksize : %d\n", params.iblocksize);
+    printf("Internal_Blocksize ");
 #endif
 #ifdef TITER
-    printf("Iteration time : %d\n", params.titer);
+    printf("Iteration_time ");
 #endif
-    printf("Iterations : %d\n", params.niter);
+    printf("Iterations ");
 #ifdef CUTOFF_SIZE
-    printf("Cutoff Size : %d\n", params.cutoff_size);
+    printf("Cutoff_Size ");
 #endif
 #ifdef CUTOFF_DEPTH
-    printf("Cutoff depth : %d\n", params.cutoff_depth);
+    printf("Cutoff_Depth ");
 #endif
-    printf("Threads : %d\n", num_threads);
+    printf("Threads ");
 #ifdef GFLOPS
-    printf("Gflops:: ");
+    printf("Gflops(Mean) ");
 #else
-    printf("Time(sec):: ");
+    printf("Time(Mean,sec) ");
 #endif
-    printf("avg : %lf :: std : %lf :: min : %lf :: max : %lf :: median : %lf\n",
+    printf("\n");
+
+    //Actual values
+    printf("%s ", progname);
+#ifdef MSIZE
+    printf("%d ", params.matrix_size);
+#endif
+#ifdef SMSIZE
+    printf("%d ", params.submatrix_size);
+#endif
+#ifdef BSIZE
+    printf("%d ", params.blocksize);
+#endif
+#ifdef IBSIZE
+    printf("%d ", params.iblocksize);
+#endif
+#ifdef TITER
+    printf("%d ", params.titer);
+#endif
+    printf("%d ", params.niter);
+#ifdef CUTOFF_SIZE
+    printf("%d ", params.cutoff_size);
+#endif
+#ifdef CUTOFF_DEPTH
+    printf("%d ", params.cutoff_depth);
+#endif
+    printf("%d ", num_threads);
+    printf("%lf\n", mean);
+    printf("#Experience summarry : avg : %lf :: std : %lf :: min : %lf :: max : %lf :: median : %lf\n",
            mean, stddev, min_, max_, median);
     if(params.check)
         printf("Check : %s\n", (params.succeed)?
