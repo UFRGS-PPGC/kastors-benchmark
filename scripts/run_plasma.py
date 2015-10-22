@@ -51,6 +51,25 @@ if __name__ == "__main__":
         elif pl == "Contiguous":
             outputLogFilename += ".contiguous"
             cmdLine += "\"{0}:" + th + ":1\" "
+        elif pl == "Spreadnode":
+            outputLogFilename += ".spreadnode"
+            #TODO: this part is idchire-specific
+            remains = int(th)
+            base = 0
+            cmdLine += "\""
+            while remains > 0:
+                remains = remains - 24
+                threads = 0
+                if remains >= 0:
+                    threads = 24
+                else:
+                    threads = remains + 24
+                if base > 0:
+                    cmdLine += ","
+                cmdLine += "{"+str(base)+"}:" + str(threads) + ":8"
+                base += 1
+            cmdLine += "\" "
+
 
         if n == "All":
             outputLogFilename += ".all"
