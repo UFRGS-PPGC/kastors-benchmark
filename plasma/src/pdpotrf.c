@@ -52,7 +52,7 @@ void plasma_pdpotrf_quark(PLASMA_enum uplo, PLASMA_desc A)
             ldak = BLKLDD(A, k);
             double *dA = A(k, k);
 #if defined(USE_OMPEXT)
-omp_set_task_priority(1);
+omp_set_task_priority(5);
 #endif
 #pragma omp task depend(inout:dA[0:A.mb*A.mb])
             {
@@ -63,6 +63,9 @@ omp_set_task_priority(1);
                 tempmm = m == A.nt-1 ? A.n-m*A.nb : A.nb;
                 double *dA = A(k, k);
                 double *dB = A(k, m);
+#if defined(USE_OMPEXT)
+omp_set_task_priority(3);
+#endif
 #pragma omp task depend(in:dA[0:A.mb*A.mb]) depend(inout:dB[0:A.mb*A.mb])
                 cblas_dtrsm(
                         CblasColMajor,
@@ -77,6 +80,9 @@ omp_set_task_priority(1);
                 ldam = BLKLDD(A, m);
                 double *dA = A(k, m);
                 double *dB = A(m, m);
+#if defined(USE_OMPEXT)
+omp_set_task_priority(2);
+#endif
 #pragma omp task depend(in:dA[0:A.mb*A.mb]) depend(inout:dB[0:A.mb*A.mb])
                 {
                     cblas_dsyrk(
@@ -86,11 +92,13 @@ omp_set_task_priority(1);
                             (-1.0), dA, ldak,
                             (1.0), dB, ldam);
                 }
-
                 for (n = k+1; n < m; n++) {
                     double *dA = A(k , n);
                     double *dB = A(k , m);
                     double *dC = A(n , m);
+#if defined(USE_OMPEXT)
+omp_set_task_priority(4);
+#endif
 #pragma omp task depend(in:dA[0:A.mb*A.mb], dB[0:A.mb*A.mb]) depend(inout:dC[0:A.mb*A.mb])
                     cblas_dgemm(CblasColMajor, (CBLAS_TRANSPOSE)PlasmaTrans, (CBLAS_TRANSPOSE)PlasmaNoTrans,
                             A.mb, tempmm, A.mb,
@@ -101,4 +109,7 @@ omp_set_task_priority(1);
             }
         }
     }
+#if defined(USE_OMPEXT)
+omp_set_task_priority(0);
+#endif
 }
