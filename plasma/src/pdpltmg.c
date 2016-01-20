@@ -13,6 +13,9 @@
  *
  **/
 #include "common.h"
+#if defined(USE_OMPEXT)
+#include <omp_ext.h>
+#endif
 
 #define A(m, n) BLKADDR(A, double, m, n)
 
