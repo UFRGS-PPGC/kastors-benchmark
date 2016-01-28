@@ -39,7 +39,7 @@ void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T, int ib)
         double *dA = A(k, k);
         double *dT = T(k, k);
 #if defined(USE_OMPEXT)
-omp_set_task_priority(1);
+omp_set_task_priority(8);
 #endif
 #pragma omp task depend(inout: dA[0:T.nb*T.nb]) depend(out:dT[0:ib*T.nb])
         {
@@ -53,6 +53,9 @@ omp_set_task_priority(1);
             double *dA = A(k, k);
             double *dT = T(k, k);
             double *dC = A(k, n);
+#if defined(USE_OMPEXT)
+omp_set_task_priority(7);
+#endif
 #pragma omp task depend(in: dA[0:T.nb*T.nb], dT[0:ib*T.nb]) depend(inout:dC[0:T.nb*T.nb])
             {
                 double work[T.nb * ib];
@@ -70,6 +73,9 @@ omp_set_task_priority(1);
             double *dA = A(k, k);
             double *dB = A(m, k);
             double *dT = T(m, k);
+#if defined(USE_OMPEXT)
+omp_set_task_priority(6);
+#endif
 #pragma omp task depend(inout:dA[0:T.nb*T.nb], dB[0:T.nb*T.nb]) depend(out:dT[0:ib*T.nb])
             {
                 double tau[T.nb];
@@ -86,6 +92,9 @@ omp_set_task_priority(1);
                 double *dB = A(m, n);
                 double *dV = A(m, k);
                 double *dT = T(m, k);
+#if defined(USE_OMPEXT)
+omp_set_task_priority(5);
+#endif
 #pragma omp task depend(inout:dA[0:T.nb*T.nb], dB[0:T.nb*T.nb]) depend(in:dV[0:T.nb*T.nb], dT[0:ib*T.nb])
                 {
                     double work[ib * T.nb];

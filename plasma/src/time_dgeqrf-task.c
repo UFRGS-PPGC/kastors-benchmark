@@ -12,6 +12,10 @@
 #define _FMULS FMULS_GEQRF( M, N )
 #define _FADDS FADDS_GEQRF( M, N )
 
+#if defined(USE_OMPEXT)
+#include "omp_ext.h"
+#endif
+
 #include "./timing.inc"
 
 static double
@@ -30,9 +34,18 @@ RunTest(real_Double_t *t_, struct user_parameters* params)
     double *ptr = (double*)malloc(N * N * sizeof(double));
     PLASMA_Desc_Create(&descA, ptr, PlasmaRealDouble, NB, NB, NB*NB, N, N, 0, 0, N, N);
 
+#if defined(USE_OMPEXT)
+    void *select, *push;
+    omp_begin_numa_init(&select, &push);
+#endif
+
 #pragma omp parallel
 #pragma omp master
     plasma_pdpltmg_quark(*descA, 5373 );
+
+#if defined(USE_OMPEXT)
+    omp_end_numa_init(select, push);
+#endif
 
     /* Save A for check */
     double *A = NULL;

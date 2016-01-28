@@ -8,6 +8,9 @@
 #define _LAMCH LAPACKE_dlamch_work
 
 #include "omp.h"
+#if defined(USE_OMPEXT)
+#include "omp_ext.h"
+#endif
 
 #define _NAME  "PLASMA_dpotrf_Tile"
 /* See Lawn 41 page 120 */
@@ -31,9 +34,18 @@ RunTest(real_Double_t *t_, struct user_parameters* params)
     double* ptr = malloc(N * N * sizeof(double));
     PLASMA_Desc_Create(&descA, ptr, PlasmaRealDouble, NB, NB, NB*NB, N, N, 0, 0, N, N);
 
+#if defined(USE_OMPEXT)
+    void *select, *push;
+    omp_begin_numa_init(&select, &push);
+#endif
+
 #pragma omp parallel
 #pragma omp master
     plasma_pdplgsy_quark( (double)N, *descA, 51 );
+
+#if defined(USE_OMPEXT)
+    omp_end_numa_init(select, push);
+#endif
 
     /* Save A for check */
     double *A = NULL;
