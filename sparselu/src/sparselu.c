@@ -28,6 +28,10 @@
 #include "timer.h"
 #include "main.h"
 
+#if defined(USE_OMPEXT) && defined(_OPENMP)
+#include "omp_ext.h"
+#endif
+
 
 /***********************************************************************
  * genmat:
@@ -35,7 +39,6 @@
 static void genmat (float *M[], int matrix_size, int submatrix_size)
 {
     int null_entry, init_val, i, j, ii, jj;
-    float *p;
 
     init_val = 1325;
 
@@ -44,6 +47,9 @@ static void genmat (float *M[], int matrix_size, int submatrix_size)
     {
         for (jj=0; jj < matrix_size; jj++)
         {
+#pragma omp task shared(M)
+{
+            float *p;
             /* computing null entries */
             null_entry=0;
             if ((ii<jj) && (ii%3 !=0)) null_entry = 1;
@@ -74,8 +80,10 @@ static void genmat (float *M[], int matrix_size, int submatrix_size)
             {
                 M[ii*matrix_size+jj] = NULL;
             }
+}
         }
     }
+#pragma omp taskwait
 }
 /***********************************************************************
  * allocate_clean_block:
@@ -217,7 +225,18 @@ double run(struct user_parameters* params)
         submatrix_size = 64;
         params->submatrix_size = submatrix_size;
     }
+#if defined(USE_OMPEXT) && defined(_OPENMP)
+    void *select, *push, *push_init;
+    omp_begin_numa_init(&select, &push, &push_init);
+#endif
+
+#pragma omp parallel
+#pragma omp master
     sparselu_init(&BENCH, matrix_size, submatrix_size);
+
+#if defined(USE_OMPEXT) && defined(_OPENMP)
+    omp_end_numa_init(select, push, push_init);
+#endif
 
     /// KERNEL INTENSIVE COMPUTATION
     START_TIMER;

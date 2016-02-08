@@ -34,17 +34,17 @@ RunTest(real_Double_t *t_, struct user_parameters* params)
     double* ptr = malloc(N * N * sizeof(double));
     PLASMA_Desc_Create(&descA, ptr, PlasmaRealDouble, NB, NB, NB*NB, N, N, 0, 0, N, N);
 
-#if defined(USE_OMPEXT)
-    void *select, *push;
-    omp_begin_numa_init(&select, &push);
+#if defined(USE_OMPEXT) && defined(_OPENMP)
+    void *select, *push, *push_init;
+    omp_begin_numa_init(&select, &push, &push_init);
 #endif
 
 #pragma omp parallel
 #pragma omp master
     plasma_pdplgsy_quark( (double)N, *descA, 51 );
 
-#if defined(USE_OMPEXT)
-    omp_end_numa_init(select, push);
+#if defined(USE_OMPEXT) && defined(_OPENMP)
+    omp_end_numa_init(select, push, push_init);
 #endif
 
     /* Save A for check */
