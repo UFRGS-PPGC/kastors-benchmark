@@ -41,11 +41,9 @@ void plasma_pdpltmg_quark(PLASMA_desc A, unsigned long long int seed)
             tempnn = n == A.nt-1 ? A.n-n*A.nb : A.nb;
             double *dA = A(m, n);
 #if defined(USE_OMPEXT)
-/*int node_row = (int)(m / 2);*/
-/*int node_col = (int)(n / 2);*/
-/*omp_set_task_affinity( (node_col%4)*6+(node_row%6), 1 );*/
-/*int push = rand_r(&seed_randr) % 24;*/
-/*omp_set_task_affinity(push, 1);*/
+int node_row = (int)(m / 2);
+int node_col = (int)(n / 2);
+omp_set_task_affinity( (node_col%4)*6+(node_row%6), 1 );
 #endif
 #pragma omp task depend(out:dA[0:tempnn*ldam])
             CORE_dplrnt(tempmm, tempnn, dA, ldam, A.m, m*A.mb, n*A.nb, seed);
