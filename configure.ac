@@ -11,6 +11,18 @@ dnl Require Autoconf v2.62 for the AC_OPENMP macro
 AC_PREREQ([2.62])
 
 AC_PROG_CC(gcc icc clang llvm cc)
+
+#Checking for C99 adds an extra flag to $CC, so check if using icc/mkl right away
+AC_ARG_WITH([mkl],
+            [AS_HELP_STRING([--with-mkl],
+                            [use Intel MKL BLAS and LAPACKE (def=no)])],
+            [
+              AS_IF( [test "x$CC" == "xicc" ], [CFLAGS="$CFLAGS -mkl=sequential"], [] )
+              with_blas=mkl
+              with_lapacke=mkl
+             ],
+            [with_mkl=no])
+
 AC_PROG_CC_C99
 AC_PROG_RANLIB
 
@@ -141,15 +153,6 @@ AS_IF( [test "x$with_lapacke_installdir" != "xnone" ],
        ],
       [])
 
-AC_ARG_WITH([mkl],
-            [AS_HELP_STRING([--with-mkl],
-                            [use Intel MKL BLAS and LAPACKE (def=no)])],
-            [
-              AS_IF( [test "x$CC" == "xicc" ], [CFLAGS="$CFLAGS -mkl=sequential"], [] )
-              with_blas=mkl
-              with_lapacke=mkl
-             ],
-            [with_mkl=no])
 
 AC_SUBST([I_PLASMA], ["$I_PLASMA"])
 AC_SUBST([LD_PLASMA], ["$LD_PLASMA"])
