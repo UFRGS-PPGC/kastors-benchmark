@@ -8,6 +8,11 @@
 # include <omp.h>
 #endif
 
+#if defined(USE_OMPEXT)
+#  include "omp_ext.h"
+#  include "partition.h"
+#endif
+
 # include "poisson.h"
 # include "main.h"
 # include "timer.h"
@@ -116,11 +121,17 @@ double run(struct user_parameters* params)
        Set the initial solution estimate UNEW.
        We are "allowed" to pick up the boundary conditions exactly.
        */
+
 #pragma omp parallel
 #pragma omp master
         //for collapse(2)
         for (j = 0; j < ny; j+= block_size)
             for (i = 0; i < nx; i+= block_size)
+            {
+#if defined(USE_OMPEXT)
+               omp_set_task_name("init_new");
+               omp_set_task_affinity( GET_PARTITION(i, j, block_size, nx, ny), 1);
+#endif
 #pragma omp task firstprivate(i,j) private(ii,jj)
                 for (jj=j; jj<j+block_size; ++jj)
                     for (ii=i; ii<i+block_size; ++ii)
@@ -131,6 +142,7 @@ double run(struct user_parameters* params)
                             (*unew)[ii][jj] = 0.0;
                         }
                     }
+              }
 
     /// KERNEL INTENSIVE COMPUTATION
     START_TIMER;
@@ -231,11 +243,24 @@ void rhs(int nx, int ny, double *f_, int block_size)
     // The "boundary" entries of F store the boundary values of the solution.
     // The "interior" entries of F store the right hand sides of the Poisson equation.
 
+#if defined(USE_OMPEXT) && defined(LOG)
+   printf(">>>>\n");
+#endif
 #pragma omp parallel
 #pragma omp master
     //for collapse(2)
     for (j = 0; j < ny; j+=block_size)
+    {
         for (i = 0; i < nx; i+=block_size)
+        {
+#if defined(USE_OMPEXT)
+             int loc;
+             omp_set_task_name("rhs");
+             omp_set_task_affinity( loc = GET_PARTITION(i, j, block_size, nx, ny), 1);
+#if defined(LOG)
+             printf("(%i, %i)=%i ", i/block_size, j/block_size, loc );
+#endif
+#endif
 #pragma omp task firstprivate(block_size,i,j,nx,ny) private(ii,jj,x,y)
             for (jj=j; jj<j+block_size; ++jj)
             {
@@ -249,6 +274,14 @@ void rhs(int nx, int ny, double *f_, int block_size)
                         (*f)[ii][jj] = - uxxyy_exact(x, y);
                 }
             }
+        }
+#if defined(USE_OMPEXT)  && defined(LOG)
+        printf("\n");
+#endif
+   }
+#if defined(USE_OMPEXT)  && defined(LOG)
+   printf("<<<<\n");
+#endif
 }
 
 /* Evaluates the exact solution. */

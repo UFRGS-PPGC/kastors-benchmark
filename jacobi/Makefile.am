@@ -28,9 +28,9 @@ jacobi_block_taskdep_SOURCES = $(jacobi_common_SRCS) src/jacobi-block-task-dep.c
 jacobi_block_for_SOURCES     = $(jacobi_common_SRCS) src/jacobi-block-for.c
 
 jacobi_comCFLAGS = -I$(srcdir)/include $(COMMON_comCFLAGS) \
-		-DMSIZE -DBSIZE -DTITER
+		-DMSIZE -DBSIZE -DTITER 
 jacobi_seq_CFLAGS = $(jacobi_comCFLAGS) $(COMMON_seqCFLAGS)
-jacobi_parCFLAGS = $(jacobi_comCFLAGS) $(COMMON_parCFLAGS)
+jacobi_parCFLAGS = $(jacobi_comCFLAGS) $(COMMON_parCFLAGS) $(OPTCFLAGS)
 
 jacobi_task_CFLAGS           = $(jacobi_parCFLAGS)
 jacobi_taskdep_CFLAGS        = $(jacobi_parCFLAGS)
@@ -40,7 +40,7 @@ jacobi_block_for_CFLAGS      = $(jacobi_parCFLAGS)
 
 jacobi_comLDFLAGS = $(COMMON_comLDFLAGS)
 jacobi_seq_LDFLAGS = $(jacobi_comLDFLAGS) $(COMMON_seqLDFLAGS)
-jacobi_parLDFLAGS = $(jacobi_comLDFLAGS) $(COMMON_seqLDFLAGS)
+jacobi_parLDFLAGS = $(jacobi_comLDFLAGS) $(COMMON_seqLDFLAGS) $(OPTLDFLAGS)
 
 jacobi_task_LDFLAGS          = $(jacobi_parLDFLAGS)
 jacobi_taskdep_LDFLAGS       = $(jacobi_parLDFLAGS)
