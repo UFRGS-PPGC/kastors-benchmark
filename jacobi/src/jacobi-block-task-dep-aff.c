@@ -1,5 +1,7 @@
 # include "poisson.h"
 
+#include  "partition.h"
+#include "omp.h"
 
 /* #pragma omp task/taskwait version of SWEEP. */
 void sweep (int nx, int ny, double dx, double dy, double *f_,
@@ -17,13 +19,17 @@ void sweep (int nx, int ny, double dx, double dy, double *f_,
     shared(u_, unew_, f, nx, ny, dx, dy, itold, itnew, block_size) 
 #pragma omp master
     {
+       int num_thread = omp_get_num_threads();
+       int square_len = 0;
+       while ((num_thread >>= 1) > 0)
+          square_len++;
         for (int it = itold + 1; it <= itnew; it++) {
             // Save the current estimate.
             for (int j = 0; j < ny; j += block_size) {
               for (int i = 0; i < nx; i += block_size) {
 #pragma omp task shared(u_, unew_)  firstprivate(i, j, block_size, nx, ny) \
                     depend(in: unew[i: block_size][j: block_size]) \
-                    depend(out: u[i: block_size][j: block_size])
+                    depend(out: u[i: block_size][j: block_size]) affinity(core:GET_PARTITION(i, j, block_size, nx, ny, square_len), 1)
                     copy_block(nx, ny, i/block_size, j/block_size, u_, unew_, block_size);
                 }
             }
@@ -42,7 +48,7 @@ void sweep (int nx, int ny, double dx, double dy, double *f_,
                                u[(i - xdm1): block_size][j: block_size], \
                                u[i: block_size][(j + ydp1): block_size], \
                                u[i: block_size][(j - ydm1): block_size], \
-                               u[(i + xdp1): block_size][j: block_size])
+                               u[(i + xdp1): block_size][j: block_size]) affinity(core:GET_PARTITION(i, j, block_size, nx, ny, square_len), 1)
                     compute_estimate(i/block_size, j/block_size, u_, unew_, f_, dx, dy,
                                      nx, ny, block_size);
                 }

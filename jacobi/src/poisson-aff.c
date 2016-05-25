@@ -8,6 +8,7 @@
 # include <omp.h>
 #endif
 
+#include "partition.h"
 
 # include "poisson.h"
 # include "main.h"
@@ -120,11 +121,16 @@ double run(struct user_parameters* params)
 
 #pragma omp parallel
 #pragma omp master
+    {
+       int num_thread = omp_get_num_threads();
+       int square_len = 0;
+       while ((num_thread >>= 1) > 0)
+          square_len++;
         //for collapse(2)
         for (j = 0; j < ny; j+= block_size)
             for (i = 0; i < nx; i+= block_size)
             {
-#pragma omp task firstprivate(i,j) private(ii,jj)
+#pragma omp task firstprivate(i,j) private(ii,jj) affinity(core:GET_PARTITION(i, j, block_size, nx, ny, square_len), 1)
                {
                 for (jj=j; jj<j+block_size; ++jj)
                     for (ii=i; ii<i+block_size; ++ii)
@@ -137,6 +143,7 @@ double run(struct user_parameters* params)
                     }
                }
               }
+    }
 
     /// KERNEL INTENSIVE COMPUTATION
     START_TIMER;
@@ -242,12 +249,22 @@ void rhs(int nx, int ny, double *f_, int block_size)
 #endif
 #pragma omp parallel
 #pragma omp master
+   {
+
+       int num_thread = omp_get_num_threads();
+       int square_len = 0;
+       while ((num_thread >>= 1) > 0)
+          square_len++;
     //for collapse(2)
     for (j = 0; j < ny; j+=block_size)
     {
         for (i = 0; i < nx; i+=block_size)
         {
-#pragma omp task firstprivate(block_size,i,j,nx,ny) private(ii,jj,x,y)
+#if defined(LOG)
+           int loc = GET_PARTITION(i, j, block_size, nx, ny, square_len);
+             printf("%2i ", loc );
+#endif
+#pragma omp task firstprivate(block_size,i,j,nx,ny) private(ii,jj,x,y) affinity(core:GET_PARTITION(i, j, block_size, nx, ny, square_len), 1)
             for (jj=j; jj<j+block_size; ++jj)
             {
                 y = (double) (jj) / (double) (ny - 1);
@@ -268,6 +285,7 @@ void rhs(int nx, int ny, double *f_, int block_size)
 #if defined(LOG)
    printf("<<<<\n");
 #endif
+   }
 }
 
 /* Evaluates the exact solution. */

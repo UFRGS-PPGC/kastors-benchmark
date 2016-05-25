@@ -212,6 +212,7 @@ int main(int argc, char* argv[])
 #else
     printf("Time(Mean,sec) ");
 #endif
+    printf("Stddev ");
     printf("\n");
 
     //Actual values
@@ -239,7 +240,8 @@ int main(int argc, char* argv[])
     printf("%d ", params.cutoff_depth);
 #endif
     printf("%d ", num_threads);
-    printf("%lf\n", mean);
+    printf("%lf ", mean);
+    printf("%lf\n", stddev);
     printf("#Experience summarry : avg : %lf :: std : %lf :: min : %lf :: max : %lf :: median : %lf\n",
            mean, stddev, min_, max_, median);
     if(params.check)
