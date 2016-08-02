@@ -17,17 +17,21 @@ CLEANFILES=$(check_SCRIPTS)
 bin_PROGRAMS = jacobi_seq jacobi_task jacobi_taskdep jacobi_block_task jacobi_block_taskdep jacobi_block_taskdep_affinity jacobi_block_for jacobi_block_for_affinity
 
 jacobi_common_HDRS = include/poisson.h $(COMMON_HDRS)
-jacobi_common_SRCS = src/poisson.c src/jacobi-seq.c $(COMMON_SRCS) \
+jacobi_common_SRCS = src/jacobi-seq.c $(COMMON_SRCS) \
 	$(jacobi_common_HDRS)
-jacobi_affinity_SRCS = src/poisson-aff.c src/jacobi-seq.c $(COMMON_SRCS) \
+jacobi_affinity_SRCS = src/poisson-aff.c $(jacobi_common_SRCS) \
+	$(jacobi_common_HDRS)
+jacobi_task_SRCS = src/poisson-task.c $(jacobi_common_SRCS) \
+	$(jacobi_common_HDRS)
+jacobi_for_SRCS = src/poisson-for.c $(jacobi_common_SRCS) \
 	$(jacobi_common_HDRS)
 
-jacobi_seq_SOURCES           = $(jacobi_common_SRCS)
-jacobi_task_SOURCES          = $(jacobi_common_SRCS) src/jacobi-task.c
-jacobi_taskdep_SOURCES       = $(jacobi_common_SRCS) src/jacobi-task-dep.c
-jacobi_block_task_SOURCES    = $(jacobi_common_SRCS) src/jacobi-block-task.c
-jacobi_block_taskdep_SOURCES = $(jacobi_common_SRCS) src/jacobi-block-task-dep.c
-jacobi_block_for_SOURCES     = $(jacobi_common_SRCS) src/jacobi-block-for.c
+jacobi_seq_SOURCES           = $(jacobi_for_SRCS)
+jacobi_task_SOURCES          = $(jacobi_task_SRCS) src/jacobi-task.c
+jacobi_taskdep_SOURCES       = $(jacobi_task_SRCS) src/jacobi-task-dep.c
+jacobi_block_task_SOURCES    = $(jacobi_task_SRCS) src/jacobi-block-task.c
+jacobi_block_taskdep_SOURCES = $(jacobi_task_SRCS) src/jacobi-block-task-dep.c
+jacobi_block_for_SOURCES     = $(jacobi_for_SRCS) src/jacobi-block-for.c
 jacobi_block_taskdep_affinity_SOURCES = $(jacobi_affinity_SRCS) src/jacobi-block-task-dep-aff.c
 jacobi_block_for_affinity_SOURCES = $(jacobi_affinity_SRCS) src/jacobi-block-for.c
 

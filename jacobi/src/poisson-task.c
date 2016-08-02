@@ -91,6 +91,8 @@ double run(struct user_parameters* params)
     int nx = matrix_size;
     int ny = matrix_size;
     double *f_ = malloc(nx * nx * sizeof(double));
+    if (f_ == 0)
+       perror("malloc");
     double (*f)[nx][ny] = (double (*)[nx][ny])f_;
     double *u_ = malloc(nx * nx * sizeof(double));
     double *unew_ = malloc(nx * ny * sizeof(double));
@@ -247,7 +249,7 @@ void rhs(int nx, int ny, double *f_, int block_size)
     {
         for (i = 0; i < nx; i+=block_size)
         {
-#pragma omp task firstprivate(block_size,i,j,nx,ny) private(ii,jj,x,y)
+#pragma omp task firstprivate(block_size,i,j,nx,ny) private(ii,jj,x,y) shared(f)
             for (jj=j; jj<j+block_size; ++jj)
             {
                 y = (double) (jj) / (double) (ny - 1);

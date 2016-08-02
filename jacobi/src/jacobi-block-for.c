@@ -20,14 +20,14 @@ void sweep (int nx, int ny, double dx, double dy, double *f_,
     {
         // Save the current estimate.
 #pragma omp for collapse(2)
-            for (block_y = 0; block_y < max_blocks_y; block_y++)
         for (block_x = 0; block_x < max_blocks_x; block_x++)
+            for (block_y = 0; block_y < max_blocks_y; block_y++)
                 copy_block(nx, ny, block_x, block_y, u_, unew_, block_size);
 
 #pragma omp for collapse(2)
         // Compute a new estimate.
-            for (block_y = 0; block_y < max_blocks_y; block_y++)
         for (block_x = 0; block_x < max_blocks_x; block_x++)
+            for (block_y = 0; block_y < max_blocks_y; block_y++)
                 compute_estimate(block_x, block_y, u_, unew_, f_, dx, dy,
                                  nx, ny, block_size);
     }
