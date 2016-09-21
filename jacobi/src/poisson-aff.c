@@ -1,8 +1,12 @@
+#define _XOPEN_SOURCE 700
+
 # include <stdlib.h>
+# include <unistd.h>
 # include <stdio.h>
 # include <math.h>
 # include <time.h>
 # include <string.h>
+# include <numaif.h>
 
 #if defined(_OPENMP)
 # include <omp.h>
@@ -91,10 +95,19 @@ double run(struct user_parameters* params)
     int jj,j;
     int nx = matrix_size;
     int ny = matrix_size;
-    double *f_ = malloc(nx * nx * sizeof(double));
+    /*double *f_ = malloc(nx * nx * sizeof(double));*/
+    double *f_ = 0;
+    if (posix_memalign((void **)&f_, getpagesize(), nx * nx * sizeof(double)))
+       perror("Error allocating memory...\n");
     double (*f)[nx][ny] = (double (*)[nx][ny])f_;
-    double *u_ = malloc(nx * nx * sizeof(double));
-    double *unew_ = malloc(nx * ny * sizeof(double));
+    /*double *u_ = malloc(nx * nx * sizeof(double));*/
+    double *u_ = 0;
+    if (posix_memalign((void **)&u_, getpagesize(), nx * nx * sizeof(double)))
+       perror("Error allocating memory...\n");
+    /*double *unew_ = malloc(nx * ny * sizeof(double));*/
+    double *unew_ = 0;
+    if (posix_memalign((void **)&unew_, getpagesize(), nx * nx * sizeof(double)))
+       perror("Error allocating memory...\n");
     double (*unew)[nx][ny] = (double (*)[nx][ny])unew_;
 
     /* test if valid */

@@ -2,6 +2,8 @@
 
 #include  "partition.h"
 #include "omp.h"
+# include <numaif.h>
+# include <stdio.h>
 
 /* #pragma omp task/taskwait version of SWEEP. */
 void sweep (int nx, int ny, double dx, double dy, double *f_,
@@ -32,8 +34,14 @@ void sweep (int nx, int ny, double dx, double dy, double *f_,
             }
 
             // Compute a new estimate.
-            for (int j = 0; j < ny; j += block_size) {
               for (int i = 0; i < nx; i += block_size) {
+            for (int j = 0; j < ny; j += block_size) {
+                    int num_node = -1;
+                    /*printf("unew[i][j] : %p, unew : %p\n", &((*unew)[i][j]), &unew_[i*nx + j]);*/
+                    if (get_mempolicy(&num_node, (void*)0, 0, &((*unew)[i][j]), MPOL_F_NODE | MPOL_F_ADDR))
+                        perror("Error get_mempolicy\n");
+                    /*int expected = GET_PARTITION(i, j, block_size, nx, ny, num_thread)/8;*/
+                    /*printf("Block %i,%i, on node %i vs %i\n", i, j, num_node, expected);*/
                     int xdm1 = i == 0 ? 0 : block_size;
                     int xdp1 = i == nx-block_size ? 0 : block_size;
                     int ydp1 = j == ny-block_size ? 0 : block_size;
