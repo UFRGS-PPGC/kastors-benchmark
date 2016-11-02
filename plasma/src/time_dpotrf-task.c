@@ -7,6 +7,9 @@
 #define _PREC  double
 #define _LAMCH LAPACKE_dlamch_work
 
+# include <stdlib.h>
+# include <unistd.h>
+
 #include "omp.h"
 #if defined(USE_OMPEXT)
 #include "omp_ext.h"
@@ -31,7 +34,10 @@ RunTest(real_Double_t *t_, struct user_parameters* params)
 
     /* Allocate Data */
     PLASMA_desc *descA = NULL;
-    double* ptr = malloc(N * N * sizeof(double));
+    double* ptr = 0;
+    if (posix_memalign((void **)&ptr, getpagesize(), N * N * sizeof(double)))
+       perror("Error allocating memory...\n");
+    /*malloc(N * N * sizeof(double));*/
     PLASMA_Desc_Create(&descA, ptr, PlasmaRealDouble, NB, NB, NB*NB, N, N, 0, 0, N, N);
 
 #pragma omp parallel init(cyclicnumastrict)

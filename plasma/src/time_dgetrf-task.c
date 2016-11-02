@@ -12,6 +12,10 @@
 #define _FMULS FMULS_GETRF(M, N)
 #define _FADDS FADDS_GETRF(M, N)
 
+# include <stdlib.h>
+# include <unistd.h>
+
+
 #include "./timing.inc"
 
 static double
@@ -25,7 +29,9 @@ RunTest(real_Double_t *t_, struct user_parameters* params)
 
     /* Allocate Data */
     PLASMA_desc *descA = NULL;
-    double* ptr = malloc(N * N * sizeof(double));
+    double* ptr = 0;
+    if (posix_memalign((void **)&ptr, getpagesize(), N * N * sizeof(double)))
+       perror("Error allocating memory...\n");
     PLASMA_Desc_Create(&descA, ptr, PlasmaRealDouble, NB, NB, NB*NB, N, N, 0, 0, N, N);
 
     int* piv = (int*)malloc(N * sizeof(double));
