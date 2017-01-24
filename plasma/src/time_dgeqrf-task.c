@@ -45,7 +45,7 @@ RunTest(real_Double_t *t_, struct user_parameters* params)
     omp_begin_numa_init(&select, &push, &push_init);
 #endif
 
-#pragma omp parallel init(cyclicnumastrict)
+#pragma omp parallel 
 #pragma omp master
     plasma_pdpltmg_quark(*descA, 5373 );
 

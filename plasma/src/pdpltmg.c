@@ -27,7 +27,7 @@
 void plasma_pdpltmg_quark(PLASMA_desc A, unsigned long long int seed)
 {
 #if defined(_OPENMP)
-    int seed_randr = omp_get_thread_num();
+    int cnt= 0;
 #endif
     int m, n;
     int ldam;
@@ -40,7 +40,7 @@ void plasma_pdpltmg_quark(PLASMA_desc A, unsigned long long int seed)
         for (n = 0; n < A.nt; n++) {
             tempnn = n == A.nt-1 ? A.n-n*A.nb : A.nb;
             double *dA = A(m, n);
-#pragma omp task depend(out:dA[0:tempnn*ldam])
+#pragma omp task depend(out:dA[0:tempnn*ldam]) affinity( node: cnt++, 1)
             CORE_dplrnt(tempmm, tempnn, dA, ldam, A.m, m*A.mb, n*A.nb, seed);
         }
     }
