@@ -212,8 +212,10 @@ static int sparselu_check(float **BENCH_SEQ, float **BENCH, int matrix_size, int
 }
 #endif
 
-double run(struct user_parameters* params)
+double run(struct user_parameters* params, uint64_t *startTime, uint64_t *endTime)
 {
+    startTime = 0;
+    endTime = 0;
     float **BENCH;
     int matrix_size = params->matrix_size;
     if (matrix_size <= 0) {

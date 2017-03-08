@@ -19,7 +19,7 @@
 #include "./timing.inc"
 
 static double
-RunTest(real_Double_t *t_, struct user_parameters* params)
+RunTest(real_Double_t *t_, struct user_parameters* params, uint64_t *startTime, uint64_t *endTime)
 {
     double  t;
     int64_t N     = params->matrix_size;

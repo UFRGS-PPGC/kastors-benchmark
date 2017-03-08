@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
+#include <unistd.h>
 #include <float.h>
 #include <math.h>
 
@@ -152,7 +154,10 @@ int main(int argc, char* argv[])
 #endif
 
     // warmup
-    run(&params);
+    uint64_t startTime;
+    uint64_t endTime;
+
+    run(&params, &startTime, &endTime);
 
     double mean = 0.0;
     double meansqr = 0.0;
@@ -162,12 +167,13 @@ int main(int argc, char* argv[])
 
     for (int i=0; i<params.niter; ++i)
     {
-      double cur_time = run(&params);
+      double cur_time = run(&params, &startTime, &endTime);
       all_times[i] = cur_time;
       mean += cur_time;
       min_ = min(min_, cur_time);
       max_ = max(max_, cur_time);
       meansqr += cur_time * cur_time;
+      sleep(5);
       }
     mean /= params.niter;
     meansqr /= params.niter;
@@ -212,7 +218,7 @@ int main(int argc, char* argv[])
 #else
     printf("Time(Mean,sec) ");
 #endif
-    printf("Stddev ");
+    printf("startTime endTime Stddev");
     printf("\n");
 
     //Actual values
@@ -241,6 +247,8 @@ int main(int argc, char* argv[])
 #endif
     printf("%d ", num_threads);
     printf("%lf ", mean);
+    printf("%lu", startTime);
+    printf("%lu", endTime);
     printf("%lf\n", stddev);
     printf("#Experience summarry : avg : %lf :: std : %lf :: min : %lf :: max : %lf :: median : %lf\n",
            mean, stddev, min_, max_, median);

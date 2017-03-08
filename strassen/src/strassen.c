@@ -386,8 +386,10 @@ for(i=0; i<matrix_size; i++)
     }
 }
 
-double run(struct user_parameters* params)
+double run(struct user_parameters* params, uint64_t *startTime, uint64_t *endTime)
 {
+    *startTime = 0;
+    *endTime = 0;
     double *A, *B, *C;
     int matrix_size = params->matrix_size;
     int cutoff_size = params->cutoff_size;

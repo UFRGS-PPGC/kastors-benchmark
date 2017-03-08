@@ -45,7 +45,7 @@
 #include "workspace.h"
 #define EPSILON 1.0E-9
 
-static double RunTest(double *t_, struct user_parameters*);
+static double RunTest(double *t_, struct user_parameters*, uint64_t *startTime, uint64_t *endTime);
 
 double cWtime(void);
 
@@ -62,7 +62,7 @@ double cWtime(void)
 }
 
 
-double run(struct user_parameters* params)
+double run(struct user_parameters* params, uint64_t *startTime, uint64_t *endTime)
 {
     double   t;
     double   fmuls, fadds;
@@ -90,7 +90,7 @@ double run(struct user_parameters* params)
     fmuls = (double)(_FMULS);
     flops = 1e-9 * (fmuls + fadds);
 
-    if (RunTest(&t, params) > EPSILON && params->check)
+    if (RunTest(&t, params, startTime, endTime) > EPSILON && params->check)
         params->succeed = 0;
 
     // return gflops

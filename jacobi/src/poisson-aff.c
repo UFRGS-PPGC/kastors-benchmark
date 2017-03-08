@@ -71,8 +71,10 @@ John Burkardt
 
 /******************************************************************************/
 
-double run(struct user_parameters* params)
+double run(struct user_parameters* params, uint64_t *startTime, uint64_t *endTime)
 {
+    startTime = 0;
+    endTime = 0;
     int matrix_size = params->matrix_size;
     if (matrix_size <= 0) {
         matrix_size = 512;

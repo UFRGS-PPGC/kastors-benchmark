@@ -29,6 +29,8 @@ struct user_parameters {
 #endif
 };
 
-extern double run(struct user_parameters* params);
+#include <stdint.h>
+
+extern double run(struct user_parameters* params, uint64_t *startTime, uint64_t *endTime);
 
 #endif
