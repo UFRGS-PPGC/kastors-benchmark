@@ -247,8 +247,8 @@ int main(int argc, char* argv[])
 #endif
     printf("%d ", num_threads);
     printf("%lf ", mean);
-    printf("%lu", startTime);
-    printf("%lu", endTime);
+    printf("%lu ", startTime);
+    printf("%lu ", endTime);
     printf("%lf\n", stddev);
     printf("#Experience summarry : avg : %lf :: std : %lf :: min : %lf :: max : %lf :: median : %lf\n",
            mean, stddev, min_, max_, median);
