@@ -25,6 +25,11 @@ RUN apt-get update && apt-get install -y \
 # Install additional libraries for BLAS
 RUN apt-get install -y libopenblas-base liblapack3
 
+# Ensure the workspace directory is empty to avoid caching issues (get the last commit, ex.)
+RUN mkdir -p /workspace
+WORKDIR /workspace
+RUN rm -rf /workspace/*
+
 # Clone the KASTORS benchmark repository (TODO: don't forget to change the branch reference)
 RUN git clone -b general-tests https://github.com/UFRGS-PPGC/kastors-benchmark.git /workspace
 
