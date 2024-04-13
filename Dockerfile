@@ -30,6 +30,9 @@ RUN mkdir -p /workspace
 WORKDIR /workspace
 RUN rm -rf /workspace/*
 
+# Force cache invalidation (last commit to be sure)
+RUN echo "Build time: $(date)" 
+
 # Clone the KASTORS benchmark repository (TODO: don't forget to change the branch reference)
 RUN git clone -b general-tests https://github.com/UFRGS-PPGC/kastors-benchmark.git /workspace
 
