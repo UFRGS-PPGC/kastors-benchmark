@@ -143,8 +143,8 @@ double run(struct user_parameters* params, uint64_t *startTime, uint64_t *endTim
         for (j = 0; j < ny; j+= block_size)
             for (i = 0; i < nx; i+= block_size)
             {
-#pragma omp taskloop firstprivate(i,j) private(ii,jj) affinity(thread:GET_PARTITION(i, j, block_size, nx, ny, num_thread), 1)
-               {
+#pragma omp taskloop collapse(2) firstprivate(i,j) private(ii,jj) affinity(thread:GET_PARTITION(i, j, block_size, nx, ny, num_thread), 1)
+                {
                 for (jj=j; jj<j+block_size; ++jj)
                     for (ii=i; ii<i+block_size; ++ii)
                     {
@@ -154,8 +154,8 @@ double run(struct user_parameters* params, uint64_t *startTime, uint64_t *endTim
                             (*unew)[ii][jj] = 0.0;
                         }
                     }
-               }
-              }
+                }
+            }
     }
 
     /// KERNEL INTENSIVE COMPUTATION
@@ -274,7 +274,7 @@ void rhs(int nx, int ny, double *f_, int block_size)
            int loc = GET_PARTITION(i, j, block_size, nx, ny, num_thread);
              printf("%2i ", loc );
 #endif
-#pragma omp taskloop firstprivate(block_size,i,j,nx,ny) private(ii,jj,x,y) affinity(thread:GET_PARTITION(i, j, block_size, nx, ny, num_thread), 1)
+#pragma omp taskloop collapse(2) firstprivate(block_size,i,j,nx,ny) private(ii,jj,x,y) affinity(thread:GET_PARTITION(i, j, block_size, nx, ny, num_thread), 1)
             for (jj=j; jj<j+block_size; ++jj)
             {
                 y = (double) (jj) / (double) (ny - 1);
