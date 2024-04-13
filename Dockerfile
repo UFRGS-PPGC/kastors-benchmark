@@ -13,27 +13,22 @@ RUN apt-get update && apt-get install -y \
     libopenblas-dev \
     liblapacke-dev \
     libnuma-dev \
-    gcc \
-    g++ \
-    make \
-    autoconf \
-    automake \
-    libtool \
+    software-properties-common \
     wget \
     git
+
+# Add the Ubuntu Toolchain Test PPA (which provides newer versions of GCC)
+RUN add-apt-repository ppa:ubuntu-toolchain-r/test && \
+    apt-get update && \
+    apt-get install -y gcc-13 g++-13
+
+# Set GCC 13 as the default gcc and g++
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 60 --slave /usr/bin/g++ g++ /usr/bin/g++-13
 
 # Install additional libraries for BLAS
 RUN apt-get install -y libopenblas-base liblapack3
 
-# Ensure the workspace directory is empty to avoid caching issues (get the last commit, ex.)
-RUN mkdir -p /workspace
-WORKDIR /workspace
-RUN rm -rf /workspace/*
-
-# Force cache invalidation (last commit to be sure)
-RUN echo "Build time: $(date)" 
-
-# Clone the KASTORS benchmark repository (TODO: don't forget to change the branch reference)
+# Clone the KASTORS benchmark repository (adjust branch as needed)
 RUN git clone -b general-tests https://github.com/UFRGS-PPGC/kastors-benchmark.git /workspace
 
 # Set the working directory to the repository directory
