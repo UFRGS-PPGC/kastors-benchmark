@@ -15,6 +15,10 @@ RUN apt-get update && apt-get install -y \
     libnuma-dev \
     software-properties-common \
     wget \
+    make \
+    autoconf \
+    automake \
+    libtool \
     git
 
 # Add the Ubuntu Toolchain Test PPA (which provides newer versions of GCC)
