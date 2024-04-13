@@ -7,6 +7,7 @@
 # include <time.h>
 # include <string.h>
 # include <numaif.h>
+#include <unistd.h>
 
 #if defined(_OPENMP)
 # include <omp.h>
@@ -142,7 +143,7 @@ double run(struct user_parameters* params, uint64_t *startTime, uint64_t *endTim
         for (j = 0; j < ny; j+= block_size)
             for (i = 0; i < nx; i+= block_size)
             {
-#pragma omp task firstprivate(i,j) private(ii,jj) affinity(thread:GET_PARTITION(i, j, block_size, nx, ny, num_thread), 1)
+#pragma omp task firstprivate(i,j) private(ii,jj) affinity(partition:GET_PARTITION(i, j, block_size, nx, ny, num_thread), 1)
                {
                 for (jj=j; jj<j+block_size; ++jj)
                     for (ii=i; ii<i+block_size; ++ii)
@@ -273,7 +274,7 @@ void rhs(int nx, int ny, double *f_, int block_size)
            int loc = GET_PARTITION(i, j, block_size, nx, ny, num_thread);
              printf("%2i ", loc );
 #endif
-#pragma omp task firstprivate(block_size,i,j,nx,ny) private(ii,jj,x,y) affinity(thread:GET_PARTITION(i, j, block_size, nx, ny, num_thread), 1)
+#pragma omp task firstprivate(block_size,i,j,nx,ny) private(ii,jj,x,y) affinity(partition:GET_PARTITION(i, j, block_size, nx, ny, num_thread), 1)
             for (jj=j; jj<j+block_size; ++jj)
             {
                 y = (double) (jj) / (double) (ny - 1);
