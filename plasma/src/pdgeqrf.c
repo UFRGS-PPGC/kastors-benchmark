@@ -41,7 +41,7 @@ void plasma_pdgeqrf_quark(PLASMA_desc A, PLASMA_desc T, int ib)
 #if defined(USE_OMPEXT)
 omp_set_task_priority(8);
 #endif
-#pragma omp task depend(inout: dA[0:T.nb*T.nb]) depend(out:dT[0:ib*T.nb]) affinity(data:dT)
+#pragma omp task depend(inout: dA[0:T.nb*T.nb]) depend(out:dT[0:ib*T.nb])
         {
             double tau[T.nb];
             double work[ib * T.nb];
@@ -56,7 +56,7 @@ omp_set_task_priority(8);
 #if defined(USE_OMPEXT)
 omp_set_task_priority(7);
 #endif
-#pragma omp task depend(in: dA[0:T.nb*T.nb], dT[0:ib*T.nb]) depend(inout:dC[0:T.nb*T.nb]) affinity(data:dC)
+#pragma omp task depend(in: dA[0:T.nb*T.nb], dT[0:ib*T.nb]) depend(inout:dC[0:T.nb*T.nb])
             {
                 double work[T.nb * ib];
                 CORE_dormqr(PlasmaLeft, PlasmaTrans,
@@ -76,7 +76,7 @@ omp_set_task_priority(7);
 #if defined(USE_OMPEXT)
 omp_set_task_priority(6);
 #endif
-#pragma omp task depend(inout:dA[0:T.nb*T.nb], dB[0:T.nb*T.nb]) depend(out:dT[0:ib*T.nb]) affinity(data:dT)
+#pragma omp task depend(inout:dA[0:T.nb*T.nb], dB[0:T.nb*T.nb]) depend(out:dT[0:ib*T.nb])
             {
                 double tau[T.nb];
                 double work[ib * T.nb];
@@ -95,7 +95,7 @@ omp_set_task_priority(6);
 #if defined(USE_OMPEXT)
 omp_set_task_priority(5);
 #endif
-#pragma omp task depend(inout:dA[0:T.nb*T.nb], dB[0:T.nb*T.nb]) depend(in:dV[0:T.nb*T.nb], dT[0:ib*T.nb]) affinity(data:dA)
+#pragma omp task depend(inout:dA[0:T.nb*T.nb], dB[0:T.nb*T.nb]) depend(in:dV[0:T.nb*T.nb], dT[0:ib*T.nb])
                 {
                     double work[ib * T.nb];
                     CORE_dtsmqr(PlasmaLeft, PlasmaTrans,

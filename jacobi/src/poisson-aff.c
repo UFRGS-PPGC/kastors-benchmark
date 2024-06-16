@@ -99,16 +99,16 @@ double run(struct user_parameters* params, uint64_t *startTime, uint64_t *endTim
     int ny = matrix_size;
     /*double *f_ = malloc(nx * nx * sizeof(double));*/
     double *f_ = 0;
-    if (posix_memalign((void **)&f_, getpagesize(), nx * nx * sizeof(double)))
+    if (posix_memalign((void **)&f_, sysconf(_SC_PAGESIZE), nx * nx * sizeof(double)))
        perror("Error allocating memory...\n");
     double (*f)[nx][ny] = (double (*)[nx][ny])f_;
     /*double *u_ = malloc(nx * nx * sizeof(double));*/
     double *u_ = 0;
-    if (posix_memalign((void **)&u_, getpagesize(), nx * nx * sizeof(double)))
+    if (posix_memalign((void **)&u_, sysconf(_SC_PAGESIZE), nx * nx * sizeof(double)))
        perror("Error allocating memory...\n");
     /*double *unew_ = malloc(nx * ny * sizeof(double));*/
     double *unew_ = 0;
-    if (posix_memalign((void **)&unew_, getpagesize(), nx * nx * sizeof(double)))
+    if (posix_memalign((void **)&unew_, sysconf(_SC_PAGESIZE), nx * nx * sizeof(double)))
        perror("Error allocating memory...\n");
     double (*unew)[nx][ny] = (double (*)[nx][ny])unew_;
 
@@ -142,7 +142,7 @@ double run(struct user_parameters* params, uint64_t *startTime, uint64_t *endTim
         for (j = 0; j < ny; j+= block_size)
             for (i = 0; i < nx; i+= block_size)
             {
-#pragma omp task firstprivate(i,j) private(ii,jj) affinity(thread:GET_PARTITION(i, j, block_size, nx, ny, num_thread), 1)
+#pragma omp task firstprivate(i,j) private(ii,jj)
                {
                 for (jj=j; jj<j+block_size; ++jj)
                     for (ii=i; ii<i+block_size; ++ii)
@@ -273,7 +273,7 @@ void rhs(int nx, int ny, double *f_, int block_size)
            int loc = GET_PARTITION(i, j, block_size, nx, ny, num_thread);
              printf("%2i ", loc );
 #endif
-#pragma omp task firstprivate(block_size,i,j,nx,ny) private(ii,jj,x,y) affinity(thread:GET_PARTITION(i, j, block_size, nx, ny, num_thread), 1)
+#pragma omp task firstprivate(block_size,i,j,nx,ny) private(ii,jj,x,y)
             for (jj=j; jj<j+block_size; ++jj)
             {
                 y = (double) (jj) / (double) (ny - 1);

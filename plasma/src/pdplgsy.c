@@ -40,7 +40,7 @@ void plasma_pdplgsy_quark( double bump, PLASMA_desc A, unsigned long long int se
         for (n = 0; n < A.nt; n++) {
             tempnn = n == A.nt-1 ? A.n-n*A.nb : A.nb;
             double *dA = A(m, n);
-#pragma omp task depend(out:dA[0:ldam*tempnn]) affinity(node: cnt++, 1)
+#pragma omp task depend(out:dA[0:ldam*tempnn])
             CORE_dplgsy( bump, tempmm, tempnn, dA, ldam, A.m, m*A.mb, n*A.nb, seed );
         }
     }

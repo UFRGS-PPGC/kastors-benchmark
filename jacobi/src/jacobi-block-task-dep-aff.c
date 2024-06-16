@@ -28,7 +28,7 @@ void sweep (int nx, int ny, double dx, double dy, double *f_,
               for (int i = 0; i < nx; i += block_size) {
 #pragma omp task shared(u_, unew_)  firstprivate(i, j, block_size, nx, ny) \
                     depend(in: unew[i: block_size][j: block_size]) \
-                    depend(out: u[i: block_size][j: block_size]) affinity(thread:GET_PARTITION(i, j, block_size, nx, ny, num_thread), 1)
+                    depend(out: u[i: block_size][j: block_size])
                     copy_block(nx, ny, i/block_size, j/block_size, u_, unew_, block_size);
                 }
             }
@@ -53,7 +53,7 @@ void sweep (int nx, int ny, double dx, double dy, double *f_,
                                u[(i - xdm1): block_size][j: block_size], \
                                u[i: block_size][(j + ydp1): block_size], \
                                u[i: block_size][(j - ydm1): block_size], \
-                               u[(i + xdp1): block_size][j: block_size]) affinity(thread:GET_PARTITION(i, j, block_size, nx, ny, num_thread), 1)
+                               u[(i + xdp1): block_size][j: block_size])
                     compute_estimate(i/block_size, j/block_size, u_, unew_, f_, dx, dy,
                                      nx, ny, block_size);
                 }
