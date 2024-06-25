@@ -219,25 +219,24 @@ dgetrf_args="-n $n_dgetrf -b $b_dgetrf"
 dpotrf_args="-n $n_dpotrf -b $b_dpotrf"
 dgeqrf_args="-n $n_dgeqrf -b $b_dgeqrf"
 
-for bench_name in $bench_names;
-do
-  for mode in $modes;
-  do
+# Ensure OMP_TOOL_LIBRARIES is set correctly
+export OMP_TOOL_LIBRARIES=$(pwd)/libompt.so
+echo "OMP_TOOL_LIBRARIES set to: $OMP_TOOL_LIBRARIES"
+
+for bench_name in $bench_names; do
+  for mode in $modes; do
     v_name="repeat_${mode}"
     eval v_value=\${$v_name}
     cmd_line=`find $build_dir -name ${bench_name}_${mode}`
-    if [ "x${v_value}" != "x0" ]
-    then
-      if [ $cmd_line ]
-        then
-          if $check
-          then
-            cmd_line="$cmd_line -c";
-          fi
+    if [ "x${v_value}" != "x0" ]; then
+      if [ $cmd_line ]; then
+        if $check; then
+          cmd_line="$cmd_line -c"
+        fi
         eval value=\${${bench_name}_args}
-        cmd_line="$cmd_line $value -i ${v_value}";
-        eval $cmd_line 
-      fi;
-    fi;
-  done;
+        cmd_line="$cmd_line $value -i ${v_value}"
+        env OMP_TOOL_LIBRARIES=$(pwd)/libompt.so $cmd_line > trace_${bench_name}_${mode}.txt
+      fi
+    fi
+  done
 done
